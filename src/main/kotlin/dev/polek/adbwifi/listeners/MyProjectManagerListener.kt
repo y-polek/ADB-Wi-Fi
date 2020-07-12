@@ -1,8 +1,8 @@
-package com.github.y-polek.adbwifi.listeners
+package dev.polek.adbwifi.listeners
 
+import dev.polek.adbwifi.services.MyProjectService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManagerListener
-import com.github.y-polek.adbwifi.services.MyProjectService
 
 internal class MyProjectManagerListener : ProjectManagerListener {
 

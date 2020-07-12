@@ -1,19 +1,19 @@
 <idea-plugin>
-    <id>com.github.y-polek.adbwifi</id>
+    <id>dev.polek.adbwifi</id>
     <name>ADB-Wi-Fi</name>
-    <vendor>y-polek</vendor>
+    <vendor>Yury Polek</vendor>
 
     <!-- Product and plugin compatibility requirements -->
     <!-- https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.github.y-polek.adbwifi.services.MyApplicationService"/>
-        <projectService serviceImplementation="com.github.y-polek.adbwifi.services.MyProjectService"/>
+        <applicationService serviceImplementation="dev.polek.adbwifi.services.MyApplicationService"/>
+        <projectService serviceImplementation="dev.polek.adbwifi.services.MyProjectService"/>
     </extensions>
 
     <projectListeners>
-        <listener class="com.github.y-polek.adbwifi.listeners.MyProjectManagerListener"
+        <listener class="dev.polek.adbwifi.listeners.MyProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </projectListeners>
 </idea-plugin>

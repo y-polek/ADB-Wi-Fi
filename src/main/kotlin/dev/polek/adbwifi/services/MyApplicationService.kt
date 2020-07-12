@@ -1,6 +1,6 @@
-package com.github.y-polek.adbwifi.services
+package dev.polek.adbwifi.services
 
-import com.github.y-polek.adbwifi.MyBundle
+import dev.polek.adbwifi.MyBundle
 
 class MyApplicationService {
 

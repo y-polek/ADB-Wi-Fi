@@ -1,7 +1,7 @@
-package com.github.y-polek.adbwifi.services
+package dev.polek.adbwifi.services
 
+import dev.polek.adbwifi.MyBundle
 import com.intellij.openapi.project.Project
-import com.github.y-polek.adbwifi.MyBundle
 
 class MyProjectService(project: Project) {
 

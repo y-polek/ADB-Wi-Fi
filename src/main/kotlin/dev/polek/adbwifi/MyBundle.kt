@@ -1,4 +1,4 @@
-package com.github.y-polek.adbwifi
+package dev.polek.adbwifi
 
 import com.intellij.AbstractBundle
 import org.jetbrains.annotations.NonNls
