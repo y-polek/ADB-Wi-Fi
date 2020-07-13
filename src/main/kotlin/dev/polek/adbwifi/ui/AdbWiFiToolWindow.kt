@@ -2,7 +2,8 @@ package dev.polek.adbwifi.ui
 
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.ui.table.JBTable
-import dev.polek.adbwifi.model.Device
+import dev.polek.adbwifi.MyBundle
+import dev.polek.adbwifi.adb.Adb
 import java.awt.BorderLayout
 import javax.swing.JPanel
 
@@ -10,16 +11,15 @@ class AdbWiFiToolWindow(private val toolWindow: ToolWindow) : JPanel() {
 
     private val tableModel = DevicesTableModel()
     private val table = JBTable(tableModel)
+    private val adb = Adb()
 
     init {
         layout = BorderLayout()
         add(table, BorderLayout.CENTER)
 
+        table.emptyText.text = MyBundle.message("noConnectedDevices")
 
-        tableModel.devices = listOf(
-                Device("3e853ff4", "ONE_A2001", "192.168.1.100"),
-                Device("R28M51Y8E0H", "SM_G9700", "192.168.1.101"),
-                Device("3", "SG-9700", "192.168.1.100")
-        )
+
+        tableModel.devices = adb.devices()
     }
 }
