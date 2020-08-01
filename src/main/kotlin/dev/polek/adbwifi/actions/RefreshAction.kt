@@ -10,9 +10,7 @@ import dev.polek.adbwifi.services.AdbService
 class RefreshAction : AnAction(), DumbAware {
 
     override fun actionPerformed(e: AnActionEvent) {
-        log.debug("Refresh")
         val adbService = ServiceManager.getService(AdbService::class.java)
-        log.debug("devices: ${adbService.devices()}")
     }
 
     companion object {

@@ -1,5 +1,6 @@
 package dev.polek.adbwifi.ui
 
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBPanel
 import dev.polek.adbwifi.model.Device
@@ -20,9 +21,12 @@ class DeviceListPanel : JBPanel<DeviceListPanel>() {
     }
 
     private fun rebuildUi() {
+        logger("AdbService").info("rebuildUi ${devices.size}")
         removeAll()
         devices.forEach { device ->
             add(DevicePanel(device))
         }
+        revalidate()
+        repaint()
     }
 }
