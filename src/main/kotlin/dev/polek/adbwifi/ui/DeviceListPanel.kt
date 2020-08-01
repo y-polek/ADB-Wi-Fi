@@ -1,5 +1,6 @@
 package dev.polek.adbwifi.ui
 
+import com.intellij.ide.plugins.newui.InstallButton
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.UIUtil
@@ -9,7 +10,6 @@ import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Insets
 import javax.swing.BoxLayout
-import javax.swing.JButton
 import javax.swing.JPanel
 
 class DeviceListPanel : JBPanel<DeviceListPanel>() {
@@ -67,7 +67,10 @@ class DeviceListPanel : JBPanel<DeviceListPanel>() {
             insets = Insets(0, 10, 0, 10)
         })
 
-        val button = JButton("Connect")
+        val button = object : InstallButton(device.isConnected) {
+            override fun setTextAndSize() {}
+        }
+        button.text = if (device.isConnected) "Disconnect" else "Connect"
         button.addActionListener {
 
         }
