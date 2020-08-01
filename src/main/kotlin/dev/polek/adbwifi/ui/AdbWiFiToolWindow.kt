@@ -1,21 +1,25 @@
 package dev.polek.adbwifi.ui
 
+import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.ActionPlaces
+import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.wm.ToolWindow
-import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.components.BorderLayoutPanel
 import dev.polek.adbwifi.adb.Adb
 import dev.polek.adbwifi.model.Device
-import java.awt.BorderLayout
-import java.awt.Dimension
-import javax.swing.JPanel
 
 class AdbWiFiToolWindow(private val toolWindow: ToolWindow) : BorderLayoutPanel() {
 
-    private val adb = Adb()
     private val deviceListPanel = DeviceListPanel()
 
     init {
+        val actionManager = ActionManager.getInstance()
+        val actionGroup = (actionManager.getAction("AdbWifi.ToolbarActions") as DefaultActionGroup)
+        val toolbar = actionManager.createActionToolbar(ActionPlaces.TOOLWINDOW_TITLE, actionGroup, true)
+        toolbar.setTargetComponent(this)
+        addToTop(toolbar.component)
+
         addToCenter(JBScrollPane(deviceListPanel))
 
 

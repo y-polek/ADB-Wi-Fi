@@ -8,8 +8,7 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="dev.polek.adbwifi.services.MyApplicationService"/>
-        <projectService serviceImplementation="dev.polek.adbwifi.services.MyProjectService"/>
+        <applicationService serviceImplementation="dev.polek.adbwifi.services.AdbService"/>
         <toolWindow
                 id="ADB Wi-Fi"
                 anchor="right"
@@ -17,8 +16,15 @@
                 factoryClass="dev.polek.adbwifi.ui.WindowFactory"/>
     </extensions>
 
-    <projectListeners>
-        <listener class="dev.polek.adbwifi.listeners.MyProjectManagerListener"
-                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </projectListeners>
+    <actions>
+        <group id="AdbWifi.ToolbarActions" />
+
+        <action
+                id="AdbWifi.Refresh"
+                class="dev.polek.adbwifi.actions.RefreshAction"
+                icon="AllIcons.Actions.Refresh"
+                text="Refresh">
+            <add-to-group group-id="AdbWifi.ToolbarActions" />
+        </action>
+    </actions>
 </idea-plugin>
