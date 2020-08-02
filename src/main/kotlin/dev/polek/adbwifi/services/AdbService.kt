@@ -21,12 +21,18 @@ class AdbService : Disposable {
     private val adb = Adb()
     private var devicesPollingThread: DevicesPollingThread? = null
 
+    fun refreshDeviceList() {
+        devicesPollingThread?.poll()
+    }
+
     fun connect(device: Device) {
         adb.connect(device)
+        refreshDeviceList()
     }
 
     fun disconnect(device: Device) {
         adb.disconnect(device)
+        refreshDeviceList()
     }
 
     override fun dispose() {
@@ -46,11 +52,8 @@ class AdbService : Disposable {
     }
 
     private fun stopPollingDevices() {
-
-    }
-
-    interface DeviceListListener {
-        fun onDeviceListUpdated(devices: List<Device>)
+        devicesPollingThread?.cancel()
+        devicesPollingThread = null
     }
 
     private abstract class DevicesPollingThread(val adb: Adb) : Thread() {
@@ -59,6 +62,10 @@ class AdbService : Disposable {
 
         fun cancel() {
             canceled = true
+        }
+
+        fun poll() {
+            interrupt()
         }
 
         abstract fun onResult(devices: List<Device>)
@@ -73,7 +80,7 @@ class AdbService : Disposable {
 
                 try {
                     log.info("Sleeping for 2 seconds")
-                    sleep(2000)
+                    sleep(5000)
                 } catch (e: InterruptedException) {
                     // Pass
                 }
