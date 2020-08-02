@@ -1,11 +1,13 @@
 package dev.polek.adbwifi.ui
 
 import com.intellij.ide.plugins.newui.InstallButton
+import com.intellij.openapi.components.ServiceManager
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.model.Device
+import dev.polek.adbwifi.services.AdbService
 import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
@@ -14,6 +16,8 @@ import java.awt.event.MouseEvent
 import java.awt.event.MouseListener
 
 class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
+
+    private val adbService = ServiceManager.getService(AdbService::class.java)
 
     init {
         minimumSize = Dimension(0, LIST_ITEM_HEIGHT)
@@ -54,7 +58,11 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         }
         button.text = if (device.isConnected) "Disconnect" else "Connect"
         button.addActionListener {
-
+            if (device.isConnected) {
+                adbService.disconnect(device)
+            } else {
+                adbService.connect(device)
+            }
         }
         add(button, GridBagConstraints().apply {
             gridx = 2

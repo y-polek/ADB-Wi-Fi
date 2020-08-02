@@ -22,11 +22,11 @@ class AdbService : Disposable {
     private var devicesPollingThread: DevicesPollingThread? = null
 
     fun connect(device: Device) {
-
+        adb.connect(device)
     }
 
     fun disconnect(device: Device) {
-
+        adb.disconnect(device)
     }
 
     override fun dispose() {

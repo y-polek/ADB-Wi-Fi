@@ -28,18 +28,5 @@ class AdbWiFiToolWindow(private val toolWindow: ToolWindow) : BorderLayoutPanel(
         adbService.deviceListListener = { devices ->
             deviceListPanel.devices = devices
         }
-
-
-
-        /*deviceListPanel.devices = listOf(
-                Device("123", "Samsung", "192.168.1.101", false),
-                Device("12345", "OnePlus", "192.168.1.102", true),
-                Device("6789", "Pixel", "192.168.1.103", false),
-                Device("1011", "Nexus", "192.168.1.104", false),
-                Device("1213", "Nokia", "192.168.1.105", false),
-                Device("1214", "LG", "192.168.1.106", false),
-                Device("1215", "Motorola", "192.168.1.105", false),
-                Device("1216", "Pixel 2", "192.168.1.105", false)
-        )*/
     }
 }
