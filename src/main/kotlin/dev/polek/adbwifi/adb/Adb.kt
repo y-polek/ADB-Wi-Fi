@@ -10,7 +10,7 @@ class Adb {
         return "adb devices".exec()
                 .drop(1)
                 .mapNotNull { line ->
-                    DEVICE_ID_REGEX.matchEntire(line)?.groupValues?.get(1)
+                    DEVICE_ID_REGEX.matchEntire(line)?.groupValues?.get(1)?.trim()
                 }
                 .map { deviceId ->
                     val model = model(deviceId)
@@ -19,7 +19,8 @@ class Adb {
                     Device(
                             id = deviceId,
                             name = "$manufacturer $model".trim(),
-                            address = address)
+                            address = address,
+                            isConnected = isConnected(deviceId))
                 }
                 .toList()
     }
@@ -37,9 +38,14 @@ class Adb {
         return address.orEmpty()
     }
 
+    private fun isConnected(deviceId: String): Boolean {
+        return IS_DEVICE_CONNECTED_REGEX.matches(deviceId)
+    }
+
     companion object {
         private val DEVICE_ID_REGEX = "(.*?)\\s+device".toRegex()
         private val DEVICE_ADDRESS_REGEX = ".*\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b.*".toRegex()
+        private val IS_DEVICE_CONNECTED_REGEX = "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(:\\d{1,5})?".toRegex()
 
         private fun String.exec(): Sequence<String> {
             val process = Runtime.getRuntime().exec(this)
