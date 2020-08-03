@@ -22,17 +22,13 @@
                 id="AdbWifi.Refresh"
                 class="dev.polek.adbwifi.actions.RefreshAction"
                 icon="AllIcons.Actions.Refresh"
-                text="Refresh">
-            <add-to-group group-id="AdbWifi.ToolbarActions" />
-        </action>
+                text="Refresh" />
 
         <action
                 id="AdbWifi.ToggleShell"
                 class="dev.polek.adbwifi.actions.ToggleShellAction"
                 icon="AllIcons.Debugger.Console"
-                text="Toggle Shell">
-            <add-to-group group-id="AdbWifi.ToolbarActions" />
-        </action>
+                text="Toggle Shell" />
 
         <group id="AdbWifi.ToolbarActions">
             <reference id="AdbWifi.Refresh" />
