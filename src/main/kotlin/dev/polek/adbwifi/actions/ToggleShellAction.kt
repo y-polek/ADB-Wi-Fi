@@ -6,7 +6,7 @@ import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.DumbAware
 import dev.polek.adbwifi.services.ShellService
 
-class ShellAction : ToggleAction(), DumbAware {
+class ToggleShellAction : ToggleAction(), DumbAware {
 
     private val service by lazy { ServiceManager.getService(ShellService::class.java) }
 

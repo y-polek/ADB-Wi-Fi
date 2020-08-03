@@ -18,8 +18,6 @@
     </extensions>
 
     <actions>
-        <group id="AdbWifi.ToolbarActions" />
-
         <action
                 id="AdbWifi.Refresh"
                 class="dev.polek.adbwifi.actions.RefreshAction"
@@ -29,11 +27,17 @@
         </action>
 
         <action
-                id="AdbWifi.Shell"
-                class="dev.polek.adbwifi.actions.ShellAction"
+                id="AdbWifi.ToggleShell"
+                class="dev.polek.adbwifi.actions.ToggleShellAction"
                 icon="AllIcons.Debugger.Console"
                 text="Toggle Shell">
             <add-to-group group-id="AdbWifi.ToolbarActions" />
         </action>
+
+        <group id="AdbWifi.ToolbarActions">
+            <reference id="AdbWifi.Refresh" />
+            <separator />
+            <reference id="AdbWifi.ToggleShell" />
+        </group>
     </actions>
 </idea-plugin>
