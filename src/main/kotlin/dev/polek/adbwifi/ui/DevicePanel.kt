@@ -35,15 +35,15 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             fill = GridBagConstraints.BOTH
             anchor = GridBagConstraints.PAGE_START
             weightx = 1.0
-            insets = Insets(0, 10, 0, 0)
+            insets = Insets(5, 10, 0, 0)
         })
 
-        val addressLabel = JBLabel(device.address)
-        addressLabel.componentStyle = UIUtil.ComponentStyle.SMALL
+        val addressLabel = JBLabel("Android ${device.androidVersion} (API ${device.apiLevel}) - ${device.address}")
+        addressLabel.componentStyle = UIUtil.ComponentStyle.REGULAR
         addressLabel.fontColor = UIUtil.FontColor.BRIGHTER
         add(panel(top = addressLabel), GridBagConstraints().apply {
             gridx = 0
-            gridy = 1
+            gridy = 2
             gridwidth = 3
             gridheight = 1
             fill = GridBagConstraints.BOTH
@@ -70,7 +70,7 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             gridwidth = 1
             gridheight = 1
             anchor = GridBagConstraints.PAGE_START
-            insets = Insets(5, 10, 0, 10)
+            insets = Insets(10, 10, 0, 10)
         })
 
         background = JBColor.background()
@@ -95,7 +95,7 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
     }
 
     companion object {
-        private const val LIST_ITEM_HEIGHT = 60
+        private const val LIST_ITEM_HEIGHT = 70
         private val HOVER_COLOR = JBColor.namedColor(
                 "Plugins.lightSelectionBackground",
                 JBColor(0xF5F9FF, 0x36393B))

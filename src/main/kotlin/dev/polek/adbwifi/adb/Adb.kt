@@ -21,6 +21,8 @@ class Adb {
                             id = deviceId,
                             name = "$manufacturer $model".trim(),
                             address = address,
+                            androidVersion = androidVersion(deviceId),
+                            apiLevel = apiLevel(deviceId),
                             isConnected = isConnected(deviceId))
                 }
                 .toList()
@@ -51,6 +53,14 @@ class Adb {
 
     private fun manufacturer(deviceId: String): String {
         return "adb -s $deviceId shell getprop ro.product.manufacturer".exec().firstLine().trim()
+    }
+
+    private fun androidVersion(deviceId: String): String {
+        return "adb -s $deviceId shell getprop ro.build.version.release".exec().firstLine().trim()
+    }
+
+    private fun apiLevel(deviceId: String): String {
+        return "adb -s $deviceId shell getprop ro.build.version.sdk".exec().firstLine().trim()
     }
 
     private fun address(deviceId: String): String {
