@@ -15,7 +15,7 @@ class AdbWiFiToolWindow(private val toolWindow: ToolWindow) : BorderLayoutPanel(
 
     private val splitter = JBSplitter(true, "AdbWifi.ShellPaneProportion", 0.6f)
     private val deviceListPanel = DeviceListPanel()
-    private val shellPanel = JBScrollPane()
+    private val shellPanel = JBScrollPane(ShellPanel())
 
     init {
         val actionManager = ActionManager.getInstance()
