@@ -1,6 +1,7 @@
 package dev.polek.adbwifi.adb
 
 import com.intellij.openapi.diagnostic.logger
+import dev.polek.adbwifi.model.Command
 import dev.polek.adbwifi.model.Device
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -28,23 +29,27 @@ class Adb {
                 .toList()
     }
 
-    fun connect(device: Device) {
+    fun connect(device: Device): List<Command> {
         if (device.isConnected) {
             log.warn("Device $device is already connected")
-            return
+            return emptyList()
         }
 
-        "adb -s ${device.id} tcpip 5555".execSilently()
-        "adb connect ${device.address}:5555".execSilently()
+        val startServer = "adb -s ${device.id} tcpip 5555".execSilently()
+        val connect = "adb connect ${device.address}:5555".execSilently()
+
+        return listOf(startServer, connect)
     }
 
-    fun disconnect(device: Device) {
+    fun disconnect(device: Device): List<Command> {
         if (!device.isConnected) {
             log.warn("Device $device is already disconnected")
-            return
+            return emptyList()
         }
 
-        "adb disconnect ${device.address}:5555".execSilently()
+        val disconnect = "adb disconnect ${device.address}:5555".execSilently()
+
+        return listOf(disconnect)
     }
 
     private fun model(deviceId: String): String {
@@ -84,8 +89,10 @@ class Adb {
             return BufferedReader(InputStreamReader(process.inputStream)).lineSequence()
         }
 
-        private fun String.execSilently() {
-            this.exec().count()
+        private fun String.execSilently(): Command {
+            val command = this
+            val output = command.exec().joinToString(separator = "\n")
+            return Command(command, output)
         }
 
         private fun Sequence<String>.firstLine(): String = this.firstOrNull().orEmpty()

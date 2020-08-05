@@ -4,6 +4,7 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import dev.polek.adbwifi.adb.Adb
+import dev.polek.adbwifi.model.CommandHistory
 import dev.polek.adbwifi.model.Device
 
 class AdbService : Disposable {
@@ -18,6 +19,8 @@ class AdbService : Disposable {
             }
         }
 
+    val commandHistory = CommandHistory()
+
     private val adb = Adb()
     private var devicesPollingThread: DevicesPollingThread? = null
 
@@ -26,12 +29,12 @@ class AdbService : Disposable {
     }
 
     fun connect(device: Device) {
-        adb.connect(device)
+        commandHistory += adb.connect(device)
         refreshDeviceList()
     }
 
     fun disconnect(device: Device) {
-        adb.disconnect(device)
+        commandHistory += adb.disconnect(device)
         refreshDeviceList()
     }
 

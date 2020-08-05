@@ -8,14 +8,21 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.components.BorderLayoutPanel
+import dev.polek.adbwifi.model.Command
+import dev.polek.adbwifi.model.CommandHistory
 import dev.polek.adbwifi.services.AdbService
 import dev.polek.adbwifi.services.ShellService
 
 class AdbWiFiToolWindow(private val toolWindow: ToolWindow) : BorderLayoutPanel() {
 
+    private val adbService by lazy { ServiceManager.getService(AdbService::class.java) }
+    private val shellService by lazy { ServiceManager.getService(ShellService::class.java) }
+
     private val splitter = JBSplitter(true, "AdbWifi.ShellPaneProportion", 0.6f)
     private val deviceListPanel = DeviceListPanel()
-    private val shellPanel = JBScrollPane(ShellPanel())
+    private val shellPanel = ShellPanel()
+    private val topPanel = JBScrollPane(deviceListPanel)
+    private val bottomPanel = JBScrollPane(shellPanel)
 
     init {
         val actionManager = ActionManager.getInstance()
@@ -23,24 +30,30 @@ class AdbWiFiToolWindow(private val toolWindow: ToolWindow) : BorderLayoutPanel(
         val toolbar = actionManager.createActionToolbar(ActionPlaces.TOOLWINDOW_TITLE, actionGroup, true)
         toolbar.setTargetComponent(this)
         addToTop(toolbar.component)
-
-        splitter.firstComponent = JBScrollPane(deviceListPanel)
-
         addToCenter(splitter)
 
-        val shellService = ServiceManager.getService(ShellService::class.java)
+        splitter.firstComponent = topPanel
+
+        adbService.deviceListListener = { devices ->
+            deviceListPanel.devices = devices
+        }
+
         updateShellPanel(shellService.isShellVisible)
         shellService.shellVisibilityListener = { isVisible ->
             updateShellPanel(isVisible)
         }
-
-        val adbService = ServiceManager.getService(AdbService::class.java)
-        adbService.deviceListListener = { devices ->
-            deviceListPanel.devices = devices
-        }
     }
 
     private fun updateShellPanel(isShellVisible: Boolean) {
-        splitter.secondComponent = if (isShellVisible) shellPanel else null
+        if (isShellVisible) {
+            splitter.secondComponent = bottomPanel
+            adbService.commandHistory.listener = object : CommandHistory.Listener {
+                override fun onCommandHistoryModified(commands: List<Command>) {
+                    shellPanel.setCommands(commands)
+                }
+            }
+        } else {
+            splitter.secondComponent = null
+        }
     }
 }
