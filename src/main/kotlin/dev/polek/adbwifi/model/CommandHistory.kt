@@ -6,7 +6,7 @@ class CommandHistory {
 
     var listener: Listener? = null
 
-    private val commands = LinkedList<Command>()
+    val commands = LinkedList<Command>()
 
     private fun add(command: Command) {
         addImpl(command)

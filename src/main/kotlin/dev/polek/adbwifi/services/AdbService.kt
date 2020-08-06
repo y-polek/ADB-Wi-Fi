@@ -83,7 +83,7 @@ class AdbService : Disposable {
 
                 try {
                     log.info("Sleeping for 2 seconds")
-                    sleep(5000)
+                    sleep(2000)
                 } catch (e: InterruptedException) {
                     // Pass
                 }

@@ -47,6 +47,9 @@ class AdbWiFiToolWindow(private val toolWindow: ToolWindow) : BorderLayoutPanel(
     private fun updateShellPanel(isShellVisible: Boolean) {
         if (isShellVisible) {
             splitter.secondComponent = bottomPanel
+
+            shellPanel.setCommands(adbService.commandHistory.commands)
+
             adbService.commandHistory.listener = object : CommandHistory.Listener {
                 override fun onCommandHistoryModified(commands: List<Command>) {
                     shellPanel.setCommands(commands)
