@@ -14,12 +14,18 @@ import java.awt.GridBagLayout
 import java.awt.Insets
 import java.awt.event.MouseEvent
 import java.awt.event.MouseListener
+import javax.swing.JButton
+import javax.swing.JProgressBar
 
 class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
 
     private val adbService = ServiceManager.getService(AdbService::class.java)
 
+    private val button: JButton
+
     init {
+        background = JBColor.background()
+
         minimumSize = Dimension(0, LIST_ITEM_HEIGHT)
         maximumSize = Dimension(Int.MAX_VALUE, LIST_ITEM_HEIGHT)
         preferredSize = Dimension(0, LIST_ITEM_HEIGHT)
@@ -53,11 +59,12 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             insets = Insets(0, 10, 0, 10)
         })
 
-        val button = object : InstallButton(device.isConnected) {
+        button = object : InstallButton(device.isConnected) {
             override fun setTextAndSize() {}
         }
         button.text = if (device.isConnected) "Disconnect" else "Connect"
         button.addActionListener {
+            showProgressBar()
             if (device.isConnected) {
                 adbService.disconnect(device)
             } else {
@@ -72,8 +79,6 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             anchor = GridBagConstraints.PAGE_START
             insets = Insets(10, 10, 0, 10)
         })
-
-        background = JBColor.background()
 
         val hoverListener = object : MouseListener {
             override fun mouseEntered(e: MouseEvent) {
@@ -92,6 +97,23 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         }
         addMouseListener(hoverListener)
         button.addMouseListener(hoverListener)
+    }
+
+    private fun showProgressBar() {
+        val progressBar = JProgressBar()
+        progressBar.isIndeterminate = true
+
+        val inset = (button.height - progressBar.height) / 2
+
+        remove(button)
+        add(progressBar, GridBagConstraints().apply {
+            gridx = 2
+            gridy = 0
+            gridwidth = 1
+            gridheight = 1
+            anchor = GridBagConstraints.PAGE_START
+            insets = Insets(6 + inset, 10, inset, 10)
+        })
     }
 
     companion object {
