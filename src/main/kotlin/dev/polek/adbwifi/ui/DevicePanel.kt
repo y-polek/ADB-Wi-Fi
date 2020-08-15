@@ -35,31 +35,37 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         val nameLabel = JBLabel(device.name)
         nameLabel.componentStyle = UIUtil.ComponentStyle.LARGE
         nameLabel.makeBold()
-        add(nameLabel, GridBagConstraints().apply {
-            gridx = 0
-            gridy = 0
-            gridwidth = 2
-            gridheight = 1
-            fill = GridBagConstraints.BOTH
-            anchor = GridBagConstraints.PAGE_START
-            weightx = 1.0
-            insets = Insets(5, 10, 0, 0)
-        })
+        add(
+            nameLabel,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 0
+                gridwidth = 2
+                gridheight = 1
+                fill = GridBagConstraints.BOTH
+                anchor = GridBagConstraints.PAGE_START
+                weightx = 1.0
+                insets = Insets(5, 10, 0, 0)
+            }
+        )
 
         val addressLabel = JBLabel("Android ${device.androidVersion} (API ${device.apiLevel}) - ${device.address}")
         addressLabel.componentStyle = UIUtil.ComponentStyle.REGULAR
         addressLabel.fontColor = UIUtil.FontColor.BRIGHTER
-        add(panel(top = addressLabel), GridBagConstraints().apply {
-            gridx = 0
-            gridy = 2
-            gridwidth = 3
-            gridheight = 1
-            fill = GridBagConstraints.BOTH
-            anchor = GridBagConstraints.PAGE_END
-            weightx = 1.0
-            weighty = 1.0
-            insets = Insets(0, 10, 0, 10)
-        })
+        add(
+            panel(top = addressLabel),
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 2
+                gridwidth = 3
+                gridheight = 1
+                fill = GridBagConstraints.BOTH
+                anchor = GridBagConstraints.PAGE_END
+                weightx = 1.0
+                weighty = 1.0
+                insets = Insets(0, 10, 0, 10)
+            }
+        )
 
         button = object : InstallButton(device.isConnected) {
             override fun setTextAndSize() {
@@ -75,14 +81,17 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
                 adbService.connect(device)
             }
         }
-        add(button, GridBagConstraints().apply {
-            gridx = 2
-            gridy = 0
-            gridwidth = 1
-            gridheight = 1
-            anchor = GridBagConstraints.PAGE_START
-            insets = Insets(10, 10, 0, 10)
-        })
+        add(
+            button,
+            GridBagConstraints().apply {
+                gridx = 2
+                gridy = 0
+                gridwidth = 1
+                gridheight = 1
+                anchor = GridBagConstraints.PAGE_START
+                insets = Insets(10, 10, 0, 10)
+            }
+        )
 
         val hoverListener = object : AbstractMouseListener() {
             override fun mouseEntered(e: MouseEvent) {
@@ -104,14 +113,17 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         val inset = (button.height - progressBar.height) / 2
 
         remove(button)
-        add(progressBar, GridBagConstraints().apply {
-            gridx = 2
-            gridy = 0
-            gridwidth = 1
-            gridheight = 1
-            anchor = GridBagConstraints.PAGE_START
-            insets = Insets(6 + inset, 10, inset, 10)
-        })
+        add(
+            progressBar,
+            GridBagConstraints().apply {
+                gridx = 2
+                gridy = 0
+                gridwidth = 1
+                gridheight = 1
+                anchor = GridBagConstraints.PAGE_START
+                insets = Insets(6 + inset, 10, inset, 10)
+            }
+        )
 
         revalidate()
         repaint()
@@ -120,7 +132,8 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
     companion object {
         private const val LIST_ITEM_HEIGHT = 70
         private val HOVER_COLOR = JBColor.namedColor(
-                "Plugins.lightSelectionBackground",
-                JBColor(0xF5F9FF, 0x36393B))
+            "Plugins.lightSelectionBackground",
+            JBColor(0xF5F9FF, 0x36393B)
+        )
     }
 }

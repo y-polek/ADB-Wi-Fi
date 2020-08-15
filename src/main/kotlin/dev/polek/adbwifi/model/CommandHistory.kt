@@ -3,7 +3,7 @@ package dev.polek.adbwifi.model
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
-import java.util.*
+import java.util.LinkedList
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CommandHistory {

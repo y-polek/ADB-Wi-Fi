@@ -18,7 +18,7 @@ class AdbWiFiToolWindow(private val toolWindow: ToolWindow) : BorderLayoutPanel(
     private val adbService by lazy { ServiceManager.getService(AdbService::class.java) }
     private val shellService by lazy { ServiceManager.getService(ShellService::class.java) }
 
-    private val splitter = JBSplitter(true, "AdbWifi.ShellPaneProportion", 0.6f)
+    private val splitter = JBSplitter(true, "AdbWifi.ShellPaneProportion", DEFAULT_PANEL_PROPORTION)
     private val deviceListPanel = DeviceListPanel()
     private val shellPanel = ShellPanel()
     private val topPanel = JBScrollPane(deviceListPanel)
@@ -58,5 +58,9 @@ class AdbWiFiToolWindow(private val toolWindow: ToolWindow) : BorderLayoutPanel(
         } else {
             splitter.secondComponent = null
         }
+    }
+
+    private companion object {
+        const val DEFAULT_PANEL_PROPORTION = 0.6f
     }
 }

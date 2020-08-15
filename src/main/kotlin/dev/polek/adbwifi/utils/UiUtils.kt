@@ -7,12 +7,12 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 
 fun panel(
-        center: JComponent? = null,
-        left: JComponent? = null,
-        top: JComponent? = null,
-        right: JComponent? = null,
-        bottom: JComponent? = null): JPanel
-{
+    center: JComponent? = null,
+    left: JComponent? = null,
+    top: JComponent? = null,
+    right: JComponent? = null,
+    bottom: JComponent? = null
+): JPanel {
     val panel = BorderLayoutPanel()
     panel.isOpaque = false
     center?.let(panel::addToCenter)

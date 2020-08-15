@@ -12,7 +12,7 @@ class ShellPanel : BorderLayoutPanel() {
         isEditable = false
         contentType = "text/html"
         background = JBColor.background()
-        border = EmptyBorder(10, 10, 10, 10)
+        border = EmptyBorder(INSET, INSET, INSET, INSET)
     }
 
     init {
@@ -24,6 +24,8 @@ class ShellPanel : BorderLayoutPanel() {
     }
 
     private companion object {
+        private const val INSET = 10
+
         private fun html(entries: List<LogEntry>): String {
             return """
                 <html>

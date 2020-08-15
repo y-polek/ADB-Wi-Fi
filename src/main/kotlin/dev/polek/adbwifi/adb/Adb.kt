@@ -13,23 +13,24 @@ class Adb {
 
     fun devices(): List<Device> {
         return "adb devices".exec()
-                .drop(1)
-                .mapNotNull { line ->
-                    DEVICE_ID_REGEX.matchEntire(line)?.groupValues?.get(1)?.trim()
-                }
-                .map { deviceId ->
-                    val model = model(deviceId)
-                    val manufacturer = manufacturer(deviceId)
-                    val address = address(deviceId)
-                    Device(
-                            id = deviceId,
-                            name = "$manufacturer $model".trim(),
-                            address = address,
-                            androidVersion = androidVersion(deviceId),
-                            apiLevel = apiLevel(deviceId),
-                            isConnected = isConnected(deviceId))
-                }
-                .toList()
+            .drop(1)
+            .mapNotNull { line ->
+                DEVICE_ID_REGEX.matchEntire(line)?.groupValues?.get(1)?.trim()
+            }
+            .map { deviceId ->
+                val model = model(deviceId)
+                val manufacturer = manufacturer(deviceId)
+                val address = address(deviceId)
+                Device(
+                    id = deviceId,
+                    name = "$manufacturer $model".trim(),
+                    address = address,
+                    androidVersion = androidVersion(deviceId),
+                    apiLevel = apiLevel(deviceId),
+                    isConnected = isConnected(deviceId)
+                )
+            }
+            .toList()
     }
 
     fun connect(device: Device): Flow<LogEntry> = flow {
@@ -68,7 +69,8 @@ class Adb {
     }
 
     private fun address(deviceId: String): String {
-        val address = DEVICE_ADDRESS_REGEX.matchEntire("adb -s $deviceId shell ip route".exec().firstLine())?.groupValues?.get(1)
+        val firstLine = "adb -s $deviceId shell ip route".exec().firstLine()
+        val address = DEVICE_ADDRESS_REGEX.matchEntire(firstLine)?.groupValues?.get(1)
         return address.orEmpty()
     }
 
