@@ -10,7 +10,7 @@ class WindowFactory : ToolWindowFactory, DumbAware {
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val contentFactory = ContentFactory.SERVICE.getInstance()
-        val content = contentFactory.createContent(AdbWiFiToolWindow(toolWindow), "", false)
+        val content = contentFactory.createContent(AdbWiFiToolWindow(project, toolWindow), "", false)
         toolWindow.contentManager.addContent(content)
     }
 }

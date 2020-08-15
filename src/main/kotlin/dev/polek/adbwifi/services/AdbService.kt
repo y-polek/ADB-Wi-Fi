@@ -1,15 +1,16 @@
 package dev.polek.adbwifi.services
 
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.diagnostic.logger
+import dev.polek.adbwifi.LOG
 import dev.polek.adbwifi.adb.ADB_DISPATCHER
 import dev.polek.adbwifi.adb.Adb
 import dev.polek.adbwifi.model.CommandHistory
 import dev.polek.adbwifi.model.Device
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
 class AdbService : Disposable {
 
@@ -26,81 +27,62 @@ class AdbService : Disposable {
     val commandHistory = CommandHistory()
 
     private val adb = Adb()
-    private var devicesPollingThread: DevicesPollingThread? = null
+    private var devicePollingJob: Job? = null
 
     fun refreshDeviceList() {
-        devicesPollingThread?.poll()
+        startPollingDevices()
     }
 
     fun connect(device: Device) = GlobalScope.launch(ADB_DISPATCHER) {
         adb.connect(device).collect { logEntry ->
             commandHistory.add(logEntry)
         }
-        refreshDeviceList()
+        withContext(Dispatchers.Main) {
+            delay(1000)
+            refreshDeviceList()
+        }
     }
 
     fun disconnect(device: Device) = GlobalScope.launch(ADB_DISPATCHER) {
         adb.disconnect(device).collect { logEntry ->
             commandHistory.add(logEntry)
         }
-        refreshDeviceList()
+        withContext(Dispatchers.Main) {
+            delay(1000)
+            refreshDeviceList()
+        }
     }
 
     override fun dispose() {
         stopPollingDevices()
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun startPollingDevices() {
-        devicesPollingThread = object : DevicesPollingThread(adb) {
-            override fun onResult(devices: List<Device>) {
-                ApplicationManager.getApplication().invokeLater {
-                    log.info("${devices.size} devices")
-                    deviceListListener?.invoke(devices)
-                }
-            }
+        devicePollingJob?.cancel()
+        devicePollingJob = GlobalScope.launch(Dispatchers.Main) {
+            devicesFlow()
+                    .flowOn(ADB_DISPATCHER)
+                    .collect { devices ->
+                        LOG.warn("devices: $devices")
+                        deviceListListener?.invoke(devices)
+                    }
         }
-        devicesPollingThread?.start()
     }
 
     private fun stopPollingDevices() {
-        devicesPollingThread?.cancel()
-        devicesPollingThread = null
+        devicePollingJob?.cancel()
+        devicePollingJob = null
     }
 
-    private abstract class DevicesPollingThread(val adb: Adb) : Thread() {
-
-        private var canceled = false
-
-        fun cancel() {
-            canceled = true
-        }
-
-        fun poll() {
-            interrupt()
-        }
-
-        abstract fun onResult(devices: List<Device>)
-
-        override fun run() {
-            while (!canceled) {
-                log.info("Running adb devices")
-                val devices = adb.devices()
-                if (canceled) return
-
-                onResult(devices)
-
-                try {
-                    log.info("Sleeping for 2 seconds")
-                    sleep(POLLING_INTERVAL_MILLIS)
-                } catch (e: InterruptedException) {
-                    // Pass
-                }
-            }
+    private fun devicesFlow(): Flow<List<Device>> = flow {
+        while (true) {
+            emit(adb.devices())
+            delay(POLLING_INTERVAL_MILLIS)
         }
     }
 
     private companion object {
-        const val POLLING_INTERVAL_MILLIS = 5000L
-        val log = logger("AdbService")
+        const val POLLING_INTERVAL_MILLIS = 3000L
     }
 }
