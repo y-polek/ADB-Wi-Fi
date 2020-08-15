@@ -2,7 +2,7 @@ package dev.polek.adbwifi.ui
 
 import com.intellij.ui.JBColor
 import com.intellij.util.ui.components.BorderLayoutPanel
-import dev.polek.adbwifi.model.Command
+import dev.polek.adbwifi.model.LogEntry
 import javax.swing.JTextPane
 import javax.swing.border.EmptyBorder
 
@@ -19,12 +19,12 @@ class ShellPanel : BorderLayoutPanel() {
         addToCenter(textPane)
     }
 
-    fun setCommands(commands: List<Command>) {
-        textPane.text = html(commands)
+    fun setLogEntries(entries: List<LogEntry>) {
+        textPane.text = html(entries)
     }
 
     private companion object {
-        private fun html(commands: List<Command>): String {
+        private fun html(entries: List<LogEntry>): String {
             return """
                 <html>
                     <head>
@@ -33,19 +33,25 @@ class ShellPanel : BorderLayoutPanel() {
                     </head>
                     <body>
                         <code>
-                            ${commands.joinToString(separator = "", transform = ::commandHtml)}
+                            ${entries.joinToString(separator = "", transform = ::commandHtml)}
                         </code>
                     </body>
                 </html>
             """.trimIndent()
         }
 
-        private fun commandHtml(command: Command) = buildString {
-            appendln("<b>> ${command.command}</b>")
-            appendln("<br/>")
-            if (command.output.isNotBlank()) {
-                appendln(command.output)
-                appendln("<br/>")
+        private fun commandHtml(entry: LogEntry) = buildString {
+            when (entry) {
+                is LogEntry.Command -> {
+                    appendln("<b>> ${entry.text}</b>")
+                    appendln("<br/>")
+                }
+                is LogEntry.Output -> {
+                    if (entry.text.isNotBlank()) {
+                        appendln(entry.text)
+                        appendln("<br/>")
+                    }
+                }
             }
         }
     }

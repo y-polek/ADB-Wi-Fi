@@ -8,8 +8,8 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.components.BorderLayoutPanel
-import dev.polek.adbwifi.model.Command
 import dev.polek.adbwifi.model.CommandHistory
+import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.AdbService
 import dev.polek.adbwifi.services.ShellService
 
@@ -48,11 +48,11 @@ class AdbWiFiToolWindow(private val toolWindow: ToolWindow) : BorderLayoutPanel(
         if (isShellVisible) {
             splitter.secondComponent = bottomPanel
 
-            shellPanel.setCommands(adbService.commandHistory.commands)
+            shellPanel.setLogEntries(adbService.commandHistory.getLogEntries())
 
             adbService.commandHistory.listener = object : CommandHistory.Listener {
-                override fun onCommandHistoryModified(commands: List<Command>) {
-                    shellPanel.setCommands(commands)
+                override fun onLogEntriesModified(entries: List<LogEntry>) {
+                    shellPanel.setLogEntries(entries)
                 }
             }
         } else {

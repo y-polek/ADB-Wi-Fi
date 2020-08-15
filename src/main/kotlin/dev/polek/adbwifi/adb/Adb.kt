@@ -1,8 +1,11 @@
 package dev.polek.adbwifi.adb
 
 import com.intellij.openapi.diagnostic.logger
-import dev.polek.adbwifi.model.Command
 import dev.polek.adbwifi.model.Device
+import dev.polek.adbwifi.model.LogEntry
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.flow
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -29,27 +32,23 @@ class Adb {
                 .toList()
     }
 
-    fun connect(device: Device): List<Command> {
+    fun connect(device: Device): Flow<LogEntry> = flow {
         if (device.isConnected) {
             log.warn("Device $device is already connected")
-            return emptyList()
+            return@flow
         }
 
-        val startServer = "adb -s ${device.id} tcpip 5555".execSilently()
-        val connect = "adb connect ${device.address}:5555".execSilently()
-
-        return listOf(startServer, connect)
+        "adb -s ${device.id} tcpip 5555".execAndLog(this)
+        "adb connect ${device.address}:5555".execAndLog(this)
     }
 
-    fun disconnect(device: Device): List<Command> {
+    fun disconnect(device: Device): Flow<LogEntry> = flow {
         if (!device.isConnected) {
             log.warn("Device $device is already disconnected")
-            return emptyList()
+            return@flow
         }
 
-        val disconnect = "adb disconnect ${device.address}:5555".execSilently()
-
-        return listOf(disconnect)
+        "adb disconnect ${device.address}:5555".execAndLog(this)
     }
 
     private fun model(deviceId: String): String {
@@ -89,10 +88,22 @@ class Adb {
             return BufferedReader(InputStreamReader(process.inputStream)).lineSequence()
         }
 
-        private fun String.execSilently(): Command {
-            val command = this
-            val output = command.exec().joinToString(separator = "\n")
-            return Command(command, output)
+        private fun String.execSilently(): String {
+            return this.exec().joinToString(separator = "\n")
+        }
+
+        private suspend fun String.execAndLog(logCollector: FlowCollector<LogEntry>) {
+            logCollector.emitCommand(this)
+            val output = this.execSilently()
+            logCollector.emitOutput(output)
+        }
+
+        private suspend fun FlowCollector<LogEntry>.emitCommand(command: String) {
+            emit(LogEntry.Command(command))
+        }
+
+        private suspend fun FlowCollector<LogEntry>.emitOutput(output: String) {
+            emit(LogEntry.Output(output))
         }
 
         private fun Sequence<String>.firstLine(): String = this.firstOrNull().orEmpty()

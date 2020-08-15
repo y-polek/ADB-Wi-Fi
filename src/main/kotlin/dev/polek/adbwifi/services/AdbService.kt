@@ -7,8 +7,9 @@ import dev.polek.adbwifi.adb.ADB_DISPATCHER
 import dev.polek.adbwifi.adb.Adb
 import dev.polek.adbwifi.model.CommandHistory
 import dev.polek.adbwifi.model.Device
-import kotlinx.coroutines.*
-import java.util.concurrent.Executors
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class AdbService : Disposable {
 
@@ -32,12 +33,16 @@ class AdbService : Disposable {
     }
 
     fun connect(device: Device) = GlobalScope.launch(ADB_DISPATCHER) {
-        commandHistory += adb.connect(device)
+        adb.connect(device).collect { logEntry ->
+            commandHistory.add(logEntry)
+        }
         refreshDeviceList()
     }
 
     fun disconnect(device: Device) = GlobalScope.launch(ADB_DISPATCHER) {
-        commandHistory += adb.disconnect(device)
+        adb.disconnect(device).collect { logEntry ->
+            commandHistory.add(logEntry)
+        }
         refreshDeviceList()
     }
 
