@@ -1,6 +1,8 @@
 package dev.polek.adbwifi.model
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.withContext
 import java.util.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -10,7 +12,7 @@ class CommandHistory {
 
     var listener: Listener? = null
 
-    fun add(entry: LogEntry) {
+    suspend fun add(entry: LogEntry) = withContext(Dispatchers.Main) {
         logEntries.add(entry)
         ensureCapacity()
         notifyListener()
