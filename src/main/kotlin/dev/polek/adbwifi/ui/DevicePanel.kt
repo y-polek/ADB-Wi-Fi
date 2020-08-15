@@ -114,6 +114,9 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             anchor = GridBagConstraints.PAGE_START
             insets = Insets(6 + inset, 10, inset, 10)
         })
+
+        revalidate()
+        repaint()
     }
 
     companion object {

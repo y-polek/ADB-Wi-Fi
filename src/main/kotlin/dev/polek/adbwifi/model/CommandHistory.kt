@@ -1,34 +1,34 @@
 package dev.polek.adbwifi.model
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CommandHistory {
 
-    var listener: Listener? = null
-
     val commands = LinkedList<Command>()
+    var listener: Listener? = null
 
     private fun add(command: Command) {
         addImpl(command)
-        notifyListener()
     }
 
-    fun add(commands: Iterable<Command>) {
-        commands.forEach(::addImpl)
-        notifyListener()
+    fun add(commands: List<Command>) {
+        addImpl(*commands.toTypedArray())
     }
 
-    operator fun plusAssign(commands: Iterable<Command>) {
+    operator fun plusAssign(commands: List<Command>) {
         add(commands)
     }
 
-    private fun addImpl(command: Command) {
-        commands += command
+    private fun addImpl(vararg newCommands: Command) {
+        commands += newCommands
         if (commands.size > MAX_SIZE) {
             repeat(commands.size - MAX_SIZE) {
                 commands.removeFirst()
             }
         }
+        notifyListener()
     }
 
     private fun notifyListener() {
@@ -40,6 +40,6 @@ class CommandHistory {
     }
 
     private companion object {
-        private const val MAX_SIZE = 10
+        private const val MAX_SIZE = 100
     }
 }

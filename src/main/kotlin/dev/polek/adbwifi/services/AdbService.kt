@@ -6,6 +6,7 @@ import com.intellij.openapi.diagnostic.logger
 import dev.polek.adbwifi.adb.Adb
 import dev.polek.adbwifi.model.CommandHistory
 import dev.polek.adbwifi.model.Device
+import kotlinx.coroutines.*
 
 class AdbService : Disposable {
 
@@ -28,12 +29,12 @@ class AdbService : Disposable {
         devicesPollingThread?.poll()
     }
 
-    fun connect(device: Device) {
+    fun connect(device: Device) = GlobalScope.launch(Dispatchers.IO) {
         commandHistory += adb.connect(device)
         refreshDeviceList()
     }
 
-    fun disconnect(device: Device) {
+    fun disconnect(device: Device) = GlobalScope.launch(Dispatchers.IO) {
         commandHistory += adb.disconnect(device)
         refreshDeviceList()
     }
@@ -83,7 +84,7 @@ class AdbService : Disposable {
 
                 try {
                     log.info("Sleeping for 2 seconds")
-                    sleep(2000)
+                    sleep(POLLING_INTERVAL_MILLIS)
                 } catch (e: InterruptedException) {
                     // Pass
                 }
@@ -91,7 +92,8 @@ class AdbService : Disposable {
         }
     }
 
-    companion object {
-        private val log = logger("AdbService")
+    private companion object {
+        const val POLLING_INTERVAL_MILLIS = 5000L
+        val log = logger("AdbService")
     }
 }
