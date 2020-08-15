@@ -1,8 +1,6 @@
 package dev.polek.adbwifi.services
 
-import com.intellij.openapi.Disposable
-
-class ShellService : Disposable {
+class ShellService {
 
     var isShellVisible = false
         set(value) {
@@ -11,8 +9,4 @@ class ShellService : Disposable {
         }
 
     var shellVisibilityListener: ((isVisible: Boolean) -> Unit)? = null
-
-    override fun dispose() {
-
-    }
 }

@@ -1,4 +1,4 @@
-package dev.polek.adbwifi.ui
+package dev.polek.adbwifi.utils
 
 import com.intellij.util.ui.components.BorderLayoutPanel
 import java.awt.Font

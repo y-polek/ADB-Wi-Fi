@@ -8,12 +8,14 @@ import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.services.AdbService
+import dev.polek.adbwifi.utils.AbstractMouseListener
+import dev.polek.adbwifi.utils.makeBold
+import dev.polek.adbwifi.utils.panel
 import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Insets
 import java.awt.event.MouseEvent
-import java.awt.event.MouseListener
 import javax.swing.JButton
 import javax.swing.JProgressBar
 
@@ -60,7 +62,9 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         })
 
         button = object : InstallButton(device.isConnected) {
-            override fun setTextAndSize() {}
+            override fun setTextAndSize() {
+                /* no-op */
+            }
         }
         button.text = if (device.isConnected) "Disconnect" else "Connect"
         button.addActionListener {
@@ -80,7 +84,7 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             insets = Insets(10, 10, 0, 10)
         })
 
-        val hoverListener = object : MouseListener {
+        val hoverListener = object : AbstractMouseListener() {
             override fun mouseEntered(e: MouseEvent) {
                 background = HOVER_COLOR
             }
@@ -88,12 +92,6 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             override fun mouseExited(e: MouseEvent) {
                 background = JBColor.background()
             }
-
-            override fun mouseClicked(e: MouseEvent) {}
-
-            override fun mousePressed(e: MouseEvent) {}
-
-            override fun mouseReleased(e: MouseEvent) {}
         }
         addMouseListener(hoverListener)
         button.addMouseListener(hoverListener)
