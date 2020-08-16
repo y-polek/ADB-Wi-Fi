@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Original Copy</title>
+    <defs>
+        <filter id="filter-1">
+            <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0.686275 0 0 0 0 0.694118 0 0 0 0 0.701961 0 0 0 1.000000 0"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="Original-Copy" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g filter="url(#filter-1)" id="Group">
+            <g transform="translate(6.000000, 2.000000)">
+                <g id="phone" stroke="#293449" stroke-linecap="round">
+                    <path d="M10,20 L2,20 C0.9,20 0,19.1 0,18 L0,2 C0,0.9 0.9,0 2,0 L10,0 C11.1,0 12,0.9 12,2 L12,18 C12,19.1 11.1,20 10,20 Z" id="Path" stroke-linejoin="round"></path>
+                    <path d="M7.47,1 L4.53,1 C4.51,1 4.5,0.99 4.5,0.97 L4.5,0 L7.5,0 L7.5,0.97 C7.5,0.99 7.49,1 7.47,1 Z" id="Path"></path>
+                </g>
+                <g id="wifi" transform="translate(2.000000, 4.000000)" stroke="#293449" stroke-linejoin="round">
+                    <line x1="3.996" y1="5.8125" x2="4" y2="5.8125" id="Path" stroke-linecap="round"></line>
+                    <path d="M4,6 C4.11044,6 4.2,5.9160375 4.2,5.8125 C4.2,5.7089625 4.11044,5.625 4,5.625 C3.88956,5.625 3.8,5.7089625 3.8,5.8125 C3.8,5.9160375 3.88956,6 4,6 Z" id="Path" stroke-linecap="square"></path>
+                    <path d="M2.57998,4.2375 C2.96398,3.93375 3.46,3.75 4,3.75 C4.54,3.75 5.036,3.93375 5.42,4.2375" id="Path" stroke-linecap="square"></path>
+                    <path d="M1.291992,2.805 C2.019992,2.22375 2.963992,1.875 4,1.875 C5.036,1.875 5.98,2.22375 6.708,2.805" id="Path" stroke-linecap="square"></path>
+                    <path d="M0,1.3725 C1.08,0.51375 2.476,0 4,0 C5.524,0 6.92,0.51375 8,1.3725" id="Path" stroke-linecap="square"></path>
+                </g>
+                <text id="ADB" font-family="RobotoMono-SemiBold, Roboto Mono" font-size="5.4" font-weight="500" fill="#293449">
+                    <tspan x="1.13920898" y="17">ADB</tspan>
+                </text>
+            </g>
+        </g>
+    </g>
+</svg>
