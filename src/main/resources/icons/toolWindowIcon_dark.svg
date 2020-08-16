@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="13px" height="13px" viewBox="0 0 13 13" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Artboard Copy</title>
+    <g id="Artboard-Copy" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linejoin="round">
+        <g id="wifi-2(24x24)@1x" transform="translate(1.000000, 2.000000)" stroke="#AFB1B3" stroke-width="1.5">
+            <line x1="5.4945" y1="8.525" x2="5.5" y2="8.525" id="Path" stroke-linecap="round"></line>
+            <path d="M5.5,8.8 C5.651855,8.8 5.775,8.676855 5.775,8.525 C5.775,8.373145 5.651855,8.25 5.5,8.25 C5.348145,8.25 5.225,8.373145 5.225,8.525 C5.225,8.676855 5.348145,8.8 5.5,8.8 Z" id="Path" stroke-linecap="square"></path>
+            <path d="M3.5474725,6.215 C4.0754725,5.7695 4.7575,5.5 5.5,5.5 C6.2425,5.5 6.9245,5.7695 7.4525,6.215" id="Path" stroke-linecap="square"></path>
+            <path d="M1.776489,4.114 C2.777489,3.2615 4.075489,2.75 5.5,2.75 C6.9245,2.75 8.2225,3.2615 9.2235,4.114" id="Path" stroke-linecap="square"></path>
+            <path d="M0,2.013 C1.485,0.7535 3.4045,0 5.5,0 C7.5955,0 9.515,0.7535 11,2.013" id="Path" stroke-linecap="square"></path>
+        </g>
+    </g>
+</svg>

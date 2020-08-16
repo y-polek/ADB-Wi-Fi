@@ -14,6 +14,7 @@
                 id="ADB Wi-Fi"
                 anchor="right"
                 secondary="true"
+                icon="/icons/toolWindowIcon.svg"
                 factoryClass="dev.polek.adbwifi.ui.WindowFactory"/>
     </extensions>
 
