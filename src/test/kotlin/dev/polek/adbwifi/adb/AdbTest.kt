@@ -1,8 +1,8 @@
 package dev.polek.adbwifi.adb
 
 import dev.polek.adbwifi.model.Device
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import org.assertj.core.api.Assertions.*
 
 class AdbTest {
 
