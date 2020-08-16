@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="22px" height="22px" viewBox="0 0 22 22" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Artboard Copy 5</title>
+    <g id="Artboard-Copy-5" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="wifi(24x24)@1x" transform="translate(1.000000, 4.000000)" stroke="#AFB1B3">
+            <path d="M13.9736,8.7495 C12.8667,7.9649 11.4909,7.5 10,7.5 C8.5091,7.5 7.13328,7.9649 6.02642,8.7495" id="Path" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M17.0089,6.25 C15.141,4.69409 12.6873,3.75 10,3.75 C7.31267,3.75 4.859,4.69409 2.99107,6.25" id="Path" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M20,3.75 C17.3907,1.42519 13.8717,0 10,0 C6.12831,0 2.60934,1.42519 0,3.75" id="Path" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+            <circle id="Oval" fill-rule="nonzero" transform="translate(10.000000, 13.000000) rotate(-90.000000) translate(-10.000000, -13.000000) " cx="10" cy="13" r="1"></circle>
+        </g>
+    </g>
+</svg>

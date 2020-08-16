@@ -2,6 +2,7 @@ package dev.polek.adbwifi.ui
 
 import com.intellij.ide.plugins.newui.InstallButton
 import com.intellij.openapi.components.ServiceManager
+import com.intellij.openapi.util.IconLoader
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
@@ -32,20 +33,38 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         maximumSize = Dimension(Int.MAX_VALUE, LIST_ITEM_HEIGHT)
         preferredSize = Dimension(0, LIST_ITEM_HEIGHT)
 
+        val iconLabel = JBLabel()
+        iconLabel.icon = when (device.connectionType) {
+            Device.ConnectionType.USB -> ICON_USB
+            Device.ConnectionType.WIFI -> ICON_WIFI
+        }
+        add(
+            iconLabel,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 0
+                gridwidth = 1
+                gridheight = 2
+                fill = GridBagConstraints.VERTICAL
+                weighty = 1.0
+                insets = Insets(0, 10, 0, 10)
+            }
+        )
+
         val nameLabel = JBLabel(device.name)
         nameLabel.componentStyle = UIUtil.ComponentStyle.LARGE
         nameLabel.makeBold()
         add(
             nameLabel,
             GridBagConstraints().apply {
-                gridx = 0
+                gridx = 1
                 gridy = 0
                 gridwidth = 2
                 gridheight = 1
                 fill = GridBagConstraints.BOTH
                 anchor = GridBagConstraints.PAGE_START
                 weightx = 1.0
-                insets = Insets(5, 10, 0, 0)
+                insets = Insets(5, 0, 0, 0)
             }
         )
 
@@ -55,15 +74,15 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         add(
             panel(top = addressLabel),
             GridBagConstraints().apply {
-                gridx = 0
-                gridy = 2
+                gridx = 1
+                gridy = 1
                 gridwidth = 3
                 gridheight = 1
                 fill = GridBagConstraints.BOTH
                 anchor = GridBagConstraints.PAGE_END
                 weightx = 1.0
                 weighty = 1.0
-                insets = Insets(0, 10, 0, 10)
+                insets = Insets(0, 0, 0, 10)
             }
         )
 
@@ -72,7 +91,8 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
                 /* no-op */
             }
         }
-        button.text = if (device.isConnected) "Disconnect" else "Connect"
+        button.text = if (device.isWifiDevice) "Disconnect" else "Connect"
+        button.isEnabled = device.isWifiDevice || !device.isConnected
         button.addActionListener {
             showProgressBar()
             if (device.isConnected) {
@@ -84,7 +104,7 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         add(
             button,
             GridBagConstraints().apply {
-                gridx = 2
+                gridx = 3
                 gridy = 0
                 gridwidth = 1
                 gridheight = 1
@@ -116,7 +136,7 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         add(
             progressBar,
             GridBagConstraints().apply {
-                gridx = 2
+                gridx = 3
                 gridy = 0
                 gridwidth = 1
                 gridheight = 1
@@ -129,11 +149,13 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         repaint()
     }
 
-    companion object {
+    private companion object {
         private const val LIST_ITEM_HEIGHT = 70
         private val HOVER_COLOR = JBColor.namedColor(
             "Plugins.lightSelectionBackground",
             JBColor(0xF5F9FF, 0x36393B)
         )
+        private val ICON_USB = IconLoader.getIcon("/icons/usbIcon.svg")
+        private val ICON_WIFI = IconLoader.getIcon("/icons/wifiIcon.svg")
     }
 }

@@ -12,7 +12,7 @@ import java.io.InputStreamReader
 class Adb {
 
     fun devices(): List<Device> {
-        return "adb devices".exec()
+        val devices = "adb devices".exec()
             .drop(1)
             .mapNotNull { line ->
                 DEVICE_ID_REGEX.matchEntire(line)?.groupValues?.get(1)?.trim()
@@ -27,10 +27,25 @@ class Adb {
                     address = address,
                     androidVersion = androidVersion(deviceId),
                     apiLevel = apiLevel(deviceId),
-                    isConnected = isConnected(deviceId)
+                    connectionType = connectionType(deviceId)
                 )
             }
             .toList()
+
+        devices.forEach { device ->
+            device.isConnected = when {
+                device.isWifiDevice -> true
+                device.address.isBlank() -> false
+                else -> {
+                    val wifiDevice = devices.firstOrNull {
+                        it.isWifiDevice && it.address == device.address
+                    }
+                    wifiDevice != null
+                }
+            }
+        }
+
+        return devices
     }
 
     fun connect(device: Device): Flow<LogEntry> = flow {
@@ -74,8 +89,11 @@ class Adb {
         return address.orEmpty()
     }
 
-    private fun isConnected(deviceId: String): Boolean {
-        return IS_DEVICE_CONNECTED_REGEX.matches(deviceId)
+    private fun connectionType(deviceId: String): Device.ConnectionType {
+        return when {
+            IS_IP_ADDRESS_REGEX.matches(deviceId) -> Device.ConnectionType.WIFI
+            else -> Device.ConnectionType.USB
+        }
     }
 
     companion object {
@@ -83,7 +101,7 @@ class Adb {
 
         private val DEVICE_ID_REGEX = "(.*?)\\s+device".toRegex()
         private val DEVICE_ADDRESS_REGEX = ".*\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b.*".toRegex()
-        private val IS_DEVICE_CONNECTED_REGEX = "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(:\\d{1,5})?".toRegex()
+        private val IS_IP_ADDRESS_REGEX = "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(:\\d{1,5})?".toRegex()
 
         private fun String.exec(): Sequence<String> {
             val process = Runtime.getRuntime().exec(this)

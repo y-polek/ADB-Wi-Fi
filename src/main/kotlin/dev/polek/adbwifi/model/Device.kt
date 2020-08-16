@@ -6,5 +6,13 @@ data class Device(
     val address: String,
     val androidVersion: String,
     val apiLevel: String,
-    val isConnected: Boolean = false
-)
+    val connectionType: ConnectionType,
+    var isConnected: Boolean = false
+) {
+    val isUsbDevice = connectionType == ConnectionType.USB
+    val isWifiDevice = connectionType == ConnectionType.WIFI
+
+    enum class ConnectionType {
+        USB, WIFI
+    }
+}
