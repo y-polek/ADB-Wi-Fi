@@ -63,11 +63,11 @@ class AdbService : Disposable {
         devicePollingJob?.cancel()
         devicePollingJob = GlobalScope.launch(Dispatchers.Main) {
             devicesFlow()
-                    .flowOn(ADB_DISPATCHER)
-                    .collect { devices ->
-                        LOG.warn("devices: $devices")
-                        deviceListListener?.invoke(devices)
-                    }
+                .flowOn(ADB_DISPATCHER)
+                .collect { devices ->
+                    LOG.warn("devices: $devices")
+                    deviceListListener?.invoke(devices)
+                }
         }
     }
 

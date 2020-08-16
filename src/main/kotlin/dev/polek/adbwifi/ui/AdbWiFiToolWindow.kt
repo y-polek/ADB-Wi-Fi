@@ -44,16 +44,21 @@ class AdbWiFiToolWindow(project: Project, private val toolWindow: ToolWindow) : 
             updateShellPanel(isVisible)
         }
 
-        project.messageBus.connect(this).subscribe(ToolWindowManagerListener.TOPIC, object : ToolWindowManagerListener {
-            override fun stateChanged(toolWindowManager: ToolWindowManager) {
-                LOG.warn("ToolWindow. isActive: ${toolWindow.isActive}, isVisible: ${toolWindow.isVisible}")
-                if (toolWindow.isVisible) {
-                    subscribeToDeviceList()
-                } else {
-                    unsubscribeFromDeviceList()
+        project.messageBus
+            .connect(this)
+            .subscribe(
+                ToolWindowManagerListener.TOPIC,
+                object : ToolWindowManagerListener {
+                    override fun stateChanged(toolWindowManager: ToolWindowManager) {
+                        LOG.warn("ToolWindow. isActive: ${toolWindow.isActive}, isVisible: ${toolWindow.isVisible}")
+                        if (toolWindow.isVisible) {
+                            subscribeToDeviceList()
+                        } else {
+                            unsubscribeFromDeviceList()
+                        }
+                    }
                 }
-            }
-        })
+            )
 
         if (toolWindow.isVisible) {
             subscribeToDeviceList()
