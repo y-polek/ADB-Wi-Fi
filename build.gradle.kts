@@ -75,6 +75,13 @@ detekt {
     }
 }
 
+// Configure ktlint-gradle plugin.
+// Read more: https://github.com/JLLeitschuh/ktlint-gradle
+ktlint {
+    version.set("0.37.2")
+    disabledRules.set(setOf("no-wildcard-imports"))
+}
+
 tasks {
     // Set the compatibility versions to 1.8
     withType<JavaCompile> {
