@@ -4,6 +4,7 @@ import com.intellij.openapi.Disposable
 import dev.polek.adbwifi.LOG
 import dev.polek.adbwifi.adb.ADB_DISPATCHER
 import dev.polek.adbwifi.adb.Adb
+import dev.polek.adbwifi.commandexecutor.RuntimeCommandExecutor
 import dev.polek.adbwifi.model.CommandHistory
 import dev.polek.adbwifi.model.Device
 import kotlinx.coroutines.*
@@ -26,7 +27,7 @@ class AdbService : Disposable {
 
     val commandHistory = CommandHistory()
 
-    private val adb = Adb()
+    private val adb = Adb(RuntimeCommandExecutor())
     private var devicePollingJob: Job? = null
 
     fun refreshDeviceList() {
