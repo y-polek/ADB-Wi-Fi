@@ -4,3 +4,13 @@
 formatting:
   Indentation:
     active: true
+  NoWildcardImports:
+    active: false
+complexity:
+  TooManyFunctions:
+    ignorePrivate: true
+style:
+  MagicNumber:
+    active: false
+  WildcardImport:
+    excludeImports: ['java.util.*', 'kotlinx.coroutines.*']
