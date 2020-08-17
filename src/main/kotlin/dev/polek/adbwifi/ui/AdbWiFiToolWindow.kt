@@ -37,7 +37,8 @@ class AdbWiFiToolWindow(project: Project, private val toolWindow: ToolWindow) : 
         val toolbar = actionManager.createActionToolbar(
             ActionPlaces.TOOLWINDOW_TITLE,
             toolbarActionGroup,
-            true)
+            true
+        )
         toolbar.setTargetComponent(this)
         addToTop(toolbar.component)
         addToCenter(splitter)
@@ -46,7 +47,8 @@ class AdbWiFiToolWindow(project: Project, private val toolWindow: ToolWindow) : 
         val logToolbar = actionManager.createActionToolbar(
             ActionPlaces.TOOLWINDOW_CONTENT,
             logToolbarActionGroup,
-            false)
+            false
+        )
         bottomPanel = panel(center = JBScrollPane(shellPanel), left = logToolbar.component)
 
         splitter.firstComponent = topPanel
