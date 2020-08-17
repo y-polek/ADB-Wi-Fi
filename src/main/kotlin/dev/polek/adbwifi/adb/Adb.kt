@@ -44,7 +44,7 @@ class Adb(private val commandExecutor: CommandExecutor) {
             }
         }
 
-        return devices
+        return devices.sortedWith(DEVICE_COMPARATOR)
     }
 
     fun connect(device: Device): Flow<LogEntry> = flow {
@@ -113,6 +113,8 @@ class Adb(private val commandExecutor: CommandExecutor) {
         private val DEVICE_ID_REGEX = "(.*?)\\s+device".toRegex()
         private val DEVICE_ADDRESS_REGEX = ".*\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b.*".toRegex()
         private val IS_IP_ADDRESS_REGEX = "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(:\\d{1,5})?".toRegex()
+
+        private val DEVICE_COMPARATOR = compareBy<Device>({ it.name }, { it.isWifiDevice })
 
         private fun Sequence<String>.firstLine(): String = this.firstOrNull().orEmpty()
     }
