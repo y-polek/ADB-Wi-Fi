@@ -17,6 +17,8 @@ import dev.polek.adbwifi.model.CommandHistory
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.AdbService
 import dev.polek.adbwifi.services.ShellService
+import dev.polek.adbwifi.utils.panel
+import javax.swing.JComponent
 
 class AdbWiFiToolWindow(project: Project, private val toolWindow: ToolWindow) : BorderLayoutPanel(), Disposable {
 
@@ -27,15 +29,25 @@ class AdbWiFiToolWindow(project: Project, private val toolWindow: ToolWindow) : 
     private val deviceListPanel = DeviceListPanel()
     private val shellPanel = ShellPanel()
     private val topPanel = JBScrollPane(deviceListPanel)
-    private val bottomPanel = JBScrollPane(shellPanel)
+    private val bottomPanel: JComponent
 
     init {
         val actionManager = ActionManager.getInstance()
-        val actionGroup = (actionManager.getAction("AdbWifi.ToolbarActions") as DefaultActionGroup)
-        val toolbar = actionManager.createActionToolbar(ActionPlaces.TOOLWINDOW_TITLE, actionGroup, true)
+        val toolbarActionGroup = actionManager.getAction("AdbWifi.ToolbarActions") as DefaultActionGroup
+        val toolbar = actionManager.createActionToolbar(
+            ActionPlaces.TOOLWINDOW_TITLE,
+            toolbarActionGroup,
+            true)
         toolbar.setTargetComponent(this)
         addToTop(toolbar.component)
         addToCenter(splitter)
+
+        val logToolbarActionGroup = actionManager.getAction("AdbWifi.LogToolbarActions") as DefaultActionGroup
+        val logToolbar = actionManager.createActionToolbar(
+            ActionPlaces.TOOLWINDOW_CONTENT,
+            logToolbarActionGroup,
+            false)
+        bottomPanel = panel(center = JBScrollPane(shellPanel), left = logToolbar.component)
 
         splitter.firstComponent = topPanel
 

@@ -20,6 +20,11 @@ class CommandHistory {
 
     fun getLogEntries(): List<LogEntry> = logEntries
 
+    fun clear() {
+        logEntries.clear()
+        notifyListener()
+    }
+
     private fun ensureCapacity() {
         if (logEntries.size > CAPACITY) {
             repeat(logEntries.size - CAPACITY) {

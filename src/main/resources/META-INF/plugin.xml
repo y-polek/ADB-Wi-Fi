@@ -24,17 +24,24 @@
                 class="dev.polek.adbwifi.actions.RefreshAction"
                 icon="AllIcons.Actions.Refresh"
                 text="Refresh" />
-
         <action
                 id="AdbWifi.ToggleShell"
                 class="dev.polek.adbwifi.actions.ToggleShellAction"
                 icon="AllIcons.Debugger.Console"
-                text="Toggle Shell" />
-
+                text="Toggle Log" />
         <group id="AdbWifi.ToolbarActions">
             <reference id="AdbWifi.Refresh" />
             <separator />
             <reference id="AdbWifi.ToggleShell" />
+        </group>
+
+        <action
+                id="AdbWifi.ClearLog"
+                class="dev.polek.adbwifi.actions.ClearLogAction"
+                icon="/icons/clearLogIcon.svg"
+                text="Clear Log" />
+        <group id="AdbWifi.LogToolbarActions">
+            <reference id="AdbWifi.ClearLog" />
         </group>
     </actions>
 </idea-plugin>
