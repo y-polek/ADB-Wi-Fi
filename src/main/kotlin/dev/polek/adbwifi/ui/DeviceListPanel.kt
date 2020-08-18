@@ -10,8 +10,11 @@ class DeviceListPanel : JBPanel<DeviceListPanel>() {
 
     var devices: List<Device> = emptyList()
         set(value) {
+            val oldList = field
             field = value
-            rebuildUi()
+            if (!oldList.contentDeepEquals(value)) {
+                rebuildUi()
+            }
         }
 
     init {
@@ -28,5 +31,11 @@ class DeviceListPanel : JBPanel<DeviceListPanel>() {
         }
         revalidate()
         repaint()
+    }
+
+    private companion object {
+        private fun List<Device>.contentDeepEquals(other: List<Device>): Boolean {
+            return this.toTypedArray().contentDeepEquals(other.toTypedArray())
+        }
     }
 }
