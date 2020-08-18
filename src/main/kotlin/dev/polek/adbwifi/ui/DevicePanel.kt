@@ -12,10 +12,7 @@ import dev.polek.adbwifi.services.AdbService
 import dev.polek.adbwifi.utils.AbstractMouseListener
 import dev.polek.adbwifi.utils.makeBold
 import dev.polek.adbwifi.utils.panel
-import java.awt.Dimension
-import java.awt.GridBagConstraints
-import java.awt.GridBagLayout
-import java.awt.Insets
+import java.awt.*
 import java.awt.event.MouseEvent
 import javax.swing.JButton
 import javax.swing.JProgressBar
@@ -113,6 +110,22 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             }
         )
 
+        val menuButton = JBLabel()
+        menuButton.icon = ICON_MENU
+        menuButton.background = MENU_BUTTON_HOVER_COLOR
+        menuButton.addMouseListener(MENU_BUTTON_HOVER_LISTENER)
+        add(
+            menuButton,
+            GridBagConstraints().apply {
+                gridx = 3
+                gridy = 1
+                gridwidth = 1
+                gridheight = 1
+                anchor = GridBagConstraints.LINE_END
+                insets = Insets(0, 0, 0, 14)
+            }
+        )
+
         val hoverListener = object : AbstractMouseListener() {
             override fun mouseEntered(e: MouseEvent) {
                 background = HOVER_COLOR
@@ -124,6 +137,7 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         }
         addMouseListener(hoverListener)
         button.addMouseListener(hoverListener)
+        menuButton.addMouseListener(hoverListener)
     }
 
     private fun showProgressBar() {
@@ -157,5 +171,30 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         )
         private val ICON_USB = IconLoader.getIcon("/icons/usbIcon.svg")
         private val ICON_WIFI = IconLoader.getIcon("/icons/wifiIcon.svg")
+        private val ICON_MENU = IconLoader.getIcon("/icons/menuIcon.svg")
+
+        private val MENU_BUTTON_HOVER_COLOR = JBColor(0xdfdfdf, 0x4b5052)
+        private val MENU_BUTTON_PRESSED_COLOR = JBColor(0xcfcfcf, 0x5b6164)
+
+        private val MENU_BUTTON_HOVER_LISTENER = object : AbstractMouseListener() {
+            override fun mouseEntered(e: MouseEvent) {
+                e.label.isOpaque = true
+            }
+
+            override fun mouseExited(e: MouseEvent) {
+                e.label.isOpaque = false
+            }
+
+            override fun mousePressed(e: MouseEvent) {
+                e.label.background = MENU_BUTTON_PRESSED_COLOR
+            }
+
+            override fun mouseReleased(e: MouseEvent) {
+                e.label.background = MENU_BUTTON_HOVER_COLOR
+            }
+
+            private val MouseEvent.label
+                get() = this.component as JBLabel
+        }
     }
 }
