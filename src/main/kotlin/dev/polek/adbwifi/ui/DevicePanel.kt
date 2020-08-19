@@ -1,18 +1,26 @@
 package dev.polek.adbwifi.ui
 
+import com.intellij.icons.AllIcons
 import com.intellij.ide.plugins.newui.InstallButton
 import com.intellij.openapi.components.ServiceManager
+import com.intellij.openapi.ui.JBMenuItem
+import com.intellij.openapi.ui.JBPopupMenu
 import com.intellij.openapi.util.IconLoader
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.UIUtil
+import dev.polek.adbwifi.MyBundle
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.services.AdbService
 import dev.polek.adbwifi.utils.AbstractMouseListener
+import dev.polek.adbwifi.utils.copyToClipboard
 import dev.polek.adbwifi.utils.makeBold
 import dev.polek.adbwifi.utils.panel
-import java.awt.*
+import java.awt.Dimension
+import java.awt.GridBagConstraints
+import java.awt.GridBagLayout
+import java.awt.Insets
 import java.awt.event.MouseEvent
 import javax.swing.JButton
 import javax.swing.JProgressBar
@@ -114,7 +122,38 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         val menuButton = JBLabel()
         menuButton.icon = ICON_MENU
         menuButton.background = MENU_BUTTON_HOVER_COLOR
-        menuButton.addMouseListener(MENU_BUTTON_HOVER_LISTENER)
+        menuButton.addMouseListener(
+            object : AbstractMouseListener() {
+                override fun mouseClicked(e: MouseEvent) {
+                    val menu = JBPopupMenu()
+                    val copyIdItem = JBMenuItem(MyBundle.message("copyDeviceIdMenuItem"), AllIcons.Actions.Copy)
+                    copyIdItem.addActionListener {
+                        copyToClipboard(device.id)
+                    }
+                    menu.add(copyIdItem)
+                    menu.show(e.label, e.x, e.y)
+                }
+
+                override fun mouseEntered(e: MouseEvent) {
+                    e.label.isOpaque = true
+                }
+
+                override fun mouseExited(e: MouseEvent) {
+                    e.label.isOpaque = false
+                }
+
+                override fun mousePressed(e: MouseEvent) {
+                    e.label.background = MENU_BUTTON_PRESSED_COLOR
+                }
+
+                override fun mouseReleased(e: MouseEvent) {
+                    e.label.background = MENU_BUTTON_HOVER_COLOR
+                }
+
+                private val MouseEvent.label
+                    get() = this.component as JBLabel
+            }
+        )
         add(
             menuButton,
             GridBagConstraints().apply {
@@ -176,26 +215,5 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
 
         private val MENU_BUTTON_HOVER_COLOR = JBColor(0xdfdfdf, 0x4b5052)
         private val MENU_BUTTON_PRESSED_COLOR = JBColor(0xcfcfcf, 0x5b6164)
-
-        private val MENU_BUTTON_HOVER_LISTENER = object : AbstractMouseListener() {
-            override fun mouseEntered(e: MouseEvent) {
-                e.label.isOpaque = true
-            }
-
-            override fun mouseExited(e: MouseEvent) {
-                e.label.isOpaque = false
-            }
-
-            override fun mousePressed(e: MouseEvent) {
-                e.label.background = MENU_BUTTON_PRESSED_COLOR
-            }
-
-            override fun mouseReleased(e: MouseEvent) {
-                e.label.background = MENU_BUTTON_HOVER_COLOR
-            }
-
-            private val MouseEvent.label
-                get() = this.component as JBLabel
-        }
     }
 }
