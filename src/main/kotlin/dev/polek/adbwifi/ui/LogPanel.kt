@@ -6,7 +6,7 @@ import dev.polek.adbwifi.model.LogEntry
 import javax.swing.JTextPane
 import javax.swing.border.EmptyBorder
 
-class ShellPanel : BorderLayoutPanel() {
+class LogPanel : BorderLayoutPanel() {
 
     private val textPane = JTextPane().apply {
         isEditable = false

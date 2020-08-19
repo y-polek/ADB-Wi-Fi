@@ -4,15 +4,15 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.ToggleAction
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.DumbAware
-import dev.polek.adbwifi.services.ShellService
+import dev.polek.adbwifi.services.LogService
 
-class ToggleShellAction : ToggleAction(), DumbAware {
+class ToggleLogAction : ToggleAction(), DumbAware {
 
-    private val service by lazy { ServiceManager.getService(ShellService::class.java) }
+    private val service by lazy { ServiceManager.getService(LogService::class.java) }
 
-    override fun isSelected(e: AnActionEvent) = service.isShellVisible
+    override fun isSelected(e: AnActionEvent) = service.isLogVisible
 
     override fun setSelected(e: AnActionEvent, state: Boolean) {
-        service.isShellVisible = state
+        service.isLogVisible = state
     }
 }

@@ -9,7 +9,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="dev.polek.adbwifi.services.AdbService"/>
-        <applicationService serviceImplementation="dev.polek.adbwifi.services.ShellService"/>
+        <applicationService serviceImplementation="dev.polek.adbwifi.services.LogService"/>
         <toolWindow
                 id="ADB Wi-Fi"
                 anchor="right"
@@ -25,14 +25,14 @@
                 icon="AllIcons.Actions.Refresh"
                 text="Refresh" />
         <action
-                id="AdbWifi.ToggleShell"
-                class="dev.polek.adbwifi.actions.ToggleShellAction"
+                id="AdbWifi.ToggleLog"
+                class="dev.polek.adbwifi.actions.ToggleLogAction"
                 icon="AllIcons.Debugger.Console"
                 text="Toggle Log" />
         <group id="AdbWifi.ToolbarActions">
             <reference id="AdbWifi.Refresh" />
             <separator />
-            <reference id="AdbWifi.ToggleShell" />
+            <reference id="AdbWifi.ToggleLog" />
         </group>
 
         <action

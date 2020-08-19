@@ -16,18 +16,18 @@ import dev.polek.adbwifi.LOG
 import dev.polek.adbwifi.model.CommandHistory
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.AdbService
-import dev.polek.adbwifi.services.ShellService
+import dev.polek.adbwifi.services.LogService
 import dev.polek.adbwifi.utils.panel
 import javax.swing.JComponent
 
 class AdbWiFiToolWindow(project: Project, private val toolWindow: ToolWindow) : BorderLayoutPanel(), Disposable {
 
     private val adbService by lazy { ServiceManager.getService(AdbService::class.java) }
-    private val shellService by lazy { ServiceManager.getService(ShellService::class.java) }
+    private val logService by lazy { ServiceManager.getService(LogService::class.java) }
 
     private val splitter = JBSplitter(true, "AdbWifi.ShellPaneProportion", DEFAULT_PANEL_PROPORTION)
     private val deviceListPanel = DeviceListPanel()
-    private val shellPanel = ShellPanel()
+    private val logPanel = LogPanel()
     private val topPanel = JBScrollPane(deviceListPanel)
     private val bottomPanel: JComponent
 
@@ -49,13 +49,13 @@ class AdbWiFiToolWindow(project: Project, private val toolWindow: ToolWindow) : 
             logToolbarActionGroup,
             false
         )
-        bottomPanel = panel(center = JBScrollPane(shellPanel), left = logToolbar.component)
+        bottomPanel = panel(center = JBScrollPane(logPanel), left = logToolbar.component)
 
         splitter.firstComponent = topPanel
 
-        updateShellPanel(shellService.isShellVisible)
-        shellService.shellVisibilityListener = { isVisible ->
-            updateShellPanel(isVisible)
+        updateLogPanel(logService.isLogVisible)
+        logService.logVisibilityListener = { isVisible ->
+            updateLogPanel(isVisible)
         }
 
         project.messageBus
@@ -81,7 +81,7 @@ class AdbWiFiToolWindow(project: Project, private val toolWindow: ToolWindow) : 
 
     override fun dispose() {
         unsubscribeFromDeviceList()
-        shellService.shellVisibilityListener = null
+        logService.logVisibilityListener = null
     }
 
     private fun subscribeToDeviceList() {
@@ -102,15 +102,15 @@ class AdbWiFiToolWindow(project: Project, private val toolWindow: ToolWindow) : 
         adbService.deviceListListener = null
     }
 
-    private fun updateShellPanel(isShellVisible: Boolean) {
-        if (isShellVisible) {
+    private fun updateLogPanel(isLogVisible: Boolean) {
+        if (isLogVisible) {
             splitter.secondComponent = bottomPanel
 
-            shellPanel.setLogEntries(adbService.commandHistory.getLogEntries())
+            logPanel.setLogEntries(adbService.commandHistory.getLogEntries())
 
             adbService.commandHistory.listener = object : CommandHistory.Listener {
                 override fun onLogEntriesModified(entries: List<LogEntry>) {
-                    shellPanel.setLogEntries(entries)
+                    logPanel.setLogEntries(entries)
                 }
             }
         } else {
