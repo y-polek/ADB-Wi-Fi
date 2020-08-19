@@ -41,20 +41,20 @@ class AdbTest {
         assertThat(devices).hasSize(2)
 
         val device1 = devices[0]
-        assertThat(device1.id).isEqualTo("R28M51Y8E0H")
-        assertThat(device1.name).isEqualTo("samsung SM-G9700")
-        assertThat(device1.address).isEqualTo("192.168.1.179")
-        assertThat(device1.androidVersion).isEqualTo("10")
-        assertThat(device1.apiLevel).isEqualTo("29")
+        assertThat(device1.id).isEqualTo("ce0717171c16e33b03")
+        assertThat(device1.name).isEqualTo("samsung SM-G930F")
+        assertThat(device1.address).isEqualTo("192.168.1.159")
+        assertThat(device1.androidVersion).isEqualTo("8.0.0")
+        assertThat(device1.apiLevel).isEqualTo("26")
         assertThat(device1.connectionType).isEqualTo(Device.ConnectionType.USB)
         assertThat(device1.isConnected).isFalse()
 
         val device2 = devices[1]
-        assertThat(device2.id).isEqualTo("ce0717171c16e33b03")
-        assertThat(device2.name).isEqualTo("samsung SM-G930F")
-        assertThat(device2.address).isEqualTo("192.168.1.159")
-        assertThat(device2.androidVersion).isEqualTo("8.0.0")
-        assertThat(device2.apiLevel).isEqualTo("26")
+        assertThat(device2.id).isEqualTo("R28M51Y8E0H")
+        assertThat(device2.name).isEqualTo("samsung SM-G9700")
+        assertThat(device2.address).isEqualTo("192.168.1.179")
+        assertThat(device2.androidVersion).isEqualTo("10")
+        assertThat(device2.apiLevel).isEqualTo("29")
         assertThat(device2.connectionType).isEqualTo(Device.ConnectionType.USB)
         assertThat(device2.isConnected).isFalse()
     }
