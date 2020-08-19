@@ -5,13 +5,14 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import dev.polek.adbwifi.utils.AbstractMouseListener
 import java.awt.event.MouseEvent
+import javax.swing.Icon
 
-class MenuButton : JBLabel() {
+class IconButton(icon: Icon) : JBLabel() {
 
     var onClickedListener: ((x: Int, y: Int) -> Unit)? = null
 
     init {
-        icon = ICON_MENU
+        this.icon = icon
         background = HOVER_COLOR
 
         addMouseListener(object : AbstractMouseListener() {
@@ -38,7 +39,6 @@ class MenuButton : JBLabel() {
     }
 
     private companion object {
-        private val ICON_MENU = IconLoader.getIcon("/icons/menuIcon.svg")
         private val HOVER_COLOR = JBColor(0xdfdfdf, 0x4b5052)
         private val PRESSED_COLOR = JBColor(0xcfcfcf, 0x5b6164)
     }

@@ -119,7 +119,7 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             }
         )
 
-        val menuButton = MenuButton()
+        val menuButton = IconButton(ICON_MENU)
         menuButton.onClickedListener = { x, y ->
             val menu = JBPopupMenu()
             val copyIdItem = JBMenuItem(MyBundle.message("copyDeviceIdMenuItem"), AllIcons.Actions.Copy)
@@ -186,5 +186,7 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         )
         private val ICON_USB = IconLoader.getIcon("/icons/usbIcon.svg")
         private val ICON_WIFI = IconLoader.getIcon("/icons/wifiIcon.svg")
+        private val ICON_MENU = IconLoader.getIcon("/icons/menuIcon.svg")
+        private val ICON_PIN = IconLoader.getIcon("/icons/pinIcon.svg")
     }
 }
