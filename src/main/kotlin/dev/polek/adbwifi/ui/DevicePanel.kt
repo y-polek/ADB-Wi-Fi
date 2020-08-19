@@ -91,6 +91,7 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         button.text = if (device.isWifiDevice) "Disconnect" else "Connect"
         button.isEnabled = device.isWifiDevice || !device.isConnected
         button.addActionListener {
+            device.isConnecting = true
             showProgressBar()
             if (device.isConnected) {
                 adbService.disconnect(device)
