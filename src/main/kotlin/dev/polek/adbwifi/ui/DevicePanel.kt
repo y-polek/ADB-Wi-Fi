@@ -119,41 +119,16 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             }
         )
 
-        val menuButton = JBLabel()
-        menuButton.icon = ICON_MENU
-        menuButton.background = MENU_BUTTON_HOVER_COLOR
-        menuButton.addMouseListener(
-            object : AbstractMouseListener() {
-                override fun mouseClicked(e: MouseEvent) {
-                    val menu = JBPopupMenu()
-                    val copyIdItem = JBMenuItem(MyBundle.message("copyDeviceIdMenuItem"), AllIcons.Actions.Copy)
-                    copyIdItem.addActionListener {
-                        copyToClipboard(device.id)
-                    }
-                    menu.add(copyIdItem)
-                    menu.show(e.label, e.x, e.y)
-                }
-
-                override fun mouseEntered(e: MouseEvent) {
-                    e.label.isOpaque = true
-                }
-
-                override fun mouseExited(e: MouseEvent) {
-                    e.label.isOpaque = false
-                }
-
-                override fun mousePressed(e: MouseEvent) {
-                    e.label.background = MENU_BUTTON_PRESSED_COLOR
-                }
-
-                override fun mouseReleased(e: MouseEvent) {
-                    e.label.background = MENU_BUTTON_HOVER_COLOR
-                }
-
-                private val MouseEvent.label
-                    get() = this.component as JBLabel
+        val menuButton = MenuButton()
+        menuButton.onClickedListener = { x, y ->
+            val menu = JBPopupMenu()
+            val copyIdItem = JBMenuItem(MyBundle.message("copyDeviceIdMenuItem"), AllIcons.Actions.Copy)
+            copyIdItem.addActionListener {
+                copyToClipboard(device.id)
             }
-        )
+            menu.add(copyIdItem)
+            menu.show(menuButton, x, y)
+        }
         add(
             menuButton,
             GridBagConstraints().apply {
@@ -211,9 +186,5 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         )
         private val ICON_USB = IconLoader.getIcon("/icons/usbIcon.svg")
         private val ICON_WIFI = IconLoader.getIcon("/icons/wifiIcon.svg")
-        private val ICON_MENU = IconLoader.getIcon("/icons/menuIcon.svg")
-
-        private val MENU_BUTTON_HOVER_COLOR = JBColor(0xdfdfdf, 0x4b5052)
-        private val MENU_BUTTON_PRESSED_COLOR = JBColor(0xcfcfcf, 0x5b6164)
     }
 }
