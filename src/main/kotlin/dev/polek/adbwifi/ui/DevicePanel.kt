@@ -119,6 +119,22 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             }
         )
 
+        val actionPanel = ButtonsPanel()
+        add(
+            actionPanel,
+            GridBagConstraints().apply {
+                gridx = 3
+                gridy = 1
+                gridwidth = 1
+                gridheight = 1
+                anchor = GridBagConstraints.LINE_END
+                insets = Insets(0, 0, 0, 14)
+            }
+        )
+
+        val pinButton = IconButton(ICON_PIN)
+        actionPanel.add(pinButton)
+
         val menuButton = IconButton(ICON_MENU)
         menuButton.onClickedListener = { x, y ->
             val menu = JBPopupMenu()
@@ -129,17 +145,7 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             menu.add(copyIdItem)
             menu.show(menuButton, x, y)
         }
-        add(
-            menuButton,
-            GridBagConstraints().apply {
-                gridx = 3
-                gridy = 1
-                gridwidth = 1
-                gridheight = 1
-                anchor = GridBagConstraints.LINE_END
-                insets = Insets(0, 0, 0, 14)
-            }
-        )
+        actionPanel.add(menuButton)
 
         val hoverListener = object : AbstractMouseListener() {
             override fun mouseEntered(e: MouseEvent) {

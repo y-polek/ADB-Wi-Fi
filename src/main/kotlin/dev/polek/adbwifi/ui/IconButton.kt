@@ -1,6 +1,5 @@
 package dev.polek.adbwifi.ui
 
-import com.intellij.openapi.util.IconLoader
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import dev.polek.adbwifi.utils.AbstractMouseListener
