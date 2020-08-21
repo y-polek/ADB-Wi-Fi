@@ -70,11 +70,17 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             }
         )
 
-        val addressLabel = JBLabel("Android ${device.androidVersion} (API ${device.apiLevel}) - ${device.address}")
-        addressLabel.componentStyle = UIUtil.ComponentStyle.REGULAR
-        addressLabel.fontColor = UIUtil.FontColor.BRIGHTER
+        val infoText = buildString {
+            append("Android ${device.androidVersion} (API ${device.apiLevel})")
+            if (device.address != null) {
+                append(" - ${device.address}")
+            }
+        }
+        val infoLabel = JBLabel(infoText)
+        infoLabel.componentStyle = UIUtil.ComponentStyle.REGULAR
+        infoLabel.fontColor = UIUtil.FontColor.BRIGHTER
         add(
-            panel(top = addressLabel),
+            panel(top = infoLabel),
             GridBagConstraints().apply {
                 gridx = 1
                 gridy = 1

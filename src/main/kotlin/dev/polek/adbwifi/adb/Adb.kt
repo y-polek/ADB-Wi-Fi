@@ -88,10 +88,9 @@ class Adb(private val commandExecutor: CommandExecutor) {
         return "adb -s $deviceId shell getprop ro.build.version.sdk".exec().firstLine().trim()
     }
 
-    private fun address(deviceId: String): String {
+    private fun address(deviceId: String): String? {
         val firstLine = "adb -s $deviceId shell ip route".exec().firstLine()
-        val address = DEVICE_ADDRESS_REGEX.matchEntire(firstLine)?.groupValues?.get(1)
-        return address.orEmpty()
+        return DEVICE_ADDRESS_REGEX.matchEntire(firstLine)?.groupValues?.get(1)
     }
 
     private fun connectionType(deviceId: String): Device.ConnectionType {

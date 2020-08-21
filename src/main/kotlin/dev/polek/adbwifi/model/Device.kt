@@ -4,7 +4,7 @@ data class Device(
     val id: String,
     val androidId: String,
     val name: String,
-    val address: String,
+    val address: String?,
     val androidVersion: String,
     val apiLevel: String,
     val connectionType: ConnectionType,
