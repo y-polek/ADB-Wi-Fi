@@ -24,8 +24,8 @@ fun panel(
     return panel
 }
 
-fun flowPanel(vararg components: JComponent): JPanel {
-    val panel = FlowLayoutPanel(hgap = 5, vgap = 0)
+fun flowPanel(vararg components: JComponent, hgap: Int = 5, vgap: Int = 0): JPanel {
+    val panel = FlowLayoutPanel(hgap = hgap, vgap = vgap)
     components.forEach { component ->
         panel.add(component)
     }

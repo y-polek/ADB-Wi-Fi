@@ -129,7 +129,7 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             menu.show(menuButton, x, y)
         }
 
-        val actionsPanel = flowPanel(pinButton, menuButton)
+        val actionsPanel = flowPanel(pinButton, menuButton, hgap = 10)
         actionsPanel.isOpaque = false
         actionsPanel.background = JBColor.RED
         add(
@@ -140,7 +140,7 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
                 gridwidth = 1
                 gridheight = 1
                 anchor = GridBagConstraints.LINE_END
-                insets = Insets(0, 0, 0, 14)
+                insets = Insets(0, 0, 0, 5)
             }
         )
 
