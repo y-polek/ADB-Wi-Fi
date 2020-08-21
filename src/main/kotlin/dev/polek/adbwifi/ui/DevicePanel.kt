@@ -13,10 +13,7 @@ import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.MyBundle
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.services.AdbService
-import dev.polek.adbwifi.utils.AbstractMouseListener
-import dev.polek.adbwifi.utils.copyToClipboard
-import dev.polek.adbwifi.utils.makeBold
-import dev.polek.adbwifi.utils.panel
+import dev.polek.adbwifi.utils.*
 import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
@@ -119,21 +116,7 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             }
         )
 
-        val actionPanel = ButtonsPanel()
-        add(
-            actionPanel,
-            GridBagConstraints().apply {
-                gridx = 3
-                gridy = 1
-                gridwidth = 1
-                gridheight = 1
-                anchor = GridBagConstraints.LINE_END
-                insets = Insets(0, 0, 0, 14)
-            }
-        )
-
         val pinButton = IconButton(ICON_PIN)
-        actionPanel.add(pinButton)
 
         val menuButton = IconButton(ICON_MENU)
         menuButton.onClickedListener = { x, y ->
@@ -145,7 +128,21 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             menu.add(copyIdItem)
             menu.show(menuButton, x, y)
         }
-        actionPanel.add(menuButton)
+
+        val actionsPanel = flowPanel(pinButton, menuButton)
+        actionsPanel.isOpaque = false
+        actionsPanel.background = JBColor.RED
+        add(
+            actionsPanel,
+            GridBagConstraints().apply {
+                gridx = 3
+                gridy = 1
+                gridwidth = 1
+                gridheight = 1
+                anchor = GridBagConstraints.LINE_END
+                insets = Insets(0, 0, 0, 14)
+            }
+        )
 
         val hoverListener = object : AbstractMouseListener() {
             override fun mouseEntered(e: MouseEvent) {
@@ -158,6 +155,8 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         }
         addMouseListener(hoverListener)
         button.addMouseListener(hoverListener)
+        actionsPanel.addMouseListener(hoverListener)
+        pinButton.addMouseListener(hoverListener)
         menuButton.addMouseListener(hoverListener)
     }
 

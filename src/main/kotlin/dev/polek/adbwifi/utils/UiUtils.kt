@@ -1,6 +1,7 @@
 package dev.polek.adbwifi.utils
 
 import com.intellij.util.ui.components.BorderLayoutPanel
+import dev.polek.adbwifi.ui.FlowLayoutPanel
 import java.awt.Font
 import javax.swing.JComponent
 import javax.swing.JLabel
@@ -20,6 +21,14 @@ fun panel(
     top?.let(panel::addToTop)
     right?.let(panel::addToRight)
     bottom?.let(panel::addToBottom)
+    return panel
+}
+
+fun flowPanel(vararg components: JComponent): JPanel {
+    val panel = FlowLayoutPanel(hgap = 5, vgap = 0)
+    components.forEach { component ->
+        panel.add(component)
+    }
     return panel
 }
 
