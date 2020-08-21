@@ -6,13 +6,14 @@ import dev.polek.adbwifi.utils.AbstractMouseListener
 import java.awt.event.MouseEvent
 import javax.swing.Icon
 
-class IconButton(icon: Icon) : JBLabel() {
+class IconButton(icon: Icon, tooltip: String? = null) : JBLabel() {
 
     var onClickedListener: ((x: Int, y: Int) -> Unit)? = null
 
     init {
         this.icon = icon
         background = HOVER_COLOR
+        toolTipText = tooltip
 
         addMouseListener(object : AbstractMouseListener() {
             override fun mouseClicked(e: MouseEvent) {

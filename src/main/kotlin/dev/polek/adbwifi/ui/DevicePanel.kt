@@ -116,7 +116,7 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             }
         )
 
-        val pinButton = IconButton(ICON_PIN)
+        val pinButton = IconButton(ICON_PIN, MyBundle.message("pinDeviceTooltip"))
 
         val menuButton = IconButton(ICON_MENU)
         menuButton.onClickedListener = { x, y ->
