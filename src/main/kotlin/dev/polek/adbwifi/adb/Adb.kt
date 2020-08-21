@@ -17,11 +17,13 @@ class Adb(private val commandExecutor: CommandExecutor) {
                 DEVICE_ID_REGEX.matchEntire(line)?.groupValues?.get(1)?.trim()
             }
             .map { deviceId ->
+                val androidId = androidId(deviceId)
                 val model = model(deviceId)
                 val manufacturer = manufacturer(deviceId)
                 val address = address(deviceId)
                 Device(
                     id = deviceId,
+                    androidId = androidId,
                     name = "$manufacturer $model".trim(),
                     address = address,
                     androidVersion = androidVersion(deviceId),
@@ -34,10 +36,10 @@ class Adb(private val commandExecutor: CommandExecutor) {
         devices.forEach { device ->
             device.isConnected = when {
                 device.isWifiDevice -> true
-                device.address.isBlank() -> false
+                device.androidId.isBlank() -> false
                 else -> {
                     val wifiDevice = devices.firstOrNull {
-                        it.isWifiDevice && it.address == device.address
+                        it.isWifiDevice && it.androidId == device.androidId
                     }
                     wifiDevice != null
                 }
@@ -64,6 +66,10 @@ class Adb(private val commandExecutor: CommandExecutor) {
         }
 
         "adb disconnect ${device.address}:5555".execAndLog(this)
+    }
+
+    private fun androidId(deviceId: String): String {
+        return "adb -s $deviceId shell settings get secure android_id".exec().firstLine()
     }
 
     private fun model(deviceId: String): String {
