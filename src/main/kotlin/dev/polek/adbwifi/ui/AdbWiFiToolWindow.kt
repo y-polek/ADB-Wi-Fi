@@ -12,7 +12,6 @@ import com.intellij.openapi.wm.ex.ToolWindowManagerListener
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.components.BorderLayoutPanel
-import dev.polek.adbwifi.LOG
 import dev.polek.adbwifi.model.CommandHistory
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.AdbService
@@ -64,7 +63,6 @@ class AdbWiFiToolWindow(project: Project, private val toolWindow: ToolWindow) : 
                 ToolWindowManagerListener.TOPIC,
                 object : ToolWindowManagerListener {
                     override fun stateChanged(toolWindowManager: ToolWindowManager) {
-                        LOG.warn("ToolWindow. isActive: ${toolWindow.isActive}, isVisible: ${toolWindow.isVisible}")
                         if (toolWindow.isVisible) {
                             subscribeToDeviceList()
                         } else {

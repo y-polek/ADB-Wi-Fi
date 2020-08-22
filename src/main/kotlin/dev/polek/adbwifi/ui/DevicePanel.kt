@@ -2,7 +2,7 @@ package dev.polek.adbwifi.ui
 
 import com.intellij.icons.AllIcons
 import com.intellij.ide.plugins.newui.InstallButton
-import com.intellij.openapi.components.ServiceManager
+import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.JBMenuItem
 import com.intellij.openapi.ui.JBPopupMenu
 import com.intellij.openapi.util.IconLoader
@@ -13,6 +13,7 @@ import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.MyBundle
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.services.AdbService
+import dev.polek.adbwifi.services.PinDeviceService
 import dev.polek.adbwifi.utils.*
 import java.awt.Dimension
 import java.awt.GridBagConstraints
@@ -24,7 +25,8 @@ import javax.swing.JProgressBar
 
 class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
 
-    private val adbService = ServiceManager.getService(AdbService::class.java)
+    private val adbService = service<AdbService>()
+    private val pinDeviceService = service<PinDeviceService>()
 
     private val button: JButton
 
@@ -123,6 +125,9 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         )
 
         val pinButton = IconButton(ICON_PIN, MyBundle.message("pinDeviceTooltip"))
+        pinButton.onClickedListener = {
+            pinDeviceService.pinDevice(device)
+        }
 
         val menuButton = IconButton(ICON_MENU)
         menuButton.onClickedListener = { event ->

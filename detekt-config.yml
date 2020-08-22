@@ -13,4 +13,5 @@ style:
   MagicNumber:
     active: false
   WildcardImport:
+    active: false
     excludeImports: ['java.util.*', 'kotlinx.coroutines.*', 'dev.polek.adbwifi.utils.*']

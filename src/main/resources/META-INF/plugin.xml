@@ -10,6 +10,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="dev.polek.adbwifi.services.AdbService"/>
         <applicationService serviceImplementation="dev.polek.adbwifi.services.LogService"/>
+        <applicationService serviceImplementation="dev.polek.adbwifi.services.PinDeviceService"/>
         <toolWindow
                 id="ADB Wi-Fi"
                 anchor="right"
