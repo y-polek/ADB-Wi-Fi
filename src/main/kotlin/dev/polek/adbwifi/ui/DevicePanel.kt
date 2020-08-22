@@ -131,7 +131,6 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
 
         val actionsPanel = flowPanel(pinButton, menuButton, hgap = 10)
         actionsPanel.isOpaque = false
-        actionsPanel.background = JBColor.RED
         add(
             actionsPanel,
             GridBagConstraints().apply {
