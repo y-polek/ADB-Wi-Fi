@@ -8,7 +8,7 @@ import javax.swing.Icon
 
 class IconButton(icon: Icon, tooltip: String? = null) : JBLabel() {
 
-    var onClickedListener: ((x: Int, y: Int) -> Unit)? = null
+    var onClickedListener: ((event: MouseEvent) -> Unit)? = null
 
     init {
         this.icon = icon
@@ -17,7 +17,7 @@ class IconButton(icon: Icon, tooltip: String? = null) : JBLabel() {
 
         addMouseListener(object : AbstractMouseListener() {
             override fun mouseClicked(e: MouseEvent) {
-                onClickedListener?.invoke(e.x, e.y)
+                onClickedListener?.invoke(e)
             }
 
             override fun mouseEntered(e: MouseEvent) {

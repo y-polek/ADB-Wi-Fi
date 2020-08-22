@@ -125,14 +125,8 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         val pinButton = IconButton(ICON_PIN, MyBundle.message("pinDeviceTooltip"))
 
         val menuButton = IconButton(ICON_MENU)
-        menuButton.onClickedListener = { x, y ->
-            val menu = JBPopupMenu()
-            val copyIdItem = JBMenuItem(MyBundle.message("copyDeviceIdMenuItem"), AllIcons.Actions.Copy)
-            copyIdItem.addActionListener {
-                copyToClipboard(device.id)
-            }
-            menu.add(copyIdItem)
-            menu.show(menuButton, x, y)
+        menuButton.onClickedListener = { event ->
+            openDeviceMenu(device, event)
         }
 
         val actionsPanel = flowPanel(pinButton, menuButton, hgap = 10)
@@ -187,6 +181,26 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
 
         revalidate()
         repaint()
+    }
+
+    private fun openDeviceMenu(device: Device, event: MouseEvent) {
+        val menu = JBPopupMenu()
+
+        val copyIdItem = JBMenuItem(MyBundle.message("copyDeviceIdMenuItem"), AllIcons.Actions.Copy)
+        copyIdItem.addActionListener {
+            copyToClipboard(device.id)
+        }
+        menu.add(copyIdItem)
+
+        val copyAddressItem = JBMenuItem(MyBundle.message("copyIpAddressMenuItem"), AllIcons.Actions.Copy)
+        copyAddressItem.addActionListener {
+            val address = device.address ?: return@addActionListener
+            copyToClipboard(address)
+        }
+        copyAddressItem.isEnabled = device.address != null
+        menu.add(copyAddressItem)
+
+        menu.show(event.component, event.x, event.y)
     }
 
     private companion object {
