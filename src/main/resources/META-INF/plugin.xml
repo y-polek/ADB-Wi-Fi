@@ -16,7 +16,7 @@
                 anchor="right"
                 secondary="true"
                 icon="/icons/toolWindowIcon.svg"
-                factoryClass="dev.polek.adbwifi.ui.WindowFactory"/>
+                factoryClass="dev.polek.adbwifi.ui.view.WindowFactory"/>
     </extensions>
 
     <actions>

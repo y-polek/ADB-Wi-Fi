@@ -1,4 +1,4 @@
-package dev.polek.adbwifi.ui
+package dev.polek.adbwifi.ui.view
 
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel

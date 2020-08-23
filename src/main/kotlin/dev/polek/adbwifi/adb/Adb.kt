@@ -1,6 +1,5 @@
 package dev.polek.adbwifi.adb
 
-import com.intellij.openapi.diagnostic.logger
 import dev.polek.adbwifi.commandexecutor.CommandExecutor
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.LogEntry
@@ -50,21 +49,11 @@ class Adb(private val commandExecutor: CommandExecutor) {
     }
 
     fun connect(device: Device): Flow<LogEntry> = flow {
-        if (device.isConnected) {
-            log.warn("Device $device is already connected")
-            return@flow
-        }
-
         "adb -s ${device.id} tcpip 5555".execAndLog(this)
         "adb connect ${device.address}:5555".execAndLog(this)
     }
 
     fun disconnect(device: Device): Flow<LogEntry> = flow {
-        if (!device.isConnected) {
-            log.warn("Device $device is already disconnected")
-            return@flow
-        }
-
         "adb disconnect ${device.address}:5555".execAndLog(this)
     }
 
@@ -113,8 +102,6 @@ class Adb(private val commandExecutor: CommandExecutor) {
     }
 
     companion object {
-        private val log = logger("Adb")
-
         private val DEVICE_ID_REGEX = "(.*?)\\s+device".toRegex()
         private val DEVICE_ADDRESS_REGEX = ".*\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b.*".toRegex()
         private val IS_IP_ADDRESS_REGEX = "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(:\\d{1,5})?".toRegex()

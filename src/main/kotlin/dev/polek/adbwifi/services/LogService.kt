@@ -1,6 +1,7 @@
 package dev.polek.adbwifi.services
 
 import com.intellij.ide.util.PropertiesComponent
+import dev.polek.adbwifi.model.CommandHistory
 
 class LogService {
 
@@ -12,6 +13,12 @@ class LogService {
         }
 
     var logVisibilityListener: ((isVisible: Boolean) -> Unit)? = null
+        set(value) {
+            field = value
+            value?.invoke(isLogVisible)
+        }
+
+    val commandHistory = CommandHistory()
 
     private val properties = PropertiesComponent.getInstance()
 

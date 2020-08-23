@@ -1,11 +1,11 @@
 package dev.polek.adbwifi.services
 
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.components.service
 import dev.polek.adbwifi.LOG
 import dev.polek.adbwifi.adb.ADB_DISPATCHER
 import dev.polek.adbwifi.adb.Adb
 import dev.polek.adbwifi.commandexecutor.RuntimeCommandExecutor
-import dev.polek.adbwifi.model.CommandHistory
 import dev.polek.adbwifi.model.Device
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
@@ -25,10 +25,9 @@ class AdbService : Disposable {
             }
         }
 
-    val commandHistory = CommandHistory()
-
     private val adb = Adb(RuntimeCommandExecutor())
     private var devicePollingJob: Job? = null
+    private val logService by lazy { service<LogService>() }
 
     fun refreshDeviceList() {
         startPollingDevices()
@@ -36,7 +35,7 @@ class AdbService : Disposable {
 
     fun connect(device: Device) = GlobalScope.launch(ADB_DISPATCHER) {
         adb.connect(device).collect { logEntry ->
-            commandHistory.add(logEntry)
+            logService.commandHistory.add(logEntry)
         }
         withContext(Dispatchers.Main) {
             delay(1000)
@@ -46,7 +45,7 @@ class AdbService : Disposable {
 
     fun disconnect(device: Device) = GlobalScope.launch(ADB_DISPATCHER) {
         adb.disconnect(device).collect { logEntry ->
-            commandHistory.add(logEntry)
+            logService.commandHistory.add(logEntry)
         }
         withContext(Dispatchers.Main) {
             delay(1000)
@@ -84,6 +83,6 @@ class AdbService : Disposable {
     }
 
     private companion object {
-        const val POLLING_INTERVAL_MILLIS = 3000L
+        const val POLLING_INTERVAL_MILLIS = 30000L
     }
 }

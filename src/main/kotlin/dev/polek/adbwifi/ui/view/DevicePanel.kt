@@ -1,8 +1,6 @@
-package dev.polek.adbwifi.ui
+package dev.polek.adbwifi.ui.view
 
 import com.intellij.icons.AllIcons
-import com.intellij.ide.plugins.newui.InstallButton
-import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.JBMenuItem
 import com.intellij.openapi.ui.JBPopupMenu
 import com.intellij.openapi.util.IconLoader
@@ -11,10 +9,12 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.MyBundle
-import dev.polek.adbwifi.model.Device
-import dev.polek.adbwifi.services.AdbService
-import dev.polek.adbwifi.services.PinDeviceService
-import dev.polek.adbwifi.utils.*
+import dev.polek.adbwifi.ui.model.DeviceViewModel
+import dev.polek.adbwifi.ui.model.DeviceViewModel.ButtonType
+import dev.polek.adbwifi.utils.AbstractMouseListener
+import dev.polek.adbwifi.utils.flowPanel
+import dev.polek.adbwifi.utils.makeBold
+import dev.polek.adbwifi.utils.panel
 import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
@@ -23,12 +23,11 @@ import java.awt.event.MouseEvent
 import javax.swing.JButton
 import javax.swing.JProgressBar
 
-class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
-
-    private val adbService = service<AdbService>()
-    private val pinDeviceService = service<PinDeviceService>()
+class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout()) {
 
     private val button: JButton
+
+    var listener: Listener? = null
 
     init {
         background = JBColor.background()
@@ -37,11 +36,7 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         maximumSize = Dimension(Int.MAX_VALUE, LIST_ITEM_HEIGHT)
         preferredSize = Dimension(0, LIST_ITEM_HEIGHT)
 
-        val iconLabel = JBLabel()
-        iconLabel.icon = when (device.connectionType) {
-            Device.ConnectionType.USB -> ICON_USB
-            Device.ConnectionType.WIFI -> ICON_WIFI
-        }
+        val iconLabel = JBLabel(device.icon)
         add(
             iconLabel,
             GridBagConstraints().apply {
@@ -55,11 +50,11 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             }
         )
 
-        val nameLabel = JBLabel(device.name)
-        nameLabel.componentStyle = UIUtil.ComponentStyle.LARGE
-        nameLabel.makeBold()
+        val titleLabel = JBLabel(device.titleText)
+        titleLabel.componentStyle = UIUtil.ComponentStyle.LARGE
+        titleLabel.makeBold()
         add(
-            nameLabel,
+            titleLabel,
             GridBagConstraints().apply {
                 gridx = 1
                 gridy = 0
@@ -72,17 +67,11 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             }
         )
 
-        val infoText = buildString {
-            append("Android ${device.androidVersion} (API ${device.apiLevel})")
-            if (device.address != null) {
-                append(" - ${device.address}")
-            }
-        }
-        val infoLabel = JBLabel(infoText)
-        infoLabel.componentStyle = UIUtil.ComponentStyle.REGULAR
-        infoLabel.fontColor = UIUtil.FontColor.BRIGHTER
+        val subtitleLabel = JBLabel(device.subtitleText)
+        subtitleLabel.componentStyle = UIUtil.ComponentStyle.REGULAR
+        subtitleLabel.fontColor = UIUtil.FontColor.BRIGHTER
         add(
-            panel(top = infoLabel),
+            panel(top = subtitleLabel),
             GridBagConstraints().apply {
                 gridx = 1
                 gridy = 1
@@ -96,20 +85,15 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             }
         )
 
-        button = object : InstallButton(device.isConnected) {
-            override fun setTextAndSize() {
-                /* no-op */
-            }
+        button = when (device.buttonType) {
+            ButtonType.CONNECT -> Button.connectButton()
+            ButtonType.CONNECT_DISABLED -> Button.connectButton(false)
+            ButtonType.DISCONNECT -> Button.disconnectButton()
         }
-        button.text = if (device.isWifiDevice) "Disconnect" else "Connect"
-        button.isEnabled = device.isWifiDevice || !device.isConnected
         button.addActionListener {
-            device.isConnecting = true
-            showProgressBar()
-            if (device.isConnected) {
-                adbService.disconnect(device)
-            } else {
-                adbService.connect(device)
+            when (device.buttonType) {
+                ButtonType.CONNECT, ButtonType.CONNECT_DISABLED -> listener?.onConnectButtonClicked(device)
+                ButtonType.DISCONNECT -> listener?.onDisconnectButtonClicked(device)
             }
         }
         add(
@@ -124,9 +108,13 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             }
         )
 
+        if (device.isInProgress) {
+            showProgressBar()
+        }
+
         val pinButton = IconButton(ICON_PIN, MyBundle.message("pinDeviceTooltip"))
         pinButton.onClickedListener = {
-            pinDeviceService.pinDevice(device)
+            listener?.onPinButtonClicked(device)
         }
 
         val menuButton = IconButton(ICON_MENU)
@@ -187,24 +175,31 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
         repaint()
     }
 
-    private fun openDeviceMenu(device: Device, event: MouseEvent) {
+    private fun openDeviceMenu(device: DeviceViewModel, event: MouseEvent) {
         val menu = JBPopupMenu()
 
         val copyIdItem = JBMenuItem(MyBundle.message("copyDeviceIdMenuItem"), AllIcons.Actions.Copy)
         copyIdItem.addActionListener {
-            copyToClipboard(device.id)
+            listener?.onCopyDeviceIdClicked(device)
         }
         menu.add(copyIdItem)
 
         val copyAddressItem = JBMenuItem(MyBundle.message("copyIpAddressMenuItem"), AllIcons.Actions.Copy)
         copyAddressItem.addActionListener {
-            val address = device.address ?: return@addActionListener
-            copyToClipboard(address)
+            listener?.onCopyDeviceAddressClicked(device)
         }
-        copyAddressItem.isEnabled = device.address != null
+        copyAddressItem.isEnabled = device.hasAddress
         menu.add(copyAddressItem)
 
         menu.show(event.component, event.x, event.y)
+    }
+
+    interface Listener {
+        fun onConnectButtonClicked(device: DeviceViewModel)
+        fun onDisconnectButtonClicked(device: DeviceViewModel)
+        fun onPinButtonClicked(device: DeviceViewModel)
+        fun onCopyDeviceIdClicked(device: DeviceViewModel)
+        fun onCopyDeviceAddressClicked(device: DeviceViewModel)
     }
 
     private companion object {
@@ -213,8 +208,6 @@ class DevicePanel(device: Device) : JBPanel<DevicePanel>(GridBagLayout()) {
             "Plugins.lightSelectionBackground",
             JBColor(0xF5F9FF, 0x36393B)
         )
-        private val ICON_USB = IconLoader.getIcon("/icons/usbIcon.svg")
-        private val ICON_WIFI = IconLoader.getIcon("/icons/wifiIcon.svg")
         private val ICON_MENU = IconLoader.getIcon("/icons/menuIcon.svg")
         private val ICON_PIN = IconLoader.getIcon("/icons/pinIcon.svg")
     }

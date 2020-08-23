@@ -3,7 +3,7 @@ package dev.polek.adbwifi.model
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
-import java.util.LinkedList
+import java.util.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CommandHistory {
@@ -11,14 +11,16 @@ class CommandHistory {
     private val logEntries = LinkedList<LogEntry>()
 
     var listener: Listener? = null
+        set(value) {
+            field = value
+            notifyListener()
+        }
 
     suspend fun add(entry: LogEntry) = withContext(Dispatchers.Main) {
         logEntries.add(entry)
         ensureCapacity()
         notifyListener()
     }
-
-    fun getLogEntries(): List<LogEntry> = logEntries
 
     fun clear() {
         logEntries.clear()

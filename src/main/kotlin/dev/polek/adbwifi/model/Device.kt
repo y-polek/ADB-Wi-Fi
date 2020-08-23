@@ -8,8 +8,7 @@ data class Device(
     val androidVersion: String,
     val apiLevel: String,
     val connectionType: ConnectionType,
-    var isConnected: Boolean = false,
-    var isConnecting: Boolean = false
+    var isConnected: Boolean = false
 ) {
     val isUsbDevice = connectionType == ConnectionType.USB
     val isWifiDevice = connectionType == ConnectionType.WIFI
