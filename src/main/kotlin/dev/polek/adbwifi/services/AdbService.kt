@@ -83,6 +83,6 @@ class AdbService : Disposable {
     }
 
     private companion object {
-        const val POLLING_INTERVAL_MILLIS = 30000L
+        const val POLLING_INTERVAL_MILLIS = 3000L
     }
 }

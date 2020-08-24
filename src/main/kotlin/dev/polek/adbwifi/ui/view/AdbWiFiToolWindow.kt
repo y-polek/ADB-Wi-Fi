@@ -17,7 +17,10 @@ import dev.polek.adbwifi.ui.presenter.ToolWindowPresenter
 import dev.polek.adbwifi.utils.panel
 import javax.swing.JComponent
 
-class AdbWiFiToolWindow(project: Project, private val toolWindow: ToolWindow) : BorderLayoutPanel(), Disposable, ToolWindowView {
+class AdbWiFiToolWindow(
+    project: Project,
+    private val toolWindow: ToolWindow
+) : BorderLayoutPanel(), Disposable, ToolWindowView {
 
     private val presenter = ToolWindowPresenter()
 
