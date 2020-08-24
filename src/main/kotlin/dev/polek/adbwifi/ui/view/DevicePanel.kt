@@ -20,14 +20,21 @@ import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Insets
 import java.awt.event.MouseEvent
-import javax.swing.JButton
 import javax.swing.JProgressBar
 
 class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout()) {
 
-    private val button: JButton
-
     var listener: Listener? = null
+
+    private val hoverListener = object : AbstractMouseListener() {
+        override fun mouseEntered(e: MouseEvent) {
+            background = HOVER_COLOR
+        }
+
+        override fun mouseExited(e: MouseEvent) {
+            background = JBColor.background()
+        }
+    }
 
     init {
         background = JBColor.background()
@@ -85,31 +92,50 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             }
         )
 
-        button = when (device.buttonType) {
-            ButtonType.CONNECT -> Button.connectButton()
-            ButtonType.CONNECT_DISABLED -> Button.connectButton(false)
-            ButtonType.DISCONNECT -> Button.disconnectButton()
-        }
-        button.addActionListener {
-            when (device.buttonType) {
-                ButtonType.CONNECT, ButtonType.CONNECT_DISABLED -> listener?.onConnectButtonClicked(device)
-                ButtonType.DISCONNECT -> listener?.onDisconnectButtonClicked(device)
-            }
-        }
-        add(
-            button,
-            GridBagConstraints().apply {
-                gridx = 3
-                gridy = 0
-                gridwidth = 1
-                gridheight = 1
-                anchor = GridBagConstraints.PAGE_START
-                insets = Insets(10, 10, 0, 10)
-            }
-        )
-
         if (device.isInProgress) {
-            showProgressBar()
+            val progressBar = JProgressBar()
+            progressBar.isIndeterminate = true
+            progressBar.preferredSize = Dimension(100, progressBar.preferredSize.height)
+            progressBar.addMouseListener(hoverListener)
+            val vInset = (BUTTON_CELL_HEIGHT - progressBar.preferredSize.height) / 2
+            add(
+                progressBar,
+                GridBagConstraints().apply {
+                    gridx = 3
+                    gridy = 0
+                    gridwidth = 1
+                    gridheight = 1
+                    weighty = 1.0
+                    anchor = GridBagConstraints.CENTER
+                    insets = Insets(vInset, 10, vInset, 10)
+                }
+            )
+        } else {
+            val button = when (device.buttonType) {
+                ButtonType.CONNECT -> Button.connectButton()
+                ButtonType.CONNECT_DISABLED -> Button.connectButton(false)
+                ButtonType.DISCONNECT -> Button.disconnectButton()
+            }
+            val vInset = (BUTTON_CELL_HEIGHT - button.preferredSize.height) / 2
+            button.addActionListener {
+                when (device.buttonType) {
+                    ButtonType.CONNECT, ButtonType.CONNECT_DISABLED -> listener?.onConnectButtonClicked(device)
+                    ButtonType.DISCONNECT -> listener?.onDisconnectButtonClicked(device)
+                }
+            }
+            button.addMouseListener(hoverListener)
+            add(
+                button,
+                GridBagConstraints().apply {
+                    gridx = 3
+                    gridy = 0
+                    gridwidth = 1
+                    gridheight = 1
+                    weighty = 1.0
+                    anchor = GridBagConstraints.CENTER
+                    insets = Insets(vInset, 10, vInset, 10)
+                }
+            )
         }
 
         val pinButton = IconButton(ICON_PIN, MyBundle.message("pinDeviceTooltip"))
@@ -136,43 +162,10 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             }
         )
 
-        val hoverListener = object : AbstractMouseListener() {
-            override fun mouseEntered(e: MouseEvent) {
-                background = HOVER_COLOR
-            }
-
-            override fun mouseExited(e: MouseEvent) {
-                background = JBColor.background()
-            }
-        }
         addMouseListener(hoverListener)
-        button.addMouseListener(hoverListener)
         actionsPanel.addMouseListener(hoverListener)
         pinButton.addMouseListener(hoverListener)
         menuButton.addMouseListener(hoverListener)
-    }
-
-    private fun showProgressBar() {
-        val progressBar = JProgressBar()
-        progressBar.isIndeterminate = true
-
-        val inset = (button.height - progressBar.height) / 2
-
-        remove(button)
-        add(
-            progressBar,
-            GridBagConstraints().apply {
-                gridx = 3
-                gridy = 0
-                gridwidth = 1
-                gridheight = 1
-                anchor = GridBagConstraints.PAGE_START
-                insets = Insets(6 + inset, 10, inset, 10)
-            }
-        )
-
-        revalidate()
-        repaint()
     }
 
     private fun openDeviceMenu(device: DeviceViewModel, event: MouseEvent) {
@@ -204,6 +197,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
 
     private companion object {
         private const val LIST_ITEM_HEIGHT = 70
+        private const val BUTTON_CELL_HEIGHT = 32
         private val HOVER_COLOR = JBColor.namedColor(
             "Plugins.lightSelectionBackground",
             JBColor(0xF5F9FF, 0x36393B)
