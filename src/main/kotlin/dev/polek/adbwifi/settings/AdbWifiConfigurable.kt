@@ -1,9 +1,12 @@
 package dev.polek.adbwifi.settings
 
 import com.intellij.openapi.components.service
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory.createSingleFolderDescriptor
+import com.intellij.openapi.fileChooser.FileChooserDescriptor
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.ui.TextComponentAccessor
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
+import com.intellij.openapi.util.SystemInfo
 import com.intellij.ui.components.JBLabel
 import dev.polek.adbwifi.MyBundle
 import dev.polek.adbwifi.services.PropertiesService
@@ -11,7 +14,9 @@ import dev.polek.adbwifi.utils.GridBagLayoutPanel
 import dev.polek.adbwifi.utils.panel
 import java.awt.GridBagConstraints
 import java.awt.Insets
+import java.io.File
 import javax.swing.JComponent
+import javax.swing.JTextField
 
 class AdbWifiConfigurable : Configurable {
 
@@ -37,7 +42,13 @@ class AdbWifiConfigurable : Configurable {
         textField = TextFieldWithBrowseButton()
         textField.text = properties.adbLocation
         textField.isEditable = false
-        textField.addBrowseFolderListener(null, null, null, createSingleFolderDescriptor())
+        textField.addBrowseFolderListener(
+            null,
+            null,
+            null,
+            adbLocationChooserDescriptor(),
+            DIRECTORY_TEXT_COMPONENT_ACCESSOR
+        )
         panel.add(
             textField,
             GridBagConstraints().apply {
@@ -62,5 +73,27 @@ class AdbWifiConfigurable : Configurable {
 
     override fun reset() {
         textField.text = properties.adbLocation
+    }
+
+    private fun adbLocationChooserDescriptor(): FileChooserDescriptor = when {
+        SystemInfo.isMac -> FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor()
+        else -> FileChooserDescriptorFactory.createSingleFolderDescriptor()
+    }
+
+    private companion object {
+
+        private val DIRECTORY_TEXT_COMPONENT_ACCESSOR = object : TextComponentAccessor<JTextField> {
+            override fun getText(component: JTextField) = component.text
+
+            override fun setText(component: JTextField, text: String) {
+                val file = File(text)
+                val dirName = if (file.isFile) {
+                    file.parent.orEmpty()
+                } else {
+                    text
+                }
+                component.text = dirName
+            }
+        }
     }
 }
