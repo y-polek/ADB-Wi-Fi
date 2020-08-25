@@ -19,7 +19,7 @@ class AdbWifiConfigurable : Configurable {
     private lateinit var textField: TextFieldWithBrowseButton
 
     override fun getDisplayName(): String {
-        return MyBundle.getMessage("name")
+        return MyBundle.getMessage("settingsPageName")
     }
 
     override fun createComponent(): JComponent? {
