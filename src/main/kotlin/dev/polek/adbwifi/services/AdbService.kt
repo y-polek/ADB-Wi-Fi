@@ -25,7 +25,7 @@ class AdbService : Disposable {
             }
         }
 
-    private val adb = Adb(RuntimeCommandExecutor())
+    private val adb = Adb(RuntimeCommandExecutor(), service())
     private var devicePollingJob: Job? = null
     private val logService by lazy { service<LogService>() }
 

@@ -1,6 +1,5 @@
 package dev.polek.adbwifi.adb
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.logger
 import dev.polek.adbwifi.commandexecutor.CommandExecutor
 import dev.polek.adbwifi.model.Device
@@ -11,10 +10,10 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import java.io.IOException
 
-class Adb(private val commandExecutor: CommandExecutor) {
-
-    private val properties = service<PropertiesService>()
-
+class Adb(
+    private val commandExecutor: CommandExecutor,
+    private val properties: PropertiesService
+) {
     fun devices(): List<Device> {
         val devices = "devices".exec()
             .drop(1)
@@ -95,12 +94,12 @@ class Adb(private val commandExecutor: CommandExecutor) {
         }
     }
 
-    private fun adb(args: String): String {
+    private fun adbCommand(args: String): String {
         return "${properties.adbLocation}/adb $args"
     }
 
     private fun String.exec(): Sequence<String> {
-        val command = adb(this)
+        val command = adbCommand(this)
         return try {
             commandExecutor.exec(command)
         } catch (e: IOException) {

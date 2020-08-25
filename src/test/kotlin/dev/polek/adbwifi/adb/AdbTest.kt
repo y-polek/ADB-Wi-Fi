@@ -6,35 +6,39 @@ import org.junit.Test
 
 class AdbTest {
 
+    private val propertiesService = MockPropertiesService()
+
     private val commandExecutor = object : MockCommandExecutor() {
+        private val adb = "${propertiesService.adbLocation}/adb"
+
         override fun mockOutput(command: String): String {
             return when (command) {
-                "adb devices" -> """
+                "$adb devices" -> """
                     List of devices attached
                     R28M51Y8E0H	device
                     ce0717171c16e33b03	device
                 """.trimIndent()
 
-                "adb -s R28M51Y8E0H shell settings get secure android_id" -> "3987ac205a864cc6"
-                "adb -s R28M51Y8E0H shell getprop ro.product.model" -> "SM-G9700"
-                "adb -s R28M51Y8E0H shell getprop ro.product.manufacturer" -> "samsung"
-                "adb -s R28M51Y8E0H shell getprop ro.build.version.release" -> "10"
-                "adb -s R28M51Y8E0H shell getprop ro.build.version.sdk" -> "29"
-                "adb -s R28M51Y8E0H shell ip route" -> "192.168.1.0/24 dev wlan0 proto kernel scope link src 192.168.1.179"
+                "$adb -s R28M51Y8E0H shell settings get secure android_id" -> "3987ac205a864cc6"
+                "$adb -s R28M51Y8E0H shell getprop ro.product.model" -> "SM-G9700"
+                "$adb -s R28M51Y8E0H shell getprop ro.product.manufacturer" -> "samsung"
+                "$adb -s R28M51Y8E0H shell getprop ro.build.version.release" -> "10"
+                "$adb -s R28M51Y8E0H shell getprop ro.build.version.sdk" -> "29"
+                "$adb -s R28M51Y8E0H shell ip route" -> "192.168.1.0/24 dev wlan0 proto kernel scope link src 192.168.1.179"
 
-                "adb -s ce0717171c16e33b03 shell settings get secure android_id" -> "c51c1b1f0a05ce61"
-                "adb -s ce0717171c16e33b03 shell getprop ro.product.model" -> "SM-G930F"
-                "adb -s ce0717171c16e33b03 shell getprop ro.product.manufacturer" -> "samsung"
-                "adb -s ce0717171c16e33b03 shell getprop ro.build.version.release" -> "8.0.0"
-                "adb -s ce0717171c16e33b03 shell getprop ro.build.version.sdk" -> "26"
-                "adb -s ce0717171c16e33b03 shell ip route" -> "192.168.1.0/24 dev wlan0  proto kernel  scope link  src 192.168.1.159"
+                "$adb -s ce0717171c16e33b03 shell settings get secure android_id" -> "c51c1b1f0a05ce61"
+                "$adb -s ce0717171c16e33b03 shell getprop ro.product.model" -> "SM-G930F"
+                "$adb -s ce0717171c16e33b03 shell getprop ro.product.manufacturer" -> "samsung"
+                "$adb -s ce0717171c16e33b03 shell getprop ro.build.version.release" -> "8.0.0"
+                "$adb -s ce0717171c16e33b03 shell getprop ro.build.version.sdk" -> "26"
+                "$adb -s ce0717171c16e33b03 shell ip route" -> "192.168.1.0/24 dev wlan0  proto kernel  scope link  src 192.168.1.159"
 
                 else -> throw NotImplementedError("Unknown command: '$command'")
             }
         }
     }
 
-    private val adb = Adb(commandExecutor)
+    private val adb = Adb(commandExecutor, propertiesService)
 
     @Test
     fun `test devices()`() {
