@@ -13,30 +13,30 @@
         <applicationService serviceImplementation="dev.polek.adbwifi.services.PropertiesService" />
         <applicationService serviceImplementation="dev.polek.adbwifi.services.PinDeviceService" />
         <toolWindow
-                id="ADB Wi-Fi"
-                anchor="right"
-                secondary="true"
-                icon="/icons/toolWindowIcon.svg"
-                factoryClass="dev.polek.adbwifi.ui.view.WindowFactory"/>
+            id="ADB Wi-Fi"
+            anchor="right"
+            secondary="true"
+            icon="/icons/toolWindowIcon.svg"
+            factoryClass="dev.polek.adbwifi.ui.view.WindowFactory"/>
         <applicationConfigurable instance="dev.polek.adbwifi.settings.AdbWifiConfigurable" />
     </extensions>
 
     <actions>
         <action
-                id="AdbWifi.Refresh"
-                class="dev.polek.adbwifi.actions.RefreshAction"
-                icon="AllIcons.Actions.Refresh"
-                text="Refresh" />
+            id="AdbWifi.Refresh"
+            class="dev.polek.adbwifi.actions.RefreshAction"
+            icon="AllIcons.Actions.Refresh"
+            text="Refresh" />
         <action
-                id="AdbWifi.ToggleLog"
-                class="dev.polek.adbwifi.actions.ToggleLogAction"
-                icon="AllIcons.Debugger.Console"
-                text="Toggle Log" />
+            id="AdbWifi.ToggleLog"
+            class="dev.polek.adbwifi.actions.ToggleLogAction"
+            icon="AllIcons.Debugger.Console"
+            text="Toggle Log" />
         <action
-                id="AdbWifi.OpenSettings"
-                class="dev.polek.adbwifi.actions.OpenSettingsAction"
-                icon="AllIcons.General.Settings"
-                text="Open Settings" />
+            id="AdbWifi.OpenSettings"
+            class="dev.polek.adbwifi.actions.OpenSettingsAction"
+            icon="AllIcons.General.Settings"
+            text="Open Settings" />
         <group id="AdbWifi.ToolbarActions">
             <reference id="AdbWifi.Refresh" />
             <separator />
@@ -45,10 +45,10 @@
         </group>
 
         <action
-                id="AdbWifi.ClearLog"
-                class="dev.polek.adbwifi.actions.ClearLogAction"
-                icon="/icons/clearLogIcon.svg"
-                text="Clear Log" />
+            id="AdbWifi.ClearLog"
+            class="dev.polek.adbwifi.actions.ClearLogAction"
+            icon="/icons/clearLogIcon.svg"
+            text="Clear Log" />
         <group id="AdbWifi.LogToolbarActions">
             <reference id="AdbWifi.ClearLog" />
         </group>
