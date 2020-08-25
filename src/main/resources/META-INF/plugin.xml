@@ -32,10 +32,16 @@
                 class="dev.polek.adbwifi.actions.ToggleLogAction"
                 icon="AllIcons.Debugger.Console"
                 text="Toggle Log" />
+        <action
+                id="AdbWifi.OpenSettings"
+                class="dev.polek.adbwifi.actions.OpenSettingsAction"
+                icon="AllIcons.General.Settings"
+                text="Open Settings" />
         <group id="AdbWifi.ToolbarActions">
             <reference id="AdbWifi.Refresh" />
             <separator />
             <reference id="AdbWifi.ToggleLog" />
+            <reference id="AdbWifi.OpenSettings" />
         </group>
 
         <action
