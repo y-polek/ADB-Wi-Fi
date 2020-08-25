@@ -59,4 +59,8 @@ class AdbWifiConfigurable : Configurable {
     override fun apply() {
         properties.adbLocation = textField.text
     }
+
+    override fun reset() {
+        textField.text = properties.adbLocation
+    }
 }
