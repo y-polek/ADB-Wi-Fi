@@ -1,4 +1,4 @@
-package dev.polek.adbwifi.ui.view
+package dev.polek.adbwifi.utils
 
 import com.intellij.ui.components.JBPanel
 import java.awt.FlowLayout

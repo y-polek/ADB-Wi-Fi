@@ -8,15 +8,17 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="dev.polek.adbwifi.services.AdbService"/>
-        <applicationService serviceImplementation="dev.polek.adbwifi.services.LogService"/>
-        <applicationService serviceImplementation="dev.polek.adbwifi.services.PinDeviceService"/>
+        <applicationService serviceImplementation="dev.polek.adbwifi.services.AdbService" />
+        <applicationService serviceImplementation="dev.polek.adbwifi.services.LogService" />
+        <applicationService serviceImplementation="dev.polek.adbwifi.services.PropertiesService" />
+        <applicationService serviceImplementation="dev.polek.adbwifi.services.PinDeviceService" />
         <toolWindow
                 id="ADB Wi-Fi"
                 anchor="right"
                 secondary="true"
                 icon="/icons/toolWindowIcon.svg"
                 factoryClass="dev.polek.adbwifi.ui.view.WindowFactory"/>
+        <applicationConfigurable instance="dev.polek.adbwifi.settings.AdbWifiConfigurable" />
     </extensions>
 
     <actions>

@@ -1,7 +1,6 @@
 package dev.polek.adbwifi.utils
 
 import com.intellij.util.ui.components.BorderLayoutPanel
-import dev.polek.adbwifi.ui.view.FlowLayoutPanel
 import java.awt.Font
 import javax.swing.JComponent
 import javax.swing.JLabel
