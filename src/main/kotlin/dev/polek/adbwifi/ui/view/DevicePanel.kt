@@ -8,7 +8,7 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.UIUtil
-import dev.polek.adbwifi.MyBundle
+import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.ButtonType
 import dev.polek.adbwifi.utils.AbstractMouseListener
@@ -138,7 +138,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             )
         }
 
-        val pinButton = IconButton(ICON_PIN, MyBundle.message("pinDeviceTooltip"))
+        val pinButton = IconButton(ICON_PIN, PluginBundle.message("pinDeviceTooltip"))
         pinButton.onClickedListener = {
             listener?.onPinButtonClicked(device)
         }
@@ -171,13 +171,13 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
     private fun openDeviceMenu(device: DeviceViewModel, event: MouseEvent) {
         val menu = JBPopupMenu()
 
-        val copyIdItem = JBMenuItem(MyBundle.message("copyDeviceIdMenuItem"), AllIcons.Actions.Copy)
+        val copyIdItem = JBMenuItem(PluginBundle.message("copyDeviceIdMenuItem"), AllIcons.Actions.Copy)
         copyIdItem.addActionListener {
             listener?.onCopyDeviceIdClicked(device)
         }
         menu.add(copyIdItem)
 
-        val copyAddressItem = JBMenuItem(MyBundle.message("copyIpAddressMenuItem"), AllIcons.Actions.Copy)
+        val copyAddressItem = JBMenuItem(PluginBundle.message("copyIpAddressMenuItem"), AllIcons.Actions.Copy)
         copyAddressItem.addActionListener {
             listener?.onCopyDeviceAddressClicked(device)
         }

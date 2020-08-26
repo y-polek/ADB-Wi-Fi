@@ -10,7 +10,7 @@ import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
-import dev.polek.adbwifi.MyBundle
+import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.utils.GridBagLayoutPanel
 import dev.polek.adbwifi.utils.panel
@@ -42,13 +42,13 @@ class AdbWifiConfigurable : Configurable {
     }
 
     override fun getDisplayName(): String {
-        return MyBundle.getMessage("settingsPageName")
+        return PluginBundle.getMessage("settingsPageName")
     }
 
     override fun createComponent(): JComponent? {
         val panel = GridBagLayoutPanel()
 
-        val titleLabel = JBLabel(MyBundle.message("adbLocationTitle"))
+        val titleLabel = JBLabel(PluginBundle.message("adbLocationTitle"))
         panel.add(
             titleLabel,
             GridBagConstraints().apply {
@@ -143,7 +143,7 @@ class AdbWifiConfigurable : Configurable {
     private companion object {
         private val OK_ICON = IconLoader.getIcon("AllIcons.General.InspectionsOK")
         private val ERROR_ICON = IconLoader.getIcon("AllIcons.General.Error")
-        private val ADB_VERIFIED_MESSAGE = MyBundle.message("adbLocationVerifiedMessage")
-        private val ADB_VERIFICATION_ERROR_MESSAGE = MyBundle.message("adbLocationVerificationErrorMessage")
+        private val ADB_VERIFIED_MESSAGE = PluginBundle.message("adbLocationVerifiedMessage")
+        private val ADB_VERIFICATION_ERROR_MESSAGE = PluginBundle.message("adbLocationVerificationErrorMessage")
     }
 }
