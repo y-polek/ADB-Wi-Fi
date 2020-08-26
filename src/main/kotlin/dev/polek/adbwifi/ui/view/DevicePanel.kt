@@ -148,7 +148,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             openDeviceMenu(device, event)
         }
 
-        val actionsPanel = flowPanel(pinButton, menuButton, hgap = 10)
+        val actionsPanel = flowPanel(/*pinButton, */menuButton, hgap = 10)
         actionsPanel.isOpaque = false
         add(
             actionsPanel,
