@@ -20,6 +20,7 @@ class ToolWindowPresenter {
 
     fun attach(view: ToolWindowView) {
         this.view = view
+        view.showEmptyMessage()
         subscribeToDeviceList()
         subscribeToLogEvents()
     }
@@ -74,7 +75,11 @@ class ToolWindowPresenter {
             val oldDevices = devices
             devices = model.map { it.toViewModel() }
             if (!oldDevices.contentDeepEquals(devices)) {
-                view?.showDevices(devices)
+                if (devices.isEmpty()) {
+                    view?.showEmptyMessage()
+                } else {
+                    view?.showDevices(devices)
+                }
             }
         }
     }

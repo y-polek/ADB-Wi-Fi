@@ -7,6 +7,10 @@ interface ToolWindowView {
 
     fun showDevices(devices: List<DeviceViewModel>)
 
+    fun showEmptyMessage()
+
+    fun showConfigurationError()
+
     fun openLog()
 
     fun closeLog()

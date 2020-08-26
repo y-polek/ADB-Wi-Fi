@@ -35,3 +35,8 @@ fun JLabel.makeBold() {
     val oldFont = this.font
     this.font = oldFont.deriveFont(oldFont.style or Font.BOLD)
 }
+
+fun JLabel.setFontSize(size: Float) {
+    val oldFont = this.font
+    this.font = oldFont.deriveFont(size)
+}

@@ -5,17 +5,23 @@ import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ActionPlaces
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.openapi.wm.ex.ToolWindowManagerListener
+import com.intellij.ui.JBColor
 import com.intellij.ui.JBSplitter
+import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.components.BorderLayoutPanel
+import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.presenter.ToolWindowPresenter
 import dev.polek.adbwifi.utils.panel
+import dev.polek.adbwifi.utils.setFontSize
 import javax.swing.JComponent
+import javax.swing.SwingConstants
 
 class AdbWiFiToolWindow(
     project: Project,
@@ -29,6 +35,17 @@ class AdbWiFiToolWindow(
     private val logPanel = LogPanel()
     private val topPanel = JBScrollPane(deviceListPanel)
     private val bottomPanel: JComponent
+    private val emptyMessageLabel = JBLabel().apply {
+        text = PluginBundle.message("deviceListEmptyMessage")
+        icon = IconLoader.getIcon("/icons/devices-lineup.png")
+        horizontalAlignment = SwingConstants.CENTER
+        horizontalTextPosition = SwingConstants.CENTER
+        verticalTextPosition = SwingConstants.BOTTOM
+        setFontSize(16f)
+        background = JBColor.background()
+        foreground = JBColor.gray
+        isOpaque = true
+    }
 
     init {
         val actionManager = ActionManager.getInstance()
@@ -75,7 +92,16 @@ class AdbWiFiToolWindow(
     }
 
     override fun showDevices(devices: List<DeviceViewModel>) {
+        splitter.firstComponent = topPanel
         deviceListPanel.devices = devices
+    }
+
+    override fun showEmptyMessage() {
+        splitter.firstComponent = emptyMessageLabel
+    }
+
+    override fun showConfigurationError() {
+        TODO("Not yet implemented")
     }
 
     override fun openLog() {
