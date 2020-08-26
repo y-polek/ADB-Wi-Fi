@@ -15,6 +15,12 @@ data class DeviceViewModel(
     val isPinned: Boolean,
     var isInProgress: Boolean = false
 ) {
+    val id: String
+        get() = device.id
+
+    val androidId: String
+        get() = device.androidId
+
     enum class ButtonType {
         CONNECT, CONNECT_DISABLED, DISCONNECT
     }

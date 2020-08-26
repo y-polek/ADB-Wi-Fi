@@ -40,14 +40,14 @@ class ToolWindowPresenter {
     }
 
     fun onConnectButtonClicked(device: DeviceViewModel) {
-        device.isInProgress = true
+        devices.findById(device.id)?.isInProgress = true
         view?.showDevices(devices)
 
         adbService.connect(device.device)
     }
 
     fun onDisconnectButtonClicked(device: DeviceViewModel) {
-        device.isInProgress = true
+        devices.findById(device.id)?.isInProgress = true
         view?.showDevices(devices)
 
         adbService.disconnect(device.device)
@@ -117,6 +117,10 @@ class ToolWindowPresenter {
     private companion object {
         private fun List<DeviceViewModel>.contentDeepEquals(other: List<DeviceViewModel>): Boolean {
             return this.toTypedArray().contentDeepEquals(other.toTypedArray())
+        }
+
+        private fun List<DeviceViewModel>.findById(id: String): DeviceViewModel? {
+            return this.find { it.id == id }
         }
     }
 }
