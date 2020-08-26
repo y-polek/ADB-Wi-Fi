@@ -2,7 +2,6 @@ package dev.polek.adbwifi.services
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.service
-import dev.polek.adbwifi.LOG
 import dev.polek.adbwifi.adb.ADB_DISPATCHER
 import dev.polek.adbwifi.adb.Adb
 import dev.polek.adbwifi.commandexecutor.RuntimeCommandExecutor
@@ -33,23 +32,31 @@ class AdbService : Disposable {
         startPollingDevices()
     }
 
-    fun connect(device: Device) = GlobalScope.launch(ADB_DISPATCHER) {
-        adb.connect(device).collect { logEntry ->
-            logService.commandHistory.add(logEntry)
-        }
-        withContext(Dispatchers.Main) {
-            delay(1000)
-            refreshDeviceList()
+    fun connect(device: Device) {
+        stopPollingDevices()
+
+        GlobalScope.launch(ADB_DISPATCHER) {
+            adb.connect(device).collect { logEntry ->
+                logService.commandHistory.add(logEntry)
+            }
+            withContext(Dispatchers.Main) {
+                delay(1000)
+                startPollingDevices()
+            }
         }
     }
 
-    fun disconnect(device: Device) = GlobalScope.launch(ADB_DISPATCHER) {
-        adb.disconnect(device).collect { logEntry ->
-            logService.commandHistory.add(logEntry)
-        }
-        withContext(Dispatchers.Main) {
-            delay(1000)
-            refreshDeviceList()
+    fun disconnect(device: Device) {
+        stopPollingDevices()
+
+        GlobalScope.launch(ADB_DISPATCHER) {
+            adb.disconnect(device).collect { logEntry ->
+                logService.commandHistory.add(logEntry)
+            }
+            withContext(Dispatchers.Main) {
+                delay(1000)
+                startPollingDevices()
+            }
         }
     }
 
@@ -64,7 +71,6 @@ class AdbService : Disposable {
             devicesFlow()
                 .flowOn(ADB_DISPATCHER)
                 .collect { devices ->
-                    LOG.warn("devices: $devices")
                     deviceListListener?.invoke(devices)
                 }
         }
