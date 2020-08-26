@@ -5,6 +5,7 @@ import dev.polek.adbwifi.commandexecutor.CommandExecutor
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.PropertiesService
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
@@ -55,6 +56,7 @@ class Adb(
 
     fun connect(device: Device): Flow<LogEntry> = flow {
         "-s ${device.id} tcpip 5555".execAndLog(this)
+        delay(1000)
         "connect ${device.address}:5555".execAndLog(this)
     }
 
@@ -108,14 +110,11 @@ class Adb(
         }
     }
 
-    private fun String.execSilently(): String {
-        return this.exec().joinToString(separator = "\n")
-    }
-
-    private suspend fun String.execAndLog(logCollector: FlowCollector<LogEntry>) {
+    private suspend fun String.execAndLog(logCollector: FlowCollector<LogEntry>): String {
         logCollector.emit(LogEntry.Command(this))
-        val output = this.execSilently()
+        val output = this.exec().joinToString(separator = "\n")
         logCollector.emit(LogEntry.Output(output))
+        return output
     }
 
     companion object {
