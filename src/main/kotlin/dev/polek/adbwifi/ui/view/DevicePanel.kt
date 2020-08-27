@@ -21,6 +21,7 @@ import java.awt.GridBagLayout
 import java.awt.Insets
 import java.awt.event.MouseEvent
 import javax.swing.JProgressBar
+import javax.swing.SwingConstants
 
 class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout()) {
 
@@ -75,6 +76,10 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         )
 
         val subtitleLabel = JBLabel(device.subtitleText)
+        if (!device.hasAddress) {
+            subtitleLabel.icon = ICON_NO_WIFI
+        }
+        subtitleLabel.horizontalTextPosition = SwingConstants.LEFT
         subtitleLabel.componentStyle = UIUtil.ComponentStyle.REGULAR
         subtitleLabel.fontColor = UIUtil.FontColor.BRIGHTER
         add(
@@ -204,5 +209,6 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         )
         private val ICON_MENU = IconLoader.getIcon("/icons/menuIcon.svg")
         private val ICON_PIN = IconLoader.getIcon("/icons/pinIcon.svg")
+        private val ICON_NO_WIFI = IconLoader.getIcon("/icons/noWifi.svg")
     }
 }

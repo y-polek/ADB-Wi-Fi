@@ -32,9 +32,9 @@ data class DeviceViewModel(
         fun Device.toViewModel(): DeviceViewModel {
             val device = this
             val subtitleText = buildString {
-                append("Android ${device.androidVersion} (API ${device.apiLevel})")
+                append("Android ${device.androidVersion} (API ${device.apiLevel}) -")
                 if (device.address != null) {
-                    append(" - ${device.address}")
+                    append(" ${device.address}")
                 }
             }
             val icon = when (device.connectionType) {
@@ -43,6 +43,7 @@ data class DeviceViewModel(
             }
             val buttonType = when {
                 device.isWifiDevice -> ButtonType.DISCONNECT
+                device.address.isNullOrBlank() -> ButtonType.CONNECT_DISABLED
                 device.isUsbDevice && device.isConnected -> ButtonType.CONNECT_DISABLED
                 else -> ButtonType.CONNECT
             }
