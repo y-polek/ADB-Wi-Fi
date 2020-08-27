@@ -105,7 +105,7 @@ class Adb(
         return try {
             commandExecutor.exec(command)
         } catch (e: IOException) {
-            LOG.error("Failed to execute command: '$command'", e)
+            LOG.warn("Failed to execute command '$command': ${e.message}")
             emptySequence()
         }
     }

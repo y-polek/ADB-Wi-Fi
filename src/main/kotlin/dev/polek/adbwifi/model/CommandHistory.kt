@@ -1,11 +1,9 @@
 package dev.polek.adbwifi.model
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
 import java.util.*
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class CommandHistory {
 
     private val logEntries = LinkedList<LogEntry>()
