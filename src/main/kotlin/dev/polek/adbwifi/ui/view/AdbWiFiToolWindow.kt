@@ -4,11 +4,13 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ActionPlaces
 import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.openapi.wm.ex.ToolWindowManagerListener
+import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.JBColor
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBLabel
@@ -18,8 +20,13 @@ import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.presenter.ToolWindowPresenter
+import dev.polek.adbwifi.utils.AbstractMouseListener
+import dev.polek.adbwifi.utils.GridBagLayoutPanel
 import dev.polek.adbwifi.utils.panel
 import dev.polek.adbwifi.utils.setFontSize
+import java.awt.GridBagConstraints
+import java.awt.Insets
+import java.awt.event.MouseEvent
 import javax.swing.JComponent
 import javax.swing.SwingConstants
 
@@ -46,16 +53,45 @@ class AdbWiFiToolWindow(
         foreground = JBColor.gray
         isOpaque = true
     }
-    private val errorMessageLabel = JBLabel().apply {
-        text = PluginBundle.message("adbLocationVerificationErrorMessage", location)
-        icon = IconLoader.getIcon("/icons/deviceWarning.png")
-        horizontalAlignment = SwingConstants.CENTER
-        horizontalTextPosition = SwingConstants.CENTER
-        verticalTextPosition = SwingConstants.BOTTOM
-        setFontSize(16f)
-        background = JBColor.background()
-        foreground = JBColor.gray
-        isOpaque = true
+    private val errorMessagePanel = GridBagLayoutPanel().apply {
+        val label = JBLabel().apply {
+            text = PluginBundle.message("adbLocationVerificationErrorMessage", location)
+            icon = IconLoader.getIcon("/icons/deviceWarning.png")
+            horizontalAlignment = SwingConstants.CENTER
+            horizontalTextPosition = SwingConstants.CENTER
+            verticalTextPosition = SwingConstants.BOTTOM
+            setFontSize(16f)
+            background = JBColor.background()
+            foreground = JBColor.gray
+            isOpaque = true
+        }
+        add(
+            label,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 0
+            }
+        )
+
+        val settingsButton = HyperlinkLabel(PluginBundle.message("goToSettingsButton")).apply {
+            setFontSize(16f)
+            addMouseListener(object : AbstractMouseListener() {
+                override fun mouseClicked(e: MouseEvent) {
+                    ShowSettingsUtil.getInstance().showSettingsDialog(
+                        null,
+                        PluginBundle.message("settingsPageName")
+                    )
+                }
+            })
+        }
+        add(
+            settingsButton,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 1
+                insets = Insets(20, 0, 20, 0)
+            }
+        )
     }
 
     init {
@@ -112,7 +148,7 @@ class AdbWiFiToolWindow(
     }
 
     override fun showInvalidAdbLocationError(location: String) {
-        splitter.firstComponent = errorMessageLabel
+        splitter.firstComponent = errorMessagePanel
     }
 
     override fun showConfigurationError() {
