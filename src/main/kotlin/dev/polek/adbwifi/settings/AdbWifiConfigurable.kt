@@ -8,14 +8,17 @@ import com.intellij.openapi.ui.TextComponentAccessor
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.util.SystemInfo
+import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.services.PropertiesService
+import dev.polek.adbwifi.utils.AbstractMouseListener
 import dev.polek.adbwifi.utils.GridBagLayoutPanel
 import dev.polek.adbwifi.utils.panel
 import java.awt.GridBagConstraints
 import java.awt.Insets
+import java.awt.event.MouseEvent
 import java.io.File
 import javax.swing.JComponent
 import javax.swing.JTextField
@@ -25,6 +28,7 @@ class AdbWifiConfigurable : Configurable {
     private val properties = service<PropertiesService>()
     private lateinit var textField: TextFieldWithBrowseButton
     private lateinit var statusLabel: JBLabel
+    private lateinit var defaultButton: HyperlinkLabel
 
     private val textComponentAccessor = object : TextComponentAccessor<JTextField> {
         override fun getText(component: JTextField) = component.text
@@ -73,6 +77,7 @@ class AdbWifiConfigurable : Configurable {
             GridBagConstraints().apply {
                 gridx = 1
                 gridy = 0
+                gridwidth = 2
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
             }
@@ -91,6 +96,21 @@ class AdbWifiConfigurable : Configurable {
             }
         )
 
+        defaultButton = HyperlinkLabel(PluginBundle.message("defaultAdbLocationButton"))
+        defaultButton.addMouseListener(object : AbstractMouseListener() {
+            override fun mouseClicked(e: MouseEvent) {
+                setAdbLocationText(properties.defaultAdbLocation)
+            }
+        })
+        panel.add(
+            defaultButton,
+            GridBagConstraints().apply {
+                gridx = 2
+                gridy = 1
+                insets = Insets(4, 0, 0, 0)
+            }
+        )
+
         verifyAdbLocation()
 
         return panel(top = panel)
@@ -105,7 +125,11 @@ class AdbWifiConfigurable : Configurable {
     }
 
     override fun reset() {
-        textField.text = properties.adbLocation
+        setAdbLocationText(properties.adbLocation)
+    }
+
+    private fun setAdbLocationText(location: String) {
+        textField.text = location
         verifyAdbLocation()
     }
 
@@ -120,6 +144,8 @@ class AdbWifiConfigurable : Configurable {
             text = ADB_VERIFIED_MESSAGE
             foreground = JBColor.foreground()
         }
+
+        defaultButton.isVisible = false
     }
 
     private fun showVerificationErrorMessage() {
@@ -128,6 +154,8 @@ class AdbWifiConfigurable : Configurable {
             text = ADB_VERIFICATION_ERROR_MESSAGE
             foreground = JBColor.RED
         }
+
+        defaultButton.isVisible = true
     }
 
     private fun verifyAdbLocation() {

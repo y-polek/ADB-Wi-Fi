@@ -25,6 +25,16 @@ class PropertiesServiceImpl : PropertiesService {
             adbLocationListener?.invoke(value, value.isValidAdbLocation())
         }
 
+    override val defaultAdbLocation: String by lazy {
+        val home = System.getProperty("user.home")
+        val path = when {
+            SystemInfo.isMac -> "$home/Library/Android/sdk/platform-tools"
+            SystemInfo.isWindows -> "$home/AppData/Local/Android/Sdk/platform-tools"
+            else -> "$home/Android/Sdk/platform-tools"
+        }
+        return@lazy File(path).absolutePath
+    }
+
     override var adbLocationListener: ((location: String, isValid: Boolean) -> Unit)? = null
         set(value) {
             field = value
@@ -35,16 +45,6 @@ class PropertiesServiceImpl : PropertiesService {
     private companion object {
         private const val IS_LOG_VISIBLE_PROPERTY = "dev.polek.adbwifi.IS_LOG_VISIBLE_PROPERTY"
         private const val ADB_LOCATION_PROPERTY = "dev.polek.adbwifi.ADB_LOCATION_PROPERTY"
-
-        private val defaultAdbLocation by lazy {
-            val home = System.getProperty("user.home")
-            val path = when {
-                SystemInfo.isMac -> "$home/Library/Android/sdk/platform-tools"
-                SystemInfo.isWindows -> "$home/AppData/Local/Android/Sdk/platform-tools"
-                else -> "$home/Android/Sdk/platform-tools"
-            }
-            return@lazy File(path).absolutePath
-        }
 
         private fun String.isValidAdbLocation(): Boolean = File("$this/adb").isFile
     }
