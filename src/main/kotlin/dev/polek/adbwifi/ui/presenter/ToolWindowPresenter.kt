@@ -5,6 +5,7 @@ import dev.polek.adbwifi.model.CommandHistory
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.AdbService
 import dev.polek.adbwifi.services.LogService
+import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.Companion.toViewModel
 import dev.polek.adbwifi.ui.view.ToolWindowView
@@ -15,7 +16,9 @@ class ToolWindowPresenter {
     private var view: ToolWindowView? = null
     private val adbService by lazy { service<AdbService>() }
     private val logService by lazy { service<LogService>() }
+    private val propertiesService by lazy { service<PropertiesService>() }
 
+    private var isViewOpen: Boolean = false
     private var devices: List<DeviceViewModel> = emptyList()
 
     fun attach(view: ToolWindowView) {
@@ -23,19 +26,23 @@ class ToolWindowPresenter {
         view.showEmptyMessage()
         subscribeToDeviceList()
         subscribeToLogEvents()
+        subscribeToAdbLocationChanges()
     }
 
     fun detach() {
         unsubscribeFromDeviceList()
         unsubscribeFromLogEvents()
+        unsubscribeFromAdbLocationChanges()
         view = null
     }
 
     fun onViewOpen() {
+        isViewOpen = true
         subscribeToDeviceList()
     }
 
     fun onViewClosed() {
+        isViewOpen = false
         unsubscribeFromDeviceList()
     }
 
@@ -112,6 +119,24 @@ class ToolWindowPresenter {
             view?.closeLog()
             logService.commandHistory.listener = null
         }
+    }
+
+    private fun subscribeToAdbLocationChanges() {
+        propertiesService.adbLocationListener = { location, isValid ->
+            if (!isValid) {
+                unsubscribeFromDeviceList()
+                view?.showInvalidAdbLocationError(location)
+            } else {
+                view?.showEmptyMessage()
+                if (isViewOpen) {
+                    subscribeToDeviceList()
+                }
+            }
+        }
+    }
+
+    private fun unsubscribeFromAdbLocationChanges() {
+        propertiesService.adbLocationListener = null
     }
 
     private companion object {

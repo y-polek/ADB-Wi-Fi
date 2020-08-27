@@ -22,6 +22,14 @@ class PropertiesServiceImpl : PropertiesService {
         }
         set(value) {
             properties.setValue(ADB_LOCATION_PROPERTY, value)
+            adbLocationListener?.invoke(value, value.isValidAdbLocation())
+        }
+
+    override var adbLocationListener: ((location: String, isValid: Boolean) -> Unit)? = null
+        set(value) {
+            field = value
+            val location = adbLocation
+            value?.invoke(location, location.isValidAdbLocation())
         }
 
     private companion object {
@@ -37,5 +45,7 @@ class PropertiesServiceImpl : PropertiesService {
             }
             return@lazy File(path).absolutePath
         }
+
+        private fun String.isValidAdbLocation(): Boolean = File("$this/adb").isFile
     }
 }

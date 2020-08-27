@@ -9,6 +9,8 @@ interface ToolWindowView {
 
     fun showEmptyMessage()
 
+    fun showInvalidAdbLocationError(location: String)
+
     fun showConfigurationError()
 
     fun openLog()

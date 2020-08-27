@@ -46,6 +46,17 @@ class AdbWiFiToolWindow(
         foreground = JBColor.gray
         isOpaque = true
     }
+    private val errorMessageLabel = JBLabel().apply {
+        text = PluginBundle.message("adbLocationVerificationErrorMessage", location)
+        icon = IconLoader.getIcon("/icons/deviceWarning.png")
+        horizontalAlignment = SwingConstants.CENTER
+        horizontalTextPosition = SwingConstants.CENTER
+        verticalTextPosition = SwingConstants.BOTTOM
+        setFontSize(16f)
+        background = JBColor.background()
+        foreground = JBColor.gray
+        isOpaque = true
+    }
 
     init {
         val actionManager = ActionManager.getInstance()
@@ -98,6 +109,10 @@ class AdbWiFiToolWindow(
 
     override fun showEmptyMessage() {
         splitter.firstComponent = emptyMessageLabel
+    }
+
+    override fun showInvalidAdbLocationError(location: String) {
+        splitter.firstComponent = errorMessageLabel
     }
 
     override fun showConfigurationError() {
