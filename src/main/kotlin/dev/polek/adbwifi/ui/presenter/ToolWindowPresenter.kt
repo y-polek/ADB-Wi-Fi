@@ -19,6 +19,7 @@ class ToolWindowPresenter {
     private val propertiesService by lazy { service<PropertiesService>() }
 
     private var isViewOpen: Boolean = false
+    private var isAdbValid: Boolean = true
     private var devices: List<DeviceViewModel> = emptyList()
 
     fun attach(view: ToolWindowView) {
@@ -38,7 +39,9 @@ class ToolWindowPresenter {
 
     fun onViewOpen() {
         isViewOpen = true
-        subscribeToDeviceList()
+        if (isAdbValid) {
+            subscribeToDeviceList()
+        }
     }
 
     fun onViewClosed() {
@@ -60,7 +63,7 @@ class ToolWindowPresenter {
         adbService.disconnect(device.device)
     }
 
-    fun onPinButtonClicked(device: DeviceViewModel) {
+    fun onPinButtonClicked(@Suppress("UNUSED_PARAMETER") device: DeviceViewModel) {
         TODO("Not implemented")
     }
 
@@ -123,8 +126,10 @@ class ToolWindowPresenter {
 
     private fun subscribeToAdbLocationChanges() {
         propertiesService.adbLocationListener = { location, isValid ->
+            isAdbValid = isValid
             if (!isValid) {
                 unsubscribeFromDeviceList()
+                devices = emptyList()
                 view?.showInvalidAdbLocationError(location)
             } else {
                 view?.showEmptyMessage()
