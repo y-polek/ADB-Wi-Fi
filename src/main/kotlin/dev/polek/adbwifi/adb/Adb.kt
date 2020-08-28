@@ -1,6 +1,6 @@
 package dev.polek.adbwifi.adb
 
-import com.intellij.openapi.diagnostic.logger
+import dev.polek.adbwifi.LOG
 import dev.polek.adbwifi.commandexecutor.CommandExecutor
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.LogEntry
@@ -118,7 +118,6 @@ class Adb(
     }
 
     companion object {
-        private val LOG = logger("Adb")
 
         private val DEVICE_ID_REGEX = "(.*?)\\s+device".toRegex()
         private val DEVICE_ADDRESS_REGEX = ".*\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b.*".toRegex()
