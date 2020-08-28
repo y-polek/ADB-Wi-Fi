@@ -8,7 +8,6 @@ import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.wm.ToolWindow
-import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.openapi.wm.ex.ToolWindowManagerListener
 import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.JBColor
@@ -121,7 +120,7 @@ class AdbWiFiToolWindow(
             .subscribe(
                 ToolWindowManagerListener.TOPIC,
                 object : ToolWindowManagerListener {
-                    override fun stateChanged(toolWindowManager: ToolWindowManager) {
+                    override fun stateChanged() {
                         if (toolWindow.isVisible) {
                             presenter.onViewOpen()
                         } else {
