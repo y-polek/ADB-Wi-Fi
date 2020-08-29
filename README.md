@@ -12,6 +12,7 @@ This plugin simplifies the usage of [ADB][adb]'s ["Connect over Wi-Fi"][adb#wire
 2. Open the "ADB Wi-Fi" Tool Window (in the right-bottom corner).
 3. Click the "Connect" button.
 4. After a successful connection, you can unplug the USB cable.
+
 ![Connect device](./docs/connect.gif)
   
 <!-- Plugin description end -->
