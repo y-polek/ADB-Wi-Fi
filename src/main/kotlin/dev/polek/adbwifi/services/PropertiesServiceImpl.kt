@@ -2,6 +2,7 @@ package dev.polek.adbwifi.services
 
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.util.SystemInfo
+import dev.polek.adbwifi.utils.isValidAdbLocation
 import java.io.File
 
 class PropertiesServiceImpl : PropertiesService {
@@ -22,7 +23,7 @@ class PropertiesServiceImpl : PropertiesService {
         }
         set(value) {
             properties.setValue(ADB_LOCATION_PROPERTY, value)
-            adbLocationListener?.invoke(value, value.isValidAdbLocation())
+            adbLocationListener?.invoke(value, isValidAdbLocation(value))
         }
 
     override val defaultAdbLocation: String by lazy {
@@ -39,13 +40,11 @@ class PropertiesServiceImpl : PropertiesService {
         set(value) {
             field = value
             val location = adbLocation
-            value?.invoke(location, location.isValidAdbLocation())
+            value?.invoke(location, isValidAdbLocation(location))
         }
 
     private companion object {
         private const val IS_LOG_VISIBLE_PROPERTY = "dev.polek.adbwifi.IS_LOG_VISIBLE_PROPERTY"
         private const val ADB_LOCATION_PROPERTY = "dev.polek.adbwifi.ADB_LOCATION_PROPERTY"
-
-        private fun String.isValidAdbLocation(): Boolean = File("$this/adb").isFile
     }
 }

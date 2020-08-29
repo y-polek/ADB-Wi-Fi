@@ -15,6 +15,7 @@ import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.utils.AbstractMouseListener
 import dev.polek.adbwifi.utils.GridBagLayoutPanel
+import dev.polek.adbwifi.utils.isValidAdbLocation
 import dev.polek.adbwifi.utils.panel
 import java.awt.GridBagConstraints
 import java.awt.Insets
@@ -160,8 +161,7 @@ class AdbWifiConfigurable : Configurable {
 
     private fun verifyAdbLocation() {
         val dir = textField.text
-        val adbFile = File("$dir/adb")
-        if (adbFile.isFile) {
+        if (isValidAdbLocation(dir)) {
             showVerifiedMessage()
         } else {
             showVerificationErrorMessage()
