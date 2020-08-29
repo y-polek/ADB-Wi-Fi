@@ -1,1 +1,1 @@
-rootProject.name = "ADB-Wi-Fi"
+rootProject.name = "ADB Wi-Fi"

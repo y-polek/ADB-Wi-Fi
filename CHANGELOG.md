@@ -1,6 +1,6 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
-# ADB-Wi-Fi Changelog
+# ADB Wi-Fi Changelog
 
 ## [Unreleased]
 ### Added
