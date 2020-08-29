@@ -5,12 +5,14 @@ import dev.polek.adbwifi.commandexecutor.CommandExecutor
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.PropertiesService
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import java.io.IOException
 
+@OptIn(FlowPreview::class)
 class Adb(
     private val commandExecutor: CommandExecutor,
     private val properties: PropertiesService

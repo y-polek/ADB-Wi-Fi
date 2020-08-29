@@ -39,8 +39,7 @@ repositories {
 }
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.3.8")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.2.1")
 
     testImplementation("org.assertj:assertj-core:3.16.1")
 

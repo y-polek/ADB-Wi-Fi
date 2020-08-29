@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
+@OptIn(FlowPreview::class)
 class AdbService : Disposable {
 
     var deviceListListener: ((List<Device>) -> Unit)? = null
@@ -64,7 +65,6 @@ class AdbService : Disposable {
         stopPollingDevices()
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private fun startPollingDevices() {
         devicePollingJob?.cancel()
         devicePollingJob = GlobalScope.launch(Dispatchers.Main) {
