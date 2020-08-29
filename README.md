@@ -5,9 +5,9 @@
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/14969.svg)](https://plugins.jetbrains.com/plugin/14969)
 
 <!-- Plugin description -->
-This plugin simplifies the usage of [ADB][adb]'s ["Connect over Wi-Fi"][adb#wireless] feature.
+This plugin simplifies the usage of [ADB](https://developer.android.com/studio/command-line/adb )'s ["Connect over Wi-Fi"](https://developer.android.com/studio/command-line/adb#wireless) feature.
 
-## How to Use
+## Usage
 1. Connect an Android device via USB cable.
 2. Open the "ADB Wi-Fi" Tool Window (in the right-bottom corner).
 3. Click the "Connect" button.
@@ -28,6 +28,3 @@ This plugin simplifies the usage of [ADB][adb]'s ["Connect over Wi-Fi"][adb#wire
 
   Download the [latest release](https://github.com/y-polek/ADB-Wi-Fi/releases/latest) and install it manually using
   <kbd>Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
-
-[adb]: https://developer.android.com/studio/command-line/adb
-[adb#wireless]: https://developer.android.com/studio/command-line/adb#wireless
