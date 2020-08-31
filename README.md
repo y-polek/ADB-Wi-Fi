@@ -6,6 +6,8 @@
 
 <!-- Plugin description -->
 This plugin simplifies the usage of [ADB](https://developer.android.com/studio/command-line/adb )'s ["Connect over Wi-Fi"](https://developer.android.com/studio/command-line/adb#wireless) feature.
+  
+<!-- Plugin description end -->
 
 ## Usage
 1. Connect an Android device via USB cable.
@@ -14,8 +16,6 @@ This plugin simplifies the usage of [ADB](https://developer.android.com/studio/c
 4. After a successful connection, you can unplug the USB cable.
 
 ![Connect device](./docs/connect.gif)
-  
-<!-- Plugin description end -->
 
 ## Installation
 
