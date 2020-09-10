@@ -28,6 +28,10 @@ class DeviceListPanel(presenter: ToolWindowPresenter) : JBPanel<DeviceListPanel>
             presenter.onPinButtonClicked(device)
         }
 
+        override fun onShareScreenClicked(device: DeviceViewModel) {
+            presenter.onShareScreenButtonClicked(device)
+        }
+
         override fun onCopyDeviceIdClicked(device: DeviceViewModel) {
             presenter.onCopyDeviceIdClicked(device)
         }

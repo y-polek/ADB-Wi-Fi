@@ -67,6 +67,10 @@ class ToolWindowPresenter {
         TODO("Not implemented")
     }
 
+    fun onShareScreenButtonClicked(device: DeviceViewModel) {
+        TODO("Not implemented")
+    }
+
     fun onCopyDeviceIdClicked(device: DeviceViewModel) {
         copyToClipboard(device.device.id)
     }

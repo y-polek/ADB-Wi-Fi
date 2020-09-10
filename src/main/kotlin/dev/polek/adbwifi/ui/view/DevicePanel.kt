@@ -148,12 +148,17 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             listener?.onPinButtonClicked(device)
         }
 
+        val shareScreenButton = IconButton(ICON_SHARE_SCREEN, PluginBundle.message("shareScreenTooltip"))
+        shareScreenButton.onClickedListener = {
+            listener?.onShareScreenClicked(device)
+        }
+
         val menuButton = IconButton(ICON_MENU)
         menuButton.onClickedListener = { event ->
             openDeviceMenu(device, event)
         }
 
-        val actionsPanel = flowPanel(/*pinButton, */menuButton, hgap = 10)
+        val actionsPanel = flowPanel(/*pinButton, */shareScreenButton, menuButton, hgap = 10)
         actionsPanel.isOpaque = false
         add(
             actionsPanel,
@@ -196,6 +201,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         fun onConnectButtonClicked(device: DeviceViewModel)
         fun onDisconnectButtonClicked(device: DeviceViewModel)
         fun onPinButtonClicked(device: DeviceViewModel)
+        fun onShareScreenClicked(device: DeviceViewModel)
         fun onCopyDeviceIdClicked(device: DeviceViewModel)
         fun onCopyDeviceAddressClicked(device: DeviceViewModel)
     }
@@ -209,6 +215,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         )
         private val ICON_MENU = IconLoader.getIcon("/icons/menuIcon.svg")
         private val ICON_PIN = IconLoader.getIcon("/icons/pinIcon.svg")
+        private val ICON_SHARE_SCREEN = IconLoader.getIcon("/icons/shareScreen.svg")
         private val ICON_NO_WIFI = IconLoader.getIcon("/icons/noWifi.svg")
     }
 }
