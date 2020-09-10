@@ -56,7 +56,7 @@ class AdbWiFiToolWindow(
         background = JBColor.background()
 
         val label = JBLabel().apply {
-            text = PluginBundle.message("adbLocationVerificationErrorMessage", location)
+            text = PluginBundle.message("adbPathVerificationErrorMessage", location)
             icon = IconLoader.getIcon("/icons/deviceWarning.png")
             horizontalAlignment = SwingConstants.CENTER
             horizontalTextPosition = SwingConstants.CENTER

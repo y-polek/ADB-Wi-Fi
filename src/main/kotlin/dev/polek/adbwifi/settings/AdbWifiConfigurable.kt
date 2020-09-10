@@ -11,6 +11,7 @@ import com.intellij.openapi.util.SystemInfo
 import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.JBColor
 import com.intellij.ui.TitledSeparator
+import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.services.PropertiesService
@@ -63,17 +64,30 @@ class AdbWifiConfigurable : Configurable {
                 gridwidth = 3
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
+                insets = Insets(0, 0, GROUP_VERTICAL_INSET, 0)
             }
         )
 
-        val adbLocationTitle = JBLabel(PluginBundle.message("adbLocationTitle"))
+        val adbSystemPathCheckbox = JBCheckBox(PluginBundle.message("adbUseSystemPath"))
+        panel.add(
+            adbSystemPathCheckbox,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 1
+                gridwidth = 3
+                anchor = GridBagConstraints.LINE_START
+                insets = Insets(0, GROUP_LEFT_INSET, 4, 0)
+            }
+        )
+
+        val adbLocationTitle = JBLabel(PluginBundle.message("adbPathTitle"))
         panel.add(
             adbLocationTitle,
             GridBagConstraints().apply {
                 gridx = 0
-                gridy = 1
+                gridy = 2
                 gridwidth = 1
-                insets = Insets(0, 20, 0, 8)
+                insets = Insets(0, GROUP_LEFT_INSET, 0, 8)
             }
         )
 
@@ -91,7 +105,7 @@ class AdbWifiConfigurable : Configurable {
             adbLocationField,
             GridBagConstraints().apply {
                 gridx = 1
-                gridy = 1
+                gridy = 2
                 gridwidth = 2
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
@@ -104,7 +118,7 @@ class AdbWifiConfigurable : Configurable {
             adbStatusLabel,
             GridBagConstraints().apply {
                 gridx = 1
-                gridy = 2
+                gridy = 3
                 gridwidth = 1
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
@@ -122,7 +136,7 @@ class AdbWifiConfigurable : Configurable {
             defaultAdbLocationButton,
             GridBagConstraints().apply {
                 gridx = 2
-                gridy = 2
+                gridy = 3
                 gridwidth = 1
                 insets = Insets(4, 0, 0, 0)
             }
@@ -133,10 +147,23 @@ class AdbWifiConfigurable : Configurable {
             scrcpySeparator,
             GridBagConstraints().apply {
                 gridx = 0
-                gridy = 3
+                gridy = 4
                 gridwidth = 3
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
+                insets = Insets(GROUP_VERTICAL_INSET, 0, GROUP_VERTICAL_INSET, 0)
+            }
+        )
+
+        val scrcpySystemPathCheckbox = JBCheckBox(PluginBundle.message("scrcpyUseSystemPath"))
+        panel.add(
+            scrcpySystemPathCheckbox,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 5
+                gridwidth = 3
+                anchor = GridBagConstraints.LINE_START
+                insets = Insets(0, GROUP_LEFT_INSET, 4, 0)
             }
         )
 
@@ -197,9 +224,11 @@ class AdbWifiConfigurable : Configurable {
     }
 
     private companion object {
+        private const val GROUP_VERTICAL_INSET = 10
+        private const val GROUP_LEFT_INSET = 20
         private val OK_ICON = IconLoader.getIcon("AllIcons.General.InspectionsOK")
         private val ERROR_ICON = IconLoader.getIcon("AllIcons.General.Error")
-        private val ADB_VERIFIED_MESSAGE = PluginBundle.message("adbLocationVerifiedMessage")
-        private val ADB_VERIFICATION_ERROR_MESSAGE = PluginBundle.message("adbLocationVerificationErrorMessage")
+        private val ADB_VERIFIED_MESSAGE = PluginBundle.message("adbPathVerifiedMessage")
+        private val ADB_VERIFICATION_ERROR_MESSAGE = PluginBundle.message("adbPathVerificationErrorMessage")
     }
 }
