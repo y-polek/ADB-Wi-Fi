@@ -10,6 +10,7 @@ import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.JBColor
+import com.intellij.ui.TitledSeparator
 import com.intellij.ui.components.JBLabel
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.services.PropertiesService
@@ -27,9 +28,9 @@ import javax.swing.JTextField
 class AdbWifiConfigurable : Configurable {
 
     private val properties = service<PropertiesService>()
-    private lateinit var textField: TextFieldWithBrowseButton
-    private lateinit var statusLabel: JBLabel
-    private lateinit var defaultButton: HyperlinkLabel
+    private lateinit var adbLocationField: TextFieldWithBrowseButton
+    private lateinit var adbStatusLabel: JBLabel
+    private lateinit var defaultAdbLocationButton: HyperlinkLabel
 
     private val textComponentAccessor = object : TextComponentAccessor<JTextField> {
         override fun getText(component: JTextField) = component.text
@@ -47,26 +48,39 @@ class AdbWifiConfigurable : Configurable {
     }
 
     override fun getDisplayName(): String {
-        return PluginBundle.getMessage("settingsPageName")
+        return PluginBundle.message("settingsPageName")
     }
 
     override fun createComponent(): JComponent? {
         val panel = GridBagLayoutPanel()
 
-        val titleLabel = JBLabel(PluginBundle.message("adbLocationTitle"))
+        val adbSeparator = TitledSeparator(PluginBundle.message("adbSettingsTitle"))
         panel.add(
-            titleLabel,
+            adbSeparator,
             GridBagConstraints().apply {
                 gridx = 0
                 gridy = 0
-                insets = Insets(0, 0, 0, 8)
+                gridwidth = 3
+                fill = GridBagConstraints.HORIZONTAL
+                weightx = 1.0
             }
         )
 
-        textField = TextFieldWithBrowseButton()
-        textField.text = properties.adbLocation
-        textField.isEditable = false
-        textField.addBrowseFolderListener(
+        val adbLocationTitle = JBLabel(PluginBundle.message("adbLocationTitle"))
+        panel.add(
+            adbLocationTitle,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 1
+                gridwidth = 1
+                insets = Insets(0, 20, 0, 8)
+            }
+        )
+
+        adbLocationField = TextFieldWithBrowseButton()
+        adbLocationField.text = properties.adbLocation
+        adbLocationField.isEditable = false
+        adbLocationField.addBrowseFolderListener(
             null,
             null,
             null,
@@ -74,41 +88,55 @@ class AdbWifiConfigurable : Configurable {
             textComponentAccessor
         )
         panel.add(
-            textField,
+            adbLocationField,
             GridBagConstraints().apply {
                 gridx = 1
-                gridy = 0
+                gridy = 1
                 gridwidth = 2
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
             }
         )
 
-        statusLabel = JBLabel("'adb' binary found.")
-        statusLabel.icon = IconLoader.getIcon("AllIcons.General.InspectionsError")
+        adbStatusLabel = JBLabel("'adb' binary found.")
+        adbStatusLabel.icon = IconLoader.getIcon("AllIcons.General.InspectionsError")
         panel.add(
-            statusLabel,
+            adbStatusLabel,
             GridBagConstraints().apply {
                 gridx = 1
-                gridy = 1
+                gridy = 2
+                gridwidth = 1
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
                 insets = Insets(4, 0, 0, 0)
             }
         )
 
-        defaultButton = HyperlinkLabel(PluginBundle.message("defaultAdbLocationButton"))
-        defaultButton.addMouseListener(object : AbstractMouseListener() {
+        defaultAdbLocationButton = HyperlinkLabel(PluginBundle.message("defaultAdbLocationButton"))
+        defaultAdbLocationButton.addMouseListener(object : AbstractMouseListener() {
             override fun mouseClicked(e: MouseEvent) {
                 setAdbLocationText(properties.defaultAdbLocation)
             }
         })
         panel.add(
-            defaultButton,
+            defaultAdbLocationButton,
             GridBagConstraints().apply {
                 gridx = 2
-                gridy = 1
+                gridy = 2
+                gridwidth = 1
                 insets = Insets(4, 0, 0, 0)
+            }
+        )
+
+        val scrcpySeparator = TitledSeparator(PluginBundle.message("scrcpySettingsTitle"))
+        panel.add(
+            scrcpySeparator,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 3
+                gridwidth = 3
+                fill = GridBagConstraints.HORIZONTAL
+                weightx = 1.0
             }
         )
 
@@ -118,11 +146,11 @@ class AdbWifiConfigurable : Configurable {
     }
 
     override fun isModified(): Boolean {
-        return textField.text != properties.adbLocation
+        return adbLocationField.text != properties.adbLocation
     }
 
     override fun apply() {
-        properties.adbLocation = textField.text
+        properties.adbLocation = adbLocationField.text
     }
 
     override fun reset() {
@@ -130,7 +158,7 @@ class AdbWifiConfigurable : Configurable {
     }
 
     private fun setAdbLocationText(location: String) {
-        textField.text = location
+        adbLocationField.text = location
         verifyAdbLocation()
     }
 
@@ -140,27 +168,27 @@ class AdbWifiConfigurable : Configurable {
     }
 
     private fun showVerifiedMessage() {
-        statusLabel.apply {
+        adbStatusLabel.apply {
             icon = OK_ICON
             text = ADB_VERIFIED_MESSAGE
             foreground = JBColor.foreground()
         }
 
-        defaultButton.isVisible = false
+        defaultAdbLocationButton.isVisible = false
     }
 
     private fun showVerificationErrorMessage() {
-        statusLabel.apply {
-            statusLabel.icon = ERROR_ICON
+        adbStatusLabel.apply {
+            adbStatusLabel.icon = ERROR_ICON
             text = ADB_VERIFICATION_ERROR_MESSAGE
             foreground = JBColor.RED
         }
 
-        defaultButton.isVisible = true
+        defaultAdbLocationButton.isVisible = true
     }
 
     private fun verifyAdbLocation() {
-        val dir = textField.text
+        val dir = adbLocationField.text
         if (isValidAdbLocation(dir)) {
             showVerifiedMessage()
         } else {
