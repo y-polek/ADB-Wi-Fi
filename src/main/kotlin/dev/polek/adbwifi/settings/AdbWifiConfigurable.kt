@@ -15,10 +15,7 @@ import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.services.PropertiesService
-import dev.polek.adbwifi.utils.AbstractMouseListener
-import dev.polek.adbwifi.utils.GridBagLayoutPanel
-import dev.polek.adbwifi.utils.isValidAdbLocation
-import dev.polek.adbwifi.utils.panel
+import dev.polek.adbwifi.utils.*
 import java.awt.GridBagConstraints
 import java.awt.Insets
 import java.awt.event.MouseEvent
@@ -29,24 +26,13 @@ import javax.swing.JTextField
 class AdbWifiConfigurable : Configurable {
 
     private val properties = service<PropertiesService>()
+
     private lateinit var adbLocationField: TextFieldWithBrowseButton
     private lateinit var adbStatusLabel: JBLabel
     private lateinit var defaultAdbLocationButton: HyperlinkLabel
 
-    private val textComponentAccessor = object : TextComponentAccessor<JTextField> {
-        override fun getText(component: JTextField) = component.text
-
-        override fun setText(component: JTextField, text: String) {
-            val file = File(text)
-            val dirName = if (file.isFile) {
-                file.parent.orEmpty()
-            } else {
-                text
-            }
-            component.text = dirName
-            verifyAdbLocation()
-        }
-    }
+    private lateinit var scrcpyLocationField: TextFieldWithBrowseButton
+    private lateinit var scrcpyStatusLabel: JBLabel
 
     override fun getDisplayName(): String {
         return PluginBundle.message("settingsPageName")
@@ -98,8 +84,8 @@ class AdbWifiConfigurable : Configurable {
             null,
             null,
             null,
-            adbLocationChooserDescriptor(),
-            textComponentAccessor
+            executableChooserDescriptor(),
+            ExecutablePathTextComponentAccessor(::verifyAdbLocation)
         )
         panel.add(
             adbLocationField,
@@ -112,7 +98,7 @@ class AdbWifiConfigurable : Configurable {
             }
         )
 
-        adbStatusLabel = JBLabel("'adb' binary found.")
+        adbStatusLabel = JBLabel()
         adbStatusLabel.icon = IconLoader.getIcon("AllIcons.General.InspectionsError")
         panel.add(
             adbStatusLabel,
@@ -167,21 +153,70 @@ class AdbWifiConfigurable : Configurable {
             }
         )
 
+        val scrcpyPathTitle = JBLabel(PluginBundle.message("scrcpyPathTitle"))
+        panel.add(
+            scrcpyPathTitle,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 6
+                gridwidth = 1
+                insets = Insets(0, GROUP_LEFT_INSET, 0, 8)
+            }
+        )
+
+        scrcpyLocationField = TextFieldWithBrowseButton()
+        scrcpyLocationField.text = properties.scrcpyLocation
+        scrcpyLocationField.isEditable = false
+        scrcpyLocationField.addBrowseFolderListener(
+            null,
+            null,
+            null,
+            executableChooserDescriptor(),
+            ExecutablePathTextComponentAccessor(::verifyScrcpyLocation)
+        )
+        panel.add(
+            scrcpyLocationField,
+            GridBagConstraints().apply {
+                gridx = 1
+                gridy = 6
+                gridwidth = 2
+                fill = GridBagConstraints.HORIZONTAL
+                weightx = 1.0
+            }
+        )
+
+        scrcpyStatusLabel = JBLabel()
+        scrcpyStatusLabel.icon = IconLoader.getIcon("AllIcons.General.InspectionsError")
+        panel.add(
+            scrcpyStatusLabel,
+            GridBagConstraints().apply {
+                gridx = 1
+                gridy = 7
+                gridwidth = 1
+                fill = GridBagConstraints.HORIZONTAL
+                weightx = 1.0
+                insets = Insets(4, 0, 0, 0)
+            }
+        )
+
         verifyAdbLocation()
+        verifyScrcpyLocation()
 
         return panel(top = panel)
     }
 
     override fun isModified(): Boolean {
-        return adbLocationField.text != properties.adbLocation
+        return adbLocationField.text != properties.adbLocation || scrcpyLocationField.text != properties.scrcpyLocation
     }
 
     override fun apply() {
         properties.adbLocation = adbLocationField.text
+        properties.scrcpyLocation = scrcpyLocationField.text
     }
 
     override fun reset() {
         setAdbLocationText(properties.adbLocation)
+        setScrcpyLocationText(properties.scrcpyLocation)
     }
 
     private fun setAdbLocationText(location: String) {
@@ -189,24 +224,37 @@ class AdbWifiConfigurable : Configurable {
         verifyAdbLocation()
     }
 
-    private fun adbLocationChooserDescriptor(): FileChooserDescriptor = when {
+    private fun setScrcpyLocationText(location: String) {
+        scrcpyLocationField.text = location
+        verifyScrcpyLocation()
+    }
+
+    private fun executableChooserDescriptor(): FileChooserDescriptor = when {
         SystemInfo.isMac -> FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor()
         else -> FileChooserDescriptorFactory.createSingleFolderDescriptor()
     }
 
-    private fun showVerifiedMessage() {
+    private fun showAdbVerifiedMessage() {
         adbStatusLabel.apply {
             icon = OK_ICON
-            text = ADB_VERIFIED_MESSAGE
+            text = VERIFIED_MESSAGE
             foreground = JBColor.foreground()
         }
 
         defaultAdbLocationButton.isVisible = false
     }
 
-    private fun showVerificationErrorMessage() {
+    private fun showScrcpyVerifiedMessage() {
+        scrcpyStatusLabel.apply {
+            icon = OK_ICON
+            text = VERIFIED_MESSAGE
+            foreground = JBColor.foreground()
+        }
+    }
+
+    private fun showAdbVerificationErrorMessage() {
         adbStatusLabel.apply {
-            adbStatusLabel.icon = ERROR_ICON
+            icon = ERROR_ICON
             text = ADB_VERIFICATION_ERROR_MESSAGE
             foreground = JBColor.RED
         }
@@ -214,12 +262,48 @@ class AdbWifiConfigurable : Configurable {
         defaultAdbLocationButton.isVisible = true
     }
 
+    private fun showScrcpyVerificationErrorMessage() {
+        scrcpyStatusLabel.apply {
+            icon = ERROR_ICON
+            text = SCRCPY_VERIFICATION_ERROR_MESSAGE
+            foreground = JBColor.RED
+        }
+    }
+
     private fun verifyAdbLocation() {
         val dir = adbLocationField.text
         if (isValidAdbLocation(dir)) {
-            showVerifiedMessage()
+            showAdbVerifiedMessage()
         } else {
-            showVerificationErrorMessage()
+            showAdbVerificationErrorMessage()
+        }
+    }
+
+    private fun verifyScrcpyLocation() {
+        val dir = scrcpyLocationField.text
+        if (isValidScrcpyLocation(dir)) {
+            showScrcpyVerifiedMessage()
+        } else {
+            showScrcpyVerificationErrorMessage()
+        }
+    }
+
+    private class ExecutablePathTextComponentAccessor(
+        val onTextChanged: () -> Unit
+    ) : TextComponentAccessor<JTextField> {
+
+        override fun getText(component: JTextField): String = component.text
+
+        override fun setText(component: JTextField, text: String) {
+            val file = File(text)
+            val dirName = if (file.isFile) {
+                file.parent.orEmpty()
+            } else {
+                text
+            }
+            component.text = dirName
+
+            onTextChanged.invoke()
         }
     }
 
@@ -228,7 +312,8 @@ class AdbWifiConfigurable : Configurable {
         private const val GROUP_LEFT_INSET = 20
         private val OK_ICON = IconLoader.getIcon("AllIcons.General.InspectionsOK")
         private val ERROR_ICON = IconLoader.getIcon("AllIcons.General.Error")
-        private val ADB_VERIFIED_MESSAGE = PluginBundle.message("adbPathVerifiedMessage")
+        private val VERIFIED_MESSAGE = PluginBundle.message("adbPathVerifiedMessage")
         private val ADB_VERIFICATION_ERROR_MESSAGE = PluginBundle.message("adbPathVerificationErrorMessage")
+        private val SCRCPY_VERIFICATION_ERROR_MESSAGE = PluginBundle.message("scrcpyPathVerificationErrorMessage")
     }
 }

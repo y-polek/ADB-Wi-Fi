@@ -3,10 +3,14 @@ package dev.polek.adbwifi.utils
 import com.intellij.openapi.util.SystemInfo
 import java.io.File
 
-fun isValidAdbLocation(dirPath: String): Boolean {
-    val adbFileName = when {
-        SystemInfo.isWindows -> "adb.exe"
-        else -> "adb"
+private fun isValidExecPath(dirPath: String, execName: String): Boolean {
+    val execFileName = when {
+        SystemInfo.isWindows -> "$execName.exe"
+        else -> execName
     }
-    return File("$dirPath/$adbFileName").isFile
+    return File("$dirPath/$execFileName").isFile
 }
+
+fun isValidAdbLocation(dirPath: String): Boolean = isValidExecPath(dirPath, "adb")
+
+fun isValidScrcpyLocation(dirPath: String): Boolean = isValidExecPath(dirPath, "scrcpy")

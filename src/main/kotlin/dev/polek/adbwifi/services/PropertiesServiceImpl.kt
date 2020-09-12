@@ -26,6 +26,14 @@ class PropertiesServiceImpl : PropertiesService {
             adbLocationListener?.invoke(value, isValidAdbLocation(value))
         }
 
+    override var scrcpyLocation: String
+        get() {
+            return properties.getValue(SCRCPY_LOCATION_PROPERTY, defaultScrcpyLocation)
+        }
+        set(value) {
+            properties.setValue(SCRCPY_LOCATION_PROPERTY, value)
+        }
+
     override val defaultAdbLocation: String by lazy {
         val home = System.getProperty("user.home")
         val path = when {
@@ -35,6 +43,8 @@ class PropertiesServiceImpl : PropertiesService {
         }
         return@lazy File(path).absolutePath
     }
+
+    override val defaultScrcpyLocation: String = ""
 
     override var adbLocationListener: ((location: String, isValid: Boolean) -> Unit)? = null
         set(value) {
@@ -46,5 +56,6 @@ class PropertiesServiceImpl : PropertiesService {
     private companion object {
         private const val IS_LOG_VISIBLE_PROPERTY = "dev.polek.adbwifi.IS_LOG_VISIBLE_PROPERTY"
         private const val ADB_LOCATION_PROPERTY = "dev.polek.adbwifi.ADB_LOCATION_PROPERTY"
+        private const val SCRCPY_LOCATION_PROPERTY = "dev.polek.adbwifi.SCRCPY_LOCATION_PROPERTY"
     }
 }
