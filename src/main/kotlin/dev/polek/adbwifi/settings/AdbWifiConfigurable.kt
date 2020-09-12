@@ -73,6 +73,7 @@ class AdbWifiConfigurable : Configurable {
                 gridx = 0
                 gridy = 2
                 gridwidth = 1
+                anchor = GridBagConstraints.LINE_START
                 insets = Insets(0, GROUP_LEFT_INSET, 0, 8)
             }
         )
@@ -160,6 +161,7 @@ class AdbWifiConfigurable : Configurable {
                 gridx = 0
                 gridy = 6
                 gridwidth = 1
+                anchor = GridBagConstraints.LINE_START
                 insets = Insets(0, GROUP_LEFT_INSET, 0, 8)
             }
         )
