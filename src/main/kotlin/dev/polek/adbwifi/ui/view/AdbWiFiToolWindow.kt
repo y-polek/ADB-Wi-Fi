@@ -26,6 +26,7 @@ import dev.polek.adbwifi.utils.setFontSize
 import java.awt.GridBagConstraints
 import java.awt.Insets
 import java.awt.event.MouseEvent
+import javax.swing.BorderFactory
 import javax.swing.JComponent
 import javax.swing.SwingConstants
 
@@ -51,9 +52,11 @@ class AdbWiFiToolWindow(
         background = JBColor.background()
         foreground = JBColor.gray
         isOpaque = true
+        border = BorderFactory.createLineBorder(JBColor.border())
     }
     private val errorMessagePanel = GridBagLayoutPanel().apply {
         background = JBColor.background()
+        border = BorderFactory.createLineBorder(JBColor.border())
 
         val label = JBLabel().apply {
             text = PluginBundle.message("adbPathVerificationErrorMessage", location)
