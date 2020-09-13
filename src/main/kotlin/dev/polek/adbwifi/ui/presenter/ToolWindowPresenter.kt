@@ -129,12 +129,12 @@ class ToolWindowPresenter {
     }
 
     private fun subscribeToAdbLocationChanges() {
-        propertiesService.adbLocationListener = { location, isValid ->
+        propertiesService.adbLocationListener = { isValid ->
             isAdbValid = isValid
             if (!isValid) {
                 unsubscribeFromDeviceList()
                 devices = emptyList()
-                view?.showInvalidAdbLocationError(location)
+                view?.showInvalidAdbLocationError()
             } else {
                 if (devices.isEmpty()) {
                     view?.showEmptyMessage()

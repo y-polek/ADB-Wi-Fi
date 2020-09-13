@@ -2,6 +2,7 @@ package dev.polek.adbwifi.services
 
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.util.SystemInfo
+import dev.polek.adbwifi.utils.hasAdbInSystemPath
 import dev.polek.adbwifi.utils.isValidAdbLocation
 import java.io.File
 
@@ -19,13 +20,14 @@ class PropertiesServiceImpl : PropertiesService {
         get() = properties.getBoolean(ADB_FROM_SYSTEM_PATH, false)
         set(value) {
             properties.setValue(ADB_FROM_SYSTEM_PATH, value)
+            notifyAdbLocationListener()
         }
 
     override var adbLocation: String
         get() = properties.getValue(ADB_LOCATION_PROPERTY, defaultAdbLocation)
         set(value) {
             properties.setValue(ADB_LOCATION_PROPERTY, value)
-            adbLocationListener?.invoke(value, isValidAdbLocation(value))
+            notifyAdbLocationListener()
         }
 
     override var useScrcpyFromPath: Boolean
@@ -52,12 +54,19 @@ class PropertiesServiceImpl : PropertiesService {
 
     override val defaultScrcpyLocation: String = ""
 
-    override var adbLocationListener: ((location: String, isValid: Boolean) -> Unit)? = null
+    override var adbLocationListener: ((isValid: Boolean) -> Unit)? = null
         set(value) {
             field = value
-            val location = adbLocation
-            value?.invoke(location, isValidAdbLocation(location))
+            notifyAdbLocationListener()
         }
+
+    private fun notifyAdbLocationListener() {
+        val isValid = when {
+            useAdbFromPath -> hasAdbInSystemPath()
+            else -> isValidAdbLocation(adbLocation)
+        }
+        adbLocationListener?.invoke(isValid)
+    }
 
     private companion object {
         private const val IS_LOG_VISIBLE_PROPERTY = "dev.polek.adbwifi.IS_LOG_VISIBLE_PROPERTY"

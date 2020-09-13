@@ -146,7 +146,7 @@ class AdbWiFiToolWindow(
         splitter.firstComponent = emptyMessageLabel
     }
 
-    override fun showInvalidAdbLocationError(location: String) {
+    override fun showInvalidAdbLocationError() {
         splitter.firstComponent = errorMessagePanel
     }
 
