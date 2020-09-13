@@ -10,26 +10,32 @@ class PropertiesServiceImpl : PropertiesService {
     private val properties = PropertiesComponent.getInstance()
 
     override var isLogVisible: Boolean
-        get() {
-            return properties.getBoolean(IS_LOG_VISIBLE_PROPERTY, false)
-        }
+        get() = properties.getBoolean(IS_LOG_VISIBLE_PROPERTY, false)
         set(value) {
             properties.setValue(IS_LOG_VISIBLE_PROPERTY, value)
         }
 
-    override var adbLocation: String
-        get() {
-            return properties.getValue(ADB_LOCATION_PROPERTY, defaultAdbLocation)
+    override var useAdbFromPath: Boolean
+        get() = properties.getBoolean(ADB_FROM_SYSTEM_PATH, false)
+        set(value) {
+            properties.setValue(ADB_FROM_SYSTEM_PATH, value)
         }
+
+    override var adbLocation: String
+        get() = properties.getValue(ADB_LOCATION_PROPERTY, defaultAdbLocation)
         set(value) {
             properties.setValue(ADB_LOCATION_PROPERTY, value)
             adbLocationListener?.invoke(value, isValidAdbLocation(value))
         }
 
-    override var scrcpyLocation: String
-        get() {
-            return properties.getValue(SCRCPY_LOCATION_PROPERTY, defaultScrcpyLocation)
+    override var useScrcpyFromPath: Boolean
+        get() = properties.getBoolean(SCRCPY_FROM_SYSTEM_PATH, true)
+        set(value) {
+            properties.setValue(SCRCPY_FROM_SYSTEM_PATH, value)
         }
+
+    override var scrcpyLocation: String
+        get() = properties.getValue(SCRCPY_LOCATION_PROPERTY, defaultScrcpyLocation)
         set(value) {
             properties.setValue(SCRCPY_LOCATION_PROPERTY, value)
         }
@@ -55,7 +61,11 @@ class PropertiesServiceImpl : PropertiesService {
 
     private companion object {
         private const val IS_LOG_VISIBLE_PROPERTY = "dev.polek.adbwifi.IS_LOG_VISIBLE_PROPERTY"
+
+        private const val ADB_FROM_SYSTEM_PATH = "dev.polek.adbwifi.ADB_FROM_SYSTEM_PATH"
         private const val ADB_LOCATION_PROPERTY = "dev.polek.adbwifi.ADB_LOCATION_PROPERTY"
+
+        private const val SCRCPY_FROM_SYSTEM_PATH = "dev.polek.adbwifi.SCRCPY_FROM_SYSTEM_PATH"
         private const val SCRCPY_LOCATION_PROPERTY = "dev.polek.adbwifi.SCRCPY_LOCATION_PROPERTY"
     }
 }

@@ -27,10 +27,14 @@ class AdbWifiConfigurable : Configurable {
 
     private val properties = service<PropertiesService>()
 
+    private lateinit var adbSystemPathCheckbox: JBCheckBox
+    private lateinit var adbLocationTitle: JBLabel
     private lateinit var adbLocationField: TextFieldWithBrowseButton
     private lateinit var adbStatusLabel: JBLabel
     private lateinit var defaultAdbLocationButton: HyperlinkLabel
 
+    private lateinit var scrcpySystemPathCheckbox: JBCheckBox
+    private lateinit var scrcpyLocationTitle: JBLabel
     private lateinit var scrcpyLocationField: TextFieldWithBrowseButton
     private lateinit var scrcpyStatusLabel: JBLabel
 
@@ -54,7 +58,11 @@ class AdbWifiConfigurable : Configurable {
             }
         )
 
-        val adbSystemPathCheckbox = JBCheckBox(PluginBundle.message("adbUseSystemPath"))
+        adbSystemPathCheckbox = JBCheckBox(PluginBundle.message("adbUseSystemPath"))
+        adbSystemPathCheckbox.isSelected = properties.useAdbFromPath
+        adbSystemPathCheckbox.addItemListener {
+            updateAdbLocationSettingsState()
+        }
         panel.add(
             adbSystemPathCheckbox,
             GridBagConstraints().apply {
@@ -66,7 +74,7 @@ class AdbWifiConfigurable : Configurable {
             }
         )
 
-        val adbLocationTitle = JBLabel(PluginBundle.message("adbPathTitle"))
+        adbLocationTitle = JBLabel(PluginBundle.message("adbPathTitle"))
         panel.add(
             adbLocationTitle,
             GridBagConstraints().apply {
@@ -142,7 +150,11 @@ class AdbWifiConfigurable : Configurable {
             }
         )
 
-        val scrcpySystemPathCheckbox = JBCheckBox(PluginBundle.message("scrcpyUseSystemPath"))
+        scrcpySystemPathCheckbox = JBCheckBox(PluginBundle.message("scrcpyUseSystemPath"))
+        scrcpySystemPathCheckbox.isSelected = properties.useScrcpyFromPath
+        scrcpySystemPathCheckbox.addItemListener {
+            updateScrcpyLocationSettingsState()
+        }
         panel.add(
             scrcpySystemPathCheckbox,
             GridBagConstraints().apply {
@@ -154,9 +166,9 @@ class AdbWifiConfigurable : Configurable {
             }
         )
 
-        val scrcpyPathTitle = JBLabel(PluginBundle.message("scrcpyPathTitle"))
+        scrcpyLocationTitle = JBLabel(PluginBundle.message("scrcpyPathTitle"))
         panel.add(
-            scrcpyPathTitle,
+            scrcpyLocationTitle,
             GridBagConstraints().apply {
                 gridx = 0
                 gridy = 6
@@ -202,22 +214,37 @@ class AdbWifiConfigurable : Configurable {
         )
 
         verifyAdbLocation()
+        updateAdbLocationSettingsState()
+
         verifyScrcpyLocation()
+        updateScrcpyLocationSettingsState()
 
         return panel(top = panel)
     }
 
     override fun isModified(): Boolean {
-        return adbLocationField.text != properties.adbLocation || scrcpyLocationField.text != properties.scrcpyLocation
+        if (adbSystemPathCheckbox.isSelected != properties.useAdbFromPath) return true
+        if (adbLocationField.text != properties.adbLocation) return true
+
+        if (scrcpySystemPathCheckbox.isSelected != properties.useScrcpyFromPath) return true
+        if (scrcpyLocationField.text != properties.scrcpyLocation) return true
+
+        return false
     }
 
     override fun apply() {
         properties.adbLocation = adbLocationField.text
+        properties.useAdbFromPath = adbSystemPathCheckbox.isSelected
+
         properties.scrcpyLocation = scrcpyLocationField.text
+        properties.useScrcpyFromPath = scrcpySystemPathCheckbox.isSelected
     }
 
     override fun reset() {
+        adbSystemPathCheckbox.isSelected = properties.useAdbFromPath
         setAdbLocationText(properties.adbLocation)
+
+        scrcpySystemPathCheckbox.isSelected = properties.useScrcpyFromPath
         setScrcpyLocationText(properties.scrcpyLocation)
     }
 
@@ -290,6 +317,21 @@ class AdbWifiConfigurable : Configurable {
         }
     }
 
+    private fun updateAdbLocationSettingsState() {
+        val enabled = !adbSystemPathCheckbox.isSelected
+        adbLocationTitle.isEnabled = enabled
+        adbLocationField.isEnabled = enabled
+        adbStatusLabel.isVisible = enabled
+        defaultAdbLocationButton.isVisible = enabled && adbStatusLabel.icon == ERROR_ICON
+    }
+
+    private fun updateScrcpyLocationSettingsState() {
+        val enabled = !scrcpySystemPathCheckbox.isSelected
+        scrcpyLocationTitle.isEnabled = enabled
+        scrcpyLocationField.isEnabled = enabled
+        scrcpyStatusLabel.isVisible = enabled
+    }
+
     private class ExecutablePathTextComponentAccessor(
         val onTextChanged: () -> Unit
     ) : TextComponentAccessor<JTextField> {
@@ -298,11 +340,7 @@ class AdbWifiConfigurable : Configurable {
 
         override fun setText(component: JTextField, text: String) {
             val file = File(text)
-            val dirName = if (file.isFile) {
-                file.parent.orEmpty()
-            } else {
-                text
-            }
+            val dirName = if (file.isFile) file.parent.orEmpty() else text
             component.text = dirName
 
             onTextChanged.invoke()
