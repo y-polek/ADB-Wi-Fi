@@ -99,7 +99,8 @@ class Adb(
     }
 
     private fun adbCommand(args: String): String {
-        return "${properties.adbLocation}/adb $args"
+        val adb = if (properties.useAdbFromPath) "adb" else "${properties.adbLocation}/adb"
+        return "$adb $args"
     }
 
     private fun String.exec(): Sequence<String> {

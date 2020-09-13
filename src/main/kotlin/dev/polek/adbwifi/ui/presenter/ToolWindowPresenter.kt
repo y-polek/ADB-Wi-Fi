@@ -136,7 +136,11 @@ class ToolWindowPresenter {
                 devices = emptyList()
                 view?.showInvalidAdbLocationError(location)
             } else {
-                view?.showEmptyMessage()
+                if (devices.isEmpty()) {
+                    view?.showEmptyMessage()
+                } else {
+                    view?.showDevices(devices)
+                }
                 if (isViewOpen) {
                     subscribeToDeviceList()
                 }
