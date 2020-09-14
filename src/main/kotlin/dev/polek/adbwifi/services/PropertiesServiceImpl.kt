@@ -33,7 +33,7 @@ class PropertiesServiceImpl : PropertiesService {
     override var useScrcpyFromPath: Boolean
         get() = properties.getBoolean(SCRCPY_FROM_SYSTEM_PATH, true)
         set(value) {
-            properties.setValue(SCRCPY_FROM_SYSTEM_PATH, value)
+            properties.setValue(SCRCPY_FROM_SYSTEM_PATH, value, true)
         }
 
     override var scrcpyLocation: String
