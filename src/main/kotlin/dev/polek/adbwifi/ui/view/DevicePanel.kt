@@ -151,6 +151,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         val shareScreenButton = IconButton(ICON_SHARE_SCREEN, PluginBundle.message("shareScreenTooltip"))
         shareScreenButton.onClickedListener = {
             listener?.onShareScreenClicked(device)
+            shareScreenButton.showProgressFor(2000)
         }
 
         val menuButton = IconButton(ICON_MENU)

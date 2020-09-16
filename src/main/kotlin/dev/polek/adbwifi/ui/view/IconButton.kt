@@ -1,8 +1,12 @@
 package dev.polek.adbwifi.ui.view
 
+import com.intellij.ui.AnimatedIcon
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import dev.polek.adbwifi.utils.AbstractMouseListener
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.awt.event.MouseEvent
 import javax.swing.Icon
 
@@ -36,6 +40,19 @@ class IconButton(icon: Icon, tooltip: String? = null) : JBLabel() {
                 background = HOVER_COLOR
             }
         })
+    }
+
+    fun showProgressFor(timeMillis: Long) {
+        val listener = onClickedListener
+        val icon = this.icon
+        onClickedListener = null
+        this.icon = AnimatedIcon.Default()
+
+        GlobalScope.launch {
+            delay(timeMillis)
+            onClickedListener = listener
+            this@IconButton.icon = icon
+        }
     }
 
     private companion object {

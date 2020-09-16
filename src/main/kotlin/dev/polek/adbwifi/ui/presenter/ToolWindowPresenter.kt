@@ -6,6 +6,7 @@ import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.AdbService
 import dev.polek.adbwifi.services.LogService
 import dev.polek.adbwifi.services.PropertiesService
+import dev.polek.adbwifi.services.ScrcpyService
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.Companion.toViewModel
 import dev.polek.adbwifi.ui.view.ToolWindowView
@@ -15,6 +16,7 @@ class ToolWindowPresenter {
 
     private var view: ToolWindowView? = null
     private val adbService by lazy { service<AdbService>() }
+    private val scrcpyService by lazy { service<ScrcpyService>() }
     private val logService by lazy { service<LogService>() }
     private val propertiesService by lazy { service<PropertiesService>() }
 
@@ -68,7 +70,7 @@ class ToolWindowPresenter {
     }
 
     fun onShareScreenButtonClicked(device: DeviceViewModel) {
-        TODO("Not implemented")
+        scrcpyService.share(device.device)
     }
 
     fun onCopyDeviceIdClicked(device: DeviceViewModel) {
