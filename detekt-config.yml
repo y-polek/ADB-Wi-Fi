@@ -9,9 +9,14 @@ formatting:
 complexity:
   TooManyFunctions:
     ignorePrivate: true
+  LongMethod:
+    active: true
+    threshold: 90
 style:
   MagicNumber:
     active: false
   WildcardImport:
     active: false
     excludeImports: ['java.util.*', 'kotlinx.coroutines.*', 'dev.polek.adbwifi.utils.*']
+  ReturnCount:
+    active: false

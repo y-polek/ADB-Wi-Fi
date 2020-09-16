@@ -21,6 +21,7 @@ import java.awt.Insets
 import java.awt.event.MouseEvent
 import java.io.File
 import javax.swing.JComponent
+import javax.swing.JPanel
 import javax.swing.JTextField
 
 class AdbWifiConfigurable : Configurable {
@@ -45,6 +46,19 @@ class AdbWifiConfigurable : Configurable {
     override fun createComponent(): JComponent? {
         val panel = GridBagLayoutPanel()
 
+        createAdbSettings(panel)
+        createScrcpySettings(panel)
+
+        verifyAdbLocation()
+        updateAdbLocationSettingsState()
+
+        verifyScrcpyLocation()
+        updateScrcpyLocationSettingsState()
+
+        return panel(top = panel)
+    }
+
+    private fun createAdbSettings(panel: JPanel) {
         val adbSeparator = TitledSeparator(PluginBundle.message("adbSettingsTitle"))
         panel.add(
             adbSeparator,
@@ -108,7 +122,6 @@ class AdbWifiConfigurable : Configurable {
         )
 
         adbStatusLabel = JBLabel()
-        adbStatusLabel.icon = IconLoader.getIcon("AllIcons.General.InspectionsError")
         panel.add(
             adbStatusLabel,
             GridBagConstraints().apply {
@@ -136,7 +149,9 @@ class AdbWifiConfigurable : Configurable {
                 insets = Insets(4, 0, 0, 0)
             }
         )
+    }
 
+    private fun createScrcpySettings(panel: JPanel) {
         val scrcpySeparator = TitledSeparator(PluginBundle.message("scrcpySettingsTitle"))
         panel.add(
             scrcpySeparator,
@@ -200,7 +215,6 @@ class AdbWifiConfigurable : Configurable {
         )
 
         scrcpyStatusLabel = JBLabel()
-        scrcpyStatusLabel.icon = IconLoader.getIcon("AllIcons.General.InspectionsError")
         panel.add(
             scrcpyStatusLabel,
             GridBagConstraints().apply {
@@ -212,14 +226,6 @@ class AdbWifiConfigurable : Configurable {
                 insets = Insets(4, 0, 0, 0)
             }
         )
-
-        verifyAdbLocation()
-        updateAdbLocationSettingsState()
-
-        verifyScrcpyLocation()
-        updateScrcpyLocationSettingsState()
-
-        return panel(top = panel)
     }
 
     override fun isModified(): Boolean {
