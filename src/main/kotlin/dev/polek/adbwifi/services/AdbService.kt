@@ -29,10 +29,6 @@ class AdbService : Disposable {
     private var devicePollingJob: Job? = null
     private val logService by lazy { service<LogService>() }
 
-    fun refreshDeviceList() {
-        startPollingDevices()
-    }
-
     fun connect(device: Device) {
         stopPollingDevices()
 
@@ -62,7 +58,11 @@ class AdbService : Disposable {
     }
 
     fun killServer() {
-        adb.killServer()
+        GlobalScope.launch(Dispatchers.Default) {
+            adb.killServer().collect { logEntry ->
+                logService.commandHistory.add(logEntry)
+            }
+        }
     }
 
     override fun dispose() {

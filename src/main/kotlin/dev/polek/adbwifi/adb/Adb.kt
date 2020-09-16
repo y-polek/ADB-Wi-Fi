@@ -66,8 +66,8 @@ class Adb(
         "disconnect ${device.address}:5555".execAndLog(this)
     }
 
-    fun killServer() {
-        "kill-server".execSilently()
+    fun killServer(): Flow<LogEntry> = flow {
+        "kill-server".execAndLog(this)
     }
 
     private fun androidId(deviceId: String): String {
@@ -114,15 +114,6 @@ class Adb(
         } catch (e: IOException) {
             LOG.warn("Failed to execute command '$command': ${e.message}")
             emptySequence()
-        }
-    }
-
-    private fun String.execSilently() {
-        val command = adbCommand(this)
-        try {
-            commandExecutor.exec(command).joinToString()
-        } catch (e: IOException) {
-            LOG.warn("Failed to execute command '$command': ${e.message}")
         }
     }
 
