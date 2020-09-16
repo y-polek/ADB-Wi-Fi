@@ -294,7 +294,7 @@ class AdbWifiConfigurable : Configurable {
             foreground = JBColor.RED
         }
 
-        defaultAdbLocationButton.isVisible = true
+        defaultAdbLocationButton.isVisible = adbStatusLabel.isVisible
     }
 
     private fun showScrcpyVerificationErrorMessage() {
