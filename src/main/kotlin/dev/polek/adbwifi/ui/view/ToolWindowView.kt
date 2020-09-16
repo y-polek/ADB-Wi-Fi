@@ -18,4 +18,6 @@ interface ToolWindowView {
     fun closeLog()
 
     fun setLogEntries(entries: List<LogEntry>)
+
+    fun showScrcpyInvalidPathError()
 }

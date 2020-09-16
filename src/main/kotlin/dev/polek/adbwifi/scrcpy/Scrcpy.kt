@@ -10,11 +10,16 @@ class Scrcpy(
     private val commandExecutor: CommandExecutor,
     private val properties: PropertiesService
 ) {
-    private val scrcpyExe: String
+    private val exe: String
         get() = if (properties.useScrcpyFromPath) "scrcpy" else "${properties.scrcpyLocation}/scrcpy"
 
+    val isValid: Boolean
+        get() {
+            return commandExecutor.textExec("$exe --version")
+        }
+
     fun share(device: Device) {
-        val command = "$scrcpyExe -s ${device.id}"
+        val command = "$exe -s ${device.id}"
         try {
             commandExecutor.exec(command)
         } catch (e: IOException) {

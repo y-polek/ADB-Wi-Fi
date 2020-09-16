@@ -1,5 +1,8 @@
 package dev.polek.adbwifi.ui.view
 
+import com.intellij.notification.NotificationDisplayType
+import com.intellij.notification.NotificationGroup
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ActionPlaces
@@ -16,6 +19,7 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.components.BorderLayoutPanel
 import dev.polek.adbwifi.PluginBundle
+import dev.polek.adbwifi.actions.OpenSettingsNotificationAction
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.presenter.ToolWindowPresenter
@@ -31,7 +35,7 @@ import javax.swing.JComponent
 import javax.swing.SwingConstants
 
 class AdbWiFiToolWindow(
-    project: Project,
+    private val project: Project,
     private val toolWindow: ToolWindow
 ) : BorderLayoutPanel(), Disposable, ToolWindowView {
 
@@ -169,7 +173,23 @@ class AdbWiFiToolWindow(
         logPanel.setLogEntries(entries)
     }
 
+    override fun showScrcpyInvalidPathError() {
+        val notification = NOTIFICATION_GROUP.createNotification(
+            PluginBundle.message("name"),
+            null,
+            PluginBundle.message("scrcpyPathVerificationErrorMessage"),
+            NotificationType.ERROR
+        )
+        notification.addAction(OpenSettingsNotificationAction())
+        notification.notify(project)
+    }
+
     private companion object {
-        const val DEFAULT_PANEL_PROPORTION = 0.6f
+        private const val DEFAULT_PANEL_PROPORTION = 0.6f
+        private val NOTIFICATION_GROUP = NotificationGroup(
+            PluginBundle.message("name"),
+            NotificationDisplayType.BALLOON,
+            false
+        )
     }
 }

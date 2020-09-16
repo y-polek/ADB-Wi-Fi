@@ -70,7 +70,11 @@ class ToolWindowPresenter {
     }
 
     fun onShareScreenButtonClicked(device: DeviceViewModel) {
-        scrcpyService.share(device.device)
+        if (scrcpyService.isScrcpyValid()) {
+            scrcpyService.share(device.device)
+        } else {
+            view?.showScrcpyInvalidPathError()
+        }
     }
 
     fun onCopyDeviceIdClicked(device: DeviceViewModel) {

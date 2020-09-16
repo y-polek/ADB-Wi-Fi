@@ -12,4 +12,6 @@ class ScrcpyService {
     fun share(device: Device) {
         scrcpy.share(device)
     }
+
+    fun isScrcpyValid() = scrcpy.isValid
 }
