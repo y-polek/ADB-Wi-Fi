@@ -23,6 +23,8 @@ import java.io.File
 import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.JTextField
+import javax.swing.event.DocumentEvent
+import javax.swing.event.DocumentListener
 
 class AdbWifiConfigurable : Configurable {
 
@@ -102,13 +104,25 @@ class AdbWifiConfigurable : Configurable {
 
         adbLocationField = TextFieldWithBrowseButton()
         adbLocationField.text = properties.adbLocation
-        adbLocationField.isEditable = false
+        adbLocationField.textField.document.addDocumentListener(object : DocumentListener {
+            override fun insertUpdate(e: DocumentEvent) {
+                verifyAdbLocation()
+            }
+
+            override fun removeUpdate(e: DocumentEvent) {
+                verifyAdbLocation()
+            }
+
+            override fun changedUpdate(e: DocumentEvent) {
+                verifyAdbLocation()
+            }
+        })
         adbLocationField.addBrowseFolderListener(
             null,
             null,
             null,
             executableChooserDescriptor(),
-            ExecutablePathTextComponentAccessor(::verifyAdbLocation)
+            ExecutablePathTextComponentAccessor()
         )
         panel.add(
             adbLocationField,
@@ -137,7 +151,7 @@ class AdbWifiConfigurable : Configurable {
         defaultAdbLocationButton = HyperlinkLabel(PluginBundle.message("defaultAdbLocationButton"))
         defaultAdbLocationButton.addMouseListener(object : AbstractMouseListener() {
             override fun mouseClicked(e: MouseEvent) {
-                setAdbLocationText(properties.defaultAdbLocation)
+                adbLocationField.text = properties.defaultAdbLocation
             }
         })
         panel.add(
@@ -195,13 +209,25 @@ class AdbWifiConfigurable : Configurable {
 
         scrcpyLocationField = TextFieldWithBrowseButton()
         scrcpyLocationField.text = properties.scrcpyLocation
-        scrcpyLocationField.isEditable = false
+        scrcpyLocationField.textField.document.addDocumentListener(object : DocumentListener {
+            override fun insertUpdate(e: DocumentEvent) {
+                verifyScrcpyLocation()
+            }
+
+            override fun removeUpdate(e: DocumentEvent) {
+                verifyScrcpyLocation()
+            }
+
+            override fun changedUpdate(e: DocumentEvent) {
+                verifyScrcpyLocation()
+            }
+        })
         scrcpyLocationField.addBrowseFolderListener(
             null,
             null,
             null,
             executableChooserDescriptor(),
-            ExecutablePathTextComponentAccessor(::verifyScrcpyLocation)
+            ExecutablePathTextComponentAccessor()
         )
         panel.add(
             scrcpyLocationField,
@@ -248,20 +274,10 @@ class AdbWifiConfigurable : Configurable {
 
     override fun reset() {
         adbSystemPathCheckbox.isSelected = properties.useAdbFromPath
-        setAdbLocationText(properties.adbLocation)
+        adbLocationField.text = properties.adbLocation
 
         scrcpySystemPathCheckbox.isSelected = properties.useScrcpyFromPath
-        setScrcpyLocationText(properties.scrcpyLocation)
-    }
-
-    private fun setAdbLocationText(location: String) {
-        adbLocationField.text = location
-        verifyAdbLocation()
-    }
-
-    private fun setScrcpyLocationText(location: String) {
-        scrcpyLocationField.text = location
-        verifyScrcpyLocation()
+        scrcpyLocationField.text = properties.scrcpyLocation
     }
 
     private fun executableChooserDescriptor(): FileChooserDescriptor = when {
@@ -339,7 +355,7 @@ class AdbWifiConfigurable : Configurable {
     }
 
     private class ExecutablePathTextComponentAccessor(
-        val onTextChanged: () -> Unit
+        val onTextChanged: (() -> Unit)? = null
     ) : TextComponentAccessor<JTextField> {
 
         override fun getText(component: JTextField): String = component.text
@@ -349,7 +365,7 @@ class AdbWifiConfigurable : Configurable {
             val dirName = if (file.isFile) file.parent.orEmpty() else text
             component.text = dirName
 
-            onTextChanged.invoke()
+            onTextChanged?.invoke()
         }
     }
 
