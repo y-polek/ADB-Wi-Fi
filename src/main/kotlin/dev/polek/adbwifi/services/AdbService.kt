@@ -61,6 +61,10 @@ class AdbService : Disposable {
         }
     }
 
+    fun killServer() {
+        adb.killServer()
+    }
+
     override fun dispose() {
         stopPollingDevices()
     }

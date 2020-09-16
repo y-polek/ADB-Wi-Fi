@@ -66,6 +66,10 @@ class Adb(
         "disconnect ${device.address}:5555".execAndLog(this)
     }
 
+    fun killServer() {
+        "kill-server".execSilently()
+    }
+
     private fun androidId(deviceId: String): String {
         return "-s $deviceId shell settings get secure android_id".exec().firstLine()
     }
@@ -110,6 +114,15 @@ class Adb(
         } catch (e: IOException) {
             LOG.warn("Failed to execute command '$command': ${e.message}")
             emptySequence()
+        }
+    }
+
+    private fun String.execSilently() {
+        val command = adbCommand(this)
+        try {
+            commandExecutor.exec(command).joinToString()
+        } catch (e: IOException) {
+            LOG.warn("Failed to execute command '$command': ${e.message}")
         }
     }
 

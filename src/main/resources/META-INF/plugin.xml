@@ -27,9 +27,9 @@
     <actions>
         <action
             id="AdbWifi.Refresh"
-            class="dev.polek.adbwifi.actions.RefreshAction"
+            class="dev.polek.adbwifi.actions.RestartAdbAction"
             icon="AllIcons.Actions.Refresh"
-            text="Refresh" />
+            text="Restart ADB" />
         <action
             id="AdbWifi.ToggleLog"
             class="dev.polek.adbwifi.actions.ToggleLogAction"
