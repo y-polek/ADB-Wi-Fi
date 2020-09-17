@@ -42,7 +42,7 @@ class AdbWiFiToolWindow(
     private val presenter = ToolWindowPresenter()
 
     private val splitter = JBSplitter(true, "AdbWifi.ShellPaneProportion", DEFAULT_PANEL_PROPORTION)
-    private val deviceListPanel = DeviceListPanel(presenter)
+    private val deviceListPanel = DeviceListPanel(presenter, "Devices", true)
     private val logPanel = LogPanel()
     private val topPanel = JBScrollPane(deviceListPanel)
     private val bottomPanel: JComponent

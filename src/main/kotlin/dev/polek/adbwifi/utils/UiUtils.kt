@@ -2,6 +2,8 @@ package dev.polek.adbwifi.utils
 
 import com.intellij.ui.HyperlinkLabel
 import com.intellij.util.ui.components.BorderLayoutPanel
+import java.awt.Component
+import java.awt.Container
 import java.awt.Font
 import javax.swing.JComponent
 import javax.swing.JLabel
@@ -45,4 +47,12 @@ fun JLabel.setFontSize(size: Float) {
 fun HyperlinkLabel.setFontSize(size: Float) {
     val oldFont = this.font
     this.font = oldFont.deriveFont(size)
+}
+
+inline fun Container.removeIf(shouldRemove: (child: Component) -> Boolean) {
+    for (child in this.components) {
+        if (shouldRemove(child)) {
+            this.remove(child)
+        }
+    }
 }
