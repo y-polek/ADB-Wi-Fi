@@ -11,13 +11,11 @@ interface ToolWindowView {
 
     fun showInvalidAdbLocationError()
 
-    fun showConfigurationError()
+    fun showInvalidScrcpyLocationError()
 
     fun openLog()
 
     fun closeLog()
 
     fun setLogEntries(entries: List<LogEntry>)
-
-    fun showScrcpyInvalidPathError()
 }

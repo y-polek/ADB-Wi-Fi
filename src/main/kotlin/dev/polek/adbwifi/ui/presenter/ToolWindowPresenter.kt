@@ -73,7 +73,7 @@ class ToolWindowPresenter {
         if (scrcpyService.isScrcpyValid()) {
             scrcpyService.share(device.device)
         } else {
-            view?.showScrcpyInvalidPathError()
+            view?.showInvalidScrcpyLocationError()
         }
     }
 

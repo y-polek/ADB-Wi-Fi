@@ -42,7 +42,8 @@ class AdbWiFiToolWindow(
     private val presenter = ToolWindowPresenter()
 
     private val splitter = JBSplitter(true, "AdbWifi.ShellPaneProportion", DEFAULT_PANEL_PROPORTION)
-    private val deviceListPanel = DeviceListPanel(presenter, "Devices", true)
+    private val deviceListPanel = DeviceListPanel(presenter)
+    private val pinnedDeviceListPanel = DeviceListPanel(presenter, showHeader = true, title = "Pinned")
     private val logPanel = LogPanel()
     private val topPanel = JBScrollPane(deviceListPanel)
     private val bottomPanel: JComponent
@@ -157,10 +158,6 @@ class AdbWiFiToolWindow(
         splitter.firstComponent = errorMessagePanel
     }
 
-    override fun showConfigurationError() {
-        TODO("Not yet implemented")
-    }
-
     override fun openLog() {
         splitter.secondComponent = bottomPanel
     }
@@ -173,7 +170,7 @@ class AdbWiFiToolWindow(
         logPanel.setLogEntries(entries)
     }
 
-    override fun showScrcpyInvalidPathError() {
+    override fun showInvalidScrcpyLocationError() {
         val notification = NOTIFICATION_GROUP.createNotification(
             PluginBundle.message("name"),
             null,
