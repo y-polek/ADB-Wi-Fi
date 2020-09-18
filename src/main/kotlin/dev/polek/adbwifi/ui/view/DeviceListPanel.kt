@@ -7,11 +7,13 @@ import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.panels.OpaquePanel
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.presenter.ToolWindowPresenter
+import dev.polek.adbwifi.utils.AbstractMouseListener
 import dev.polek.adbwifi.utils.removeIf
 import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Insets
+import java.awt.event.MouseEvent
 import javax.swing.BoxLayout
 
 class DeviceListPanel(
@@ -25,6 +27,8 @@ class DeviceListPanel(
             field = value
             rebuildUi()
         }
+
+    private lateinit var headerIcon: JBLabel
 
     private val devicePanelListener = object : DevicePanel.Listener {
 
@@ -77,7 +81,7 @@ class DeviceListPanel(
             }
         )
 
-        val headerIcon = JBLabel(AllIcons.General.ArrowUp)
+        headerIcon = JBLabel(AllIcons.General.ArrowUp)
         header.add(
             headerIcon,
             GridBagConstraints().apply {
@@ -92,10 +96,20 @@ class DeviceListPanel(
         header.preferredSize = Dimension(0, HEADER_HEIGHT)
         header.background = HEADER_BACKGROUND_COLOR
         add(header)
+
+        header.addMouseListener(object : AbstractMouseListener() {
+            override fun mouseClicked(e: MouseEvent) {
+                isExpanded = !isExpanded
+                rebuildUi()
+            }
+        })
     }
 
     private fun rebuildUi() {
+        headerIcon.icon = if (isExpanded) ICON_EXPANDED else ICON_COLLAPSED
+
         removeIf { child -> child is DevicePanel }
+
         if (isExpanded) {
             for (device in devices) {
                 val devicePanel = DevicePanel(device)
@@ -114,5 +128,7 @@ class DeviceListPanel(
             JBColor(0xF5F9FF, 0x36393B)
         )
         private val HEADER_FOREGROUND_COLOR = JBColor(0x787878, 0xBBBBBB)
+        private val ICON_EXPANDED = AllIcons.General.ArrowUp
+        private val ICON_COLLAPSED = AllIcons.General.ArrowDown
     }
 }
