@@ -20,3 +20,8 @@ style:
     excludeImports: ['java.util.*', 'kotlinx.coroutines.*', 'dev.polek.adbwifi.utils.*']
   ReturnCount:
     active: false
+  LoopWithTooManyJumpStatements:
+    active: false
+performance:
+  SpreadOperator:
+    active: false
