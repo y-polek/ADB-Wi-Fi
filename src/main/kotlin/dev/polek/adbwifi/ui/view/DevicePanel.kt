@@ -20,6 +20,7 @@ import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Insets
 import java.awt.event.MouseEvent
+import javax.swing.JComponent
 import javax.swing.JProgressBar
 import javax.swing.SwingConstants
 
@@ -143,23 +144,26 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             )
         }
 
-        val pinButton = IconButton(ICON_PIN, PluginBundle.message("pinDeviceTooltip"))
-        pinButton.onClickedListener = {
-            listener?.onPinButtonClicked(device)
-        }
+        val actionButtons = arrayListOf<JComponent>()
 
-        val shareScreenButton = IconButton(ICON_SHARE_SCREEN, PluginBundle.message("shareScreenTooltip"))
-        shareScreenButton.onClickedListener = {
-            listener?.onShareScreenClicked(device)
-            shareScreenButton.showProgressFor(2000)
+        if (device.isShareScreenButtonVisible) {
+            val shareScreenButton = IconButton(ICON_SHARE_SCREEN, PluginBundle.message("shareScreenTooltip"))
+            shareScreenButton.onClickedListener = {
+                listener?.onShareScreenClicked(device)
+                shareScreenButton.showProgressFor(2000)
+            }
+            shareScreenButton.addMouseListener(hoverListener)
+            actionButtons.add(shareScreenButton)
         }
 
         val menuButton = IconButton(ICON_MENU)
         menuButton.onClickedListener = { event ->
             openDeviceMenu(device, event)
         }
+        menuButton.addMouseListener(hoverListener)
+        actionButtons.add(menuButton)
 
-        val actionsPanel = flowPanel(/*pinButton, */shareScreenButton, menuButton, hgap = 10)
+        val actionsPanel = flowPanel(*actionButtons.toTypedArray(), menuButton, hgap = 10)
         actionsPanel.isOpaque = false
         add(
             actionsPanel,
@@ -175,8 +179,6 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
 
         addMouseListener(hoverListener)
         actionsPanel.addMouseListener(hoverListener)
-        pinButton.addMouseListener(hoverListener)
-        menuButton.addMouseListener(hoverListener)
     }
 
     private fun openDeviceMenu(device: DeviceViewModel, event: MouseEvent) {
@@ -215,7 +217,6 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             JBColor(0xF5F9FF, 0x36393B)
         )
         private val ICON_MENU = IconLoader.getIcon("/icons/menuIcon.svg")
-        private val ICON_PIN = IconLoader.getIcon("/icons/pinIcon.svg")
         private val ICON_SHARE_SCREEN = IconLoader.getIcon("/icons/shareScreen.svg")
         private val ICON_NO_WIFI = IconLoader.getIcon("/icons/noWifi.svg")
     }
