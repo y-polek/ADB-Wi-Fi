@@ -171,7 +171,9 @@ class ToolWindowPresenter {
     private fun List<PinnedDevice>.toViewModel(): List<DeviceViewModel> {
         return this.asSequence()
             .filter { pinnedDevice ->
-                devices.find { device -> device.androidId == pinnedDevice.androidId } == null
+                devices.find { device ->
+                    device.androidId == pinnedDevice.androidId && device.address == pinnedDevice.address
+                } == null
             }
             .sortedBy { it.name }
             .map { it.toViewModel() }

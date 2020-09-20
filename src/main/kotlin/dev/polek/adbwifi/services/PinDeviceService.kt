@@ -41,7 +41,9 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
     private companion object {
 
         private fun List<PinnedDevice>.contains(device: Device): Boolean {
-            return this.find { it.androidId == device.androidId } != null
+            return this.find {
+                it.androidId == device.androidId && it.address == device.address
+            } != null
         }
 
         private fun List<PinnedDevice>.add(device: Device): List<PinnedDevice> {
@@ -56,7 +58,9 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
         }
 
         private fun List<PinnedDevice>.remove(device: Device): List<PinnedDevice> {
-            return this.filter { it.androidId != device.androidId }
+            return this.filter {
+                it.androidId != device.androidId && it.address == device.address
+            }
         }
     }
 }
