@@ -3,10 +3,8 @@ package dev.polek.adbwifi.ui.presenter
 import com.intellij.openapi.components.service
 import dev.polek.adbwifi.model.CommandHistory
 import dev.polek.adbwifi.model.LogEntry
-import dev.polek.adbwifi.services.AdbService
-import dev.polek.adbwifi.services.LogService
-import dev.polek.adbwifi.services.PropertiesService
-import dev.polek.adbwifi.services.ScrcpyService
+import dev.polek.adbwifi.services.*
+import dev.polek.adbwifi.services.PinDeviceService.Companion.contains
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.Companion.toViewModel
 import dev.polek.adbwifi.ui.view.ToolWindowView
@@ -19,6 +17,7 @@ class ToolWindowPresenter {
     private val scrcpyService by lazy { service<ScrcpyService>() }
     private val logService by lazy { service<LogService>() }
     private val propertiesService by lazy { service<PropertiesService>() }
+    private val pinDeviceService by lazy { service<PinDeviceService>() }
 
     private var isViewOpen: Boolean = false
     private var isAdbValid: Boolean = true
@@ -95,10 +94,17 @@ class ToolWindowPresenter {
             val oldDevices = devices
             devices = model.map { it.toViewModel() }
             if (!oldDevices.contentDeepEquals(devices)) {
-                if (devices.isEmpty()) {
+                val pinnedDevices = pinDeviceService.pinnedDevices
+                    .asSequence()
+                    .filter { !model.contains(it) }
+                    .map { it.toViewModel() }
+                    .toList()
+
+                if (devices.isEmpty() && pinnedDevices.isEmpty()) {
                     view?.showEmptyMessage()
                 } else {
                     view?.showDevices(devices)
+                    view?.showPinnedDevices(pinnedDevices)
                 }
             }
         }

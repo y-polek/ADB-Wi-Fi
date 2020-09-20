@@ -14,6 +14,6 @@ data class Device(
     val isWifiDevice = connectionType == ConnectionType.WIFI
 
     enum class ConnectionType {
-        USB, WIFI
+        USB, WIFI, NONE
     }
 }

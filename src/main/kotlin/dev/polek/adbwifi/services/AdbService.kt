@@ -28,6 +28,7 @@ class AdbService : Disposable {
     private val adb = Adb(RuntimeCommandExecutor(), service())
     private var devicePollingJob: Job? = null
     private val logService by lazy { service<LogService>() }
+    private val pinDeviceService by lazy { service<PinDeviceService>() }
 
     fun connect(device: Device) {
         stopPollingDevices()
@@ -75,6 +76,7 @@ class AdbService : Disposable {
             devicesFlow()
                 .flowOn(ADB_DISPATCHER)
                 .collect { devices ->
+                    pinDeviceService.addPreviouslyConnectedDevices(devices)
                     deviceListListener?.invoke(devices)
                 }
         }

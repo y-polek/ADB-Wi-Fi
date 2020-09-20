@@ -7,6 +7,8 @@ interface ToolWindowView {
 
     fun showDevices(devices: List<DeviceViewModel>)
 
+    fun showPinnedDevices(devices: List<DeviceViewModel>)
+
     fun showEmptyMessage()
 
     fun showInvalidAdbLocationError()

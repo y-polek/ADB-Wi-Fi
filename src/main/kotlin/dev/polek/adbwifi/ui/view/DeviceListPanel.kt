@@ -18,8 +18,8 @@ import javax.swing.BoxLayout
 
 class DeviceListPanel(
     presenter: ToolWindowPresenter,
-    private val title: String,
-    private var isExpanded: Boolean
+    showHeader: Boolean = false,
+    private val title: String? = null
 ) : JBPanel<DeviceListPanel>() {
 
     var devices: List<DeviceViewModel> = emptyList()
@@ -28,7 +28,13 @@ class DeviceListPanel(
             rebuildUi()
         }
 
-    private lateinit var headerIcon: JBLabel
+    private var isExpanded: Boolean = true
+        set(value) {
+            field = value
+            rebuildUi()
+        }
+
+    private var headerIcon: JBLabel? = null
 
     private val devicePanelListener = object : DevicePanel.Listener {
 
@@ -61,14 +67,16 @@ class DeviceListPanel(
         layout = BoxLayout(this, BoxLayout.PAGE_AXIS)
         background = JBColor.background()
 
-        buildHeader()
+        if (showHeader) {
+            buildHeader()
+        }
         rebuildUi()
     }
 
     private fun buildHeader() {
         val header = OpaquePanel(GridBagLayout())
 
-        val headerLabel = JBLabel(title)
+        val headerLabel = JBLabel(title.orEmpty())
         headerLabel.foreground = HEADER_FOREGROUND_COLOR
         header.add(
             headerLabel,
@@ -83,7 +91,7 @@ class DeviceListPanel(
 
         headerIcon = JBLabel(AllIcons.General.ArrowUp)
         header.add(
-            headerIcon,
+            headerIcon!!,
             GridBagConstraints().apply {
                 gridx = 1
                 gridy = 0
@@ -100,13 +108,12 @@ class DeviceListPanel(
         header.addMouseListener(object : AbstractMouseListener() {
             override fun mouseClicked(e: MouseEvent) {
                 isExpanded = !isExpanded
-                rebuildUi()
             }
         })
     }
 
     private fun rebuildUi() {
-        headerIcon.icon = if (isExpanded) ICON_EXPANDED else ICON_COLLAPSED
+        headerIcon?.icon = if (isExpanded) ICON_EXPANDED else ICON_COLLAPSED
 
         removeIf { child -> child is DevicePanel }
 

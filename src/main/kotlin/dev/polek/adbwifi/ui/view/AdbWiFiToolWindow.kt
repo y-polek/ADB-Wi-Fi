@@ -30,9 +30,7 @@ import dev.polek.adbwifi.utils.setFontSize
 import java.awt.GridBagConstraints
 import java.awt.Insets
 import java.awt.event.MouseEvent
-import javax.swing.BorderFactory
-import javax.swing.JComponent
-import javax.swing.SwingConstants
+import javax.swing.*
 
 class AdbWiFiToolWindow(
     private val project: Project,
@@ -45,7 +43,13 @@ class AdbWiFiToolWindow(
     private val deviceListPanel = DeviceListPanel(presenter)
     private val pinnedDeviceListPanel = DeviceListPanel(presenter, showHeader = true, title = "Pinned")
     private val logPanel = LogPanel()
-    private val topPanel = JBScrollPane(deviceListPanel)
+    private val topPanel = JBScrollPane().apply {
+        val panel = JPanel()
+        panel.layout = BoxLayout(panel, BoxLayout.PAGE_AXIS)
+        panel.add(deviceListPanel)
+        panel.add(pinnedDeviceListPanel)
+        this.setViewportView(panel)
+    }
     private val bottomPanel: JComponent
     private val emptyMessageLabel = JBLabel().apply {
         text = PluginBundle.message("deviceListEmptyMessage")
@@ -148,6 +152,10 @@ class AdbWiFiToolWindow(
     override fun showDevices(devices: List<DeviceViewModel>) {
         splitter.firstComponent = topPanel
         deviceListPanel.devices = devices
+    }
+
+    override fun showPinnedDevices(devices: List<DeviceViewModel>) {
+        pinnedDeviceListPanel.devices = devices
     }
 
     override fun showEmptyMessage() {

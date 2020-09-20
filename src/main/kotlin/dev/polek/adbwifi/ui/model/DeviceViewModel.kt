@@ -2,7 +2,8 @@ package dev.polek.adbwifi.ui.model
 
 import com.intellij.openapi.util.IconLoader
 import dev.polek.adbwifi.model.Device
-import dev.polek.adbwifi.model.Device.ConnectionType
+import dev.polek.adbwifi.model.Device.ConnectionType.*
+import dev.polek.adbwifi.model.PinnedDevice
 import javax.swing.Icon
 
 data class DeviceViewModel(
@@ -27,35 +28,67 @@ data class DeviceViewModel(
 
     companion object {
         private val ICON_USB = IconLoader.getIcon("/icons/usbIcon.svg")
+        private val ICON_NO_USB = IconLoader.getIcon("/icons/noUsbIcon.svg")
         private val ICON_WIFI = IconLoader.getIcon("/icons/wifiIcon.svg")
 
         fun Device.toViewModel(): DeviceViewModel {
             val device = this
-            val subtitleText = buildString {
-                append("Android ${device.androidVersion} (API ${device.apiLevel}) -")
-                if (device.address != null) {
-                    append(" ${device.address}")
-                }
+            return DeviceViewModel(
+                device = device,
+                titleText = device.name,
+                subtitleText = device.subtitleText(),
+                icon = device.icon(),
+                hasAddress = device.hasAddress(),
+                buttonType = device.buttonType(),
+                isPinned = false
+            )
+        }
+
+        fun PinnedDevice.toViewModel(): DeviceViewModel {
+            val device = Device(
+                id = this.id,
+                androidId = this.androidId,
+                name = this.name,
+                address = this.address,
+                androidVersion = this.androidVersion,
+                apiLevel = this.apiLevel,
+                connectionType = NONE
+            )
+            return DeviceViewModel(
+                device = device,
+                titleText = device.name,
+                subtitleText = device.subtitleText(),
+                icon = device.icon(),
+                hasAddress = device.hasAddress(),
+                buttonType = device.buttonType(),
+                isPinned = false
+            )
+        }
+
+        private fun Device.subtitleText() = buildString {
+            val device = this@subtitleText
+            append("Android ${device.androidVersion} (API ${device.apiLevel}) -")
+            if (device.address != null) {
+                append(" ${device.address}")
             }
-            val icon = when (device.connectionType) {
-                ConnectionType.USB -> ICON_USB
-                ConnectionType.WIFI -> ICON_WIFI
-            }
-            val buttonType = when {
+        }
+
+        private fun Device.icon() = when (connectionType) {
+            USB -> ICON_USB
+            WIFI -> ICON_WIFI
+            NONE -> ICON_NO_USB
+        }
+
+        private fun Device.hasAddress() = this.address != null
+
+        private fun Device.buttonType(): ButtonType {
+            val device = this
+            return when {
                 device.isWifiDevice -> ButtonType.DISCONNECT
                 device.address.isNullOrBlank() -> ButtonType.CONNECT_DISABLED
                 device.isUsbDevice && device.isConnected -> ButtonType.CONNECT_DISABLED
                 else -> ButtonType.CONNECT
             }
-            return DeviceViewModel(
-                device = device,
-                titleText = device.name,
-                subtitleText = subtitleText,
-                icon = icon,
-                hasAddress = device.address != null,
-                buttonType = buttonType,
-                isPinned = false
-            )
         }
     }
 }
