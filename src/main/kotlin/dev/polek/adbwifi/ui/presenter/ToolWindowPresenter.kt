@@ -22,6 +22,7 @@ class ToolWindowPresenter {
     private var isViewOpen: Boolean = false
     private var isAdbValid: Boolean = true
     private var devices: List<DeviceViewModel> = emptyList()
+    private var pinnedDevices: List<DeviceViewModel> = pinDeviceService.pinnedDevices.map { it.toViewModel() }
 
     fun attach(view: ToolWindowView) {
         this.view = view
@@ -52,14 +53,16 @@ class ToolWindowPresenter {
 
     fun onConnectButtonClicked(device: DeviceViewModel) {
         devices.findById(device.id)?.isInProgress = true
-        view?.showDevices(devices)
+        pinnedDevices.findById(device.id)?.isInProgress = true
+        view?.showDevices(devices, pinnedDevices)
 
         adbService.connect(device.device)
     }
 
     fun onDisconnectButtonClicked(device: DeviceViewModel) {
         devices.findById(device.id)?.isInProgress = true
-        view?.showDevices(devices)
+        pinnedDevices.findById(device.id)?.isInProgress = true
+        view?.showDevices(devices, pinnedDevices)
 
         adbService.disconnect(device.device)
     }
@@ -94,7 +97,7 @@ class ToolWindowPresenter {
             val oldDevices = devices
             devices = model.map { it.toViewModel() }
             if (!oldDevices.contentDeepEquals(devices)) {
-                val pinnedDevices = pinDeviceService.pinnedDevices
+                pinnedDevices = pinDeviceService.pinnedDevices
                     .asSequence()
                     .filter { !model.contains(it) }
                     .map { it.toViewModel() }
@@ -103,8 +106,7 @@ class ToolWindowPresenter {
                 if (devices.isEmpty() && pinnedDevices.isEmpty()) {
                     view?.showEmptyMessage()
                 } else {
-                    view?.showDevices(devices)
-                    view?.showPinnedDevices(pinnedDevices)
+                    view?.showDevices(devices, pinnedDevices)
                 }
             }
         }
@@ -148,10 +150,10 @@ class ToolWindowPresenter {
                 devices = emptyList()
                 view?.showInvalidAdbLocationError()
             } else {
-                if (devices.isEmpty()) {
+                if (devices.isEmpty() && pinnedDevices.isEmpty()) {
                     view?.showEmptyMessage()
                 } else {
-                    view?.showDevices(devices)
+                    view?.showDevices(devices, pinnedDevices)
                 }
                 if (isViewOpen) {
                     subscribeToDeviceList()

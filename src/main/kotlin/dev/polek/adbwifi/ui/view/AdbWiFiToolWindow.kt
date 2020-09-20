@@ -149,13 +149,10 @@ class AdbWiFiToolWindow(
         presenter.detach()
     }
 
-    override fun showDevices(devices: List<DeviceViewModel>) {
+    override fun showDevices(devices: List<DeviceViewModel>, pinnedDevices: List<DeviceViewModel>) {
         splitter.firstComponent = topPanel
         deviceListPanel.devices = devices
-    }
-
-    override fun showPinnedDevices(devices: List<DeviceViewModel>) {
-        pinnedDeviceListPanel.devices = devices
+        pinnedDeviceListPanel.devices = pinnedDevices
     }
 
     override fun showEmptyMessage() {

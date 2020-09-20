@@ -13,14 +13,10 @@ data class DeviceViewModel(
     val icon: Icon,
     val hasAddress: Boolean,
     val buttonType: ButtonType,
-    val isPinned: Boolean,
     var isInProgress: Boolean = false
 ) {
     val id: String
         get() = device.id
-
-    val androidId: String
-        get() = device.androidId
 
     enum class ButtonType {
         CONNECT, CONNECT_DISABLED, DISCONNECT
@@ -39,8 +35,7 @@ data class DeviceViewModel(
                 subtitleText = device.subtitleText(),
                 icon = device.icon(),
                 hasAddress = device.hasAddress(),
-                buttonType = device.buttonType(),
-                isPinned = false
+                buttonType = device.buttonType()
             )
         }
 
@@ -60,8 +55,7 @@ data class DeviceViewModel(
                 subtitleText = device.subtitleText(),
                 icon = device.icon(),
                 hasAddress = device.hasAddress(),
-                buttonType = device.buttonType(),
-                isPinned = false
+                buttonType = device.buttonType()
             )
         }
 
