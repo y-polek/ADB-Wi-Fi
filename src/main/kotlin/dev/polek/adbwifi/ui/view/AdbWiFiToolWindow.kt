@@ -7,6 +7,7 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ActionPlaces
 import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.components.service
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader
@@ -21,6 +22,7 @@ import com.intellij.util.ui.components.BorderLayoutPanel
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.actions.OpenSettingsNotificationAction
 import dev.polek.adbwifi.model.LogEntry
+import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.presenter.ToolWindowPresenter
 import dev.polek.adbwifi.utils.AbstractMouseListener
@@ -38,13 +40,45 @@ class AdbWiFiToolWindow(
 ) : BorderLayoutPanel(), Disposable, ToolWindowView {
 
     private val presenter = ToolWindowPresenter()
+    private val propertiesService = service<PropertiesService>()
+
+    private val devicePanelListener = object : DevicePanel.Listener {
+
+        override fun onConnectButtonClicked(device: DeviceViewModel) {
+            presenter.onConnectButtonClicked(device)
+        }
+
+        override fun onDisconnectButtonClicked(device: DeviceViewModel) {
+            presenter.onDisconnectButtonClicked(device)
+        }
+
+        override fun onShareScreenClicked(device: DeviceViewModel) {
+            presenter.onShareScreenButtonClicked(device)
+        }
+
+        override fun onRemoveDeviceClicked(device: DeviceViewModel) {
+            presenter.onRemoveDeviceButtonClicked(device)
+        }
+
+        override fun onCopyDeviceIdClicked(device: DeviceViewModel) {
+            presenter.onCopyDeviceIdClicked(device)
+        }
+
+        override fun onCopyDeviceAddressClicked(device: DeviceViewModel) {
+            presenter.onCopyDeviceAddressClicked(device)
+        }
+    }
 
     private val splitter = JBSplitter(true, "AdbWifi.ShellPaneProportion", DEFAULT_PANEL_PROPORTION)
-    private val deviceListPanel = DeviceListPanel(presenter)
+    private val deviceListPanel = DeviceListPanel(devicePanelListener)
     private val pinnedDeviceListPanel = DeviceListPanel(
-        presenter,
+        devicePanelListener,
         showHeader = true,
-        title = PluginBundle.message("previouslyConnectedTitle")
+        title = PluginBundle.message("previouslyConnectedTitle"),
+        isHeaderExpanded = propertiesService.isPreviouslyConnectedDevicesExpanded,
+        onHeaderExpandChanged = { isExpanded ->
+            propertiesService.isPreviouslyConnectedDevicesExpanded = isExpanded
+        }
     )
     private val logPanel = LogPanel()
     private val topPanel = JBScrollPane().apply {

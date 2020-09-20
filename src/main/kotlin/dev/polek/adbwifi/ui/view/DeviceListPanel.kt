@@ -6,7 +6,6 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.panels.OpaquePanel
 import dev.polek.adbwifi.ui.model.DeviceViewModel
-import dev.polek.adbwifi.ui.presenter.ToolWindowPresenter
 import dev.polek.adbwifi.utils.AbstractMouseListener
 import dev.polek.adbwifi.utils.removeIf
 import java.awt.Dimension
@@ -19,9 +18,11 @@ import javax.swing.BoxLayout
 import javax.swing.JPanel
 
 class DeviceListPanel(
-    presenter: ToolWindowPresenter,
+    private val devicePanelListener: DevicePanel.Listener,
     showHeader: Boolean = false,
-    private val title: String? = null
+    private val title: String? = null,
+    isHeaderExpanded: Boolean = true,
+    private val onHeaderExpandChanged: ((isExpanded: Boolean) -> Unit)? = null
 ) : JBPanel<DeviceListPanel>() {
 
     var devices: List<DeviceViewModel> = emptyList()
@@ -30,42 +31,16 @@ class DeviceListPanel(
             rebuildUi()
         }
 
-    private var isExpanded: Boolean = true
+    private var isExpanded: Boolean = isHeaderExpanded
         set(value) {
             field = value
             rebuildUi()
+            onHeaderExpandChanged?.invoke(value)
         }
 
     private var header: JPanel? = null
     private var headerLabel: JBLabel? = null
     private var headerIcon: JBLabel? = null
-
-    private val devicePanelListener = object : DevicePanel.Listener {
-
-        override fun onConnectButtonClicked(device: DeviceViewModel) {
-            presenter.onConnectButtonClicked(device)
-        }
-
-        override fun onDisconnectButtonClicked(device: DeviceViewModel) {
-            presenter.onDisconnectButtonClicked(device)
-        }
-
-        override fun onShareScreenClicked(device: DeviceViewModel) {
-            presenter.onShareScreenButtonClicked(device)
-        }
-
-        override fun onRemoveDeviceClicked(device: DeviceViewModel) {
-            presenter.onRemoveDeviceButtonClicked(device)
-        }
-
-        override fun onCopyDeviceIdClicked(device: DeviceViewModel) {
-            presenter.onCopyDeviceIdClicked(device)
-        }
-
-        override fun onCopyDeviceAddressClicked(device: DeviceViewModel) {
-            presenter.onCopyDeviceAddressClicked(device)
-        }
-    }
 
     init {
         layout = BoxLayout(this, BoxLayout.PAGE_AXIS)

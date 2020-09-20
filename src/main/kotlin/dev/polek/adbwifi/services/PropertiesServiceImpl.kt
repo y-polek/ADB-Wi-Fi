@@ -16,6 +16,12 @@ class PropertiesServiceImpl : PropertiesService {
             properties.setValue(IS_LOG_VISIBLE_PROPERTY, value)
         }
 
+    override var isPreviouslyConnectedDevicesExpanded: Boolean
+        get() = properties.getBoolean(IS_PREVIOUSLY_CONNECTED_DEVICES_EXPANDED, true)
+        set(value) {
+            properties.setValue(IS_PREVIOUSLY_CONNECTED_DEVICES_EXPANDED, value, true)
+        }
+
     override var useAdbFromPath: Boolean
         get() = properties.getBoolean(ADB_FROM_SYSTEM_PATH, false)
         set(value) {
@@ -70,6 +76,9 @@ class PropertiesServiceImpl : PropertiesService {
 
     private companion object {
         private const val IS_LOG_VISIBLE_PROPERTY = "dev.polek.adbwifi.IS_LOG_VISIBLE_PROPERTY"
+
+        private const val IS_PREVIOUSLY_CONNECTED_DEVICES_EXPANDED =
+            "dev.polek.adbwifi.IS_PREVIOUSLY_CONNECTED_DEVICES_EXPANDED"
 
         private const val ADB_FROM_SYSTEM_PATH = "dev.polek.adbwifi.ADB_FROM_SYSTEM_PATH"
         private const val ADB_LOCATION_PROPERTY = "dev.polek.adbwifi.ADB_LOCATION_PROPERTY"
