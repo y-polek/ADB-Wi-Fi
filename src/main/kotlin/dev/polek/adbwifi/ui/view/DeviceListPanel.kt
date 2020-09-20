@@ -14,7 +14,9 @@ import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Insets
 import java.awt.event.MouseEvent
+import javax.swing.BorderFactory
 import javax.swing.BoxLayout
+import javax.swing.JPanel
 
 class DeviceListPanel(
     presenter: ToolWindowPresenter,
@@ -34,6 +36,7 @@ class DeviceListPanel(
             rebuildUi()
         }
 
+    private var header: JPanel? = null
     private var headerLabel: JBLabel? = null
     private var headerIcon: JBLabel? = null
 
@@ -76,6 +79,7 @@ class DeviceListPanel(
 
     private fun buildHeader() {
         val header = OpaquePanel(GridBagLayout())
+        this.header = header
 
         headerLabel = JBLabel().apply {
             foreground = HEADER_FOREGROUND_COLOR
@@ -115,6 +119,7 @@ class DeviceListPanel(
     }
 
     private fun rebuildUi() {
+        header?.border = if (isExpanded) HEADER_BORDER_EXPANDED else HEADER_BORDER_COLLAPSED
         headerLabel?.text = "$title (${devices.size})"
         headerIcon?.icon = if (isExpanded) ICON_EXPANDED else ICON_COLLAPSED
 
@@ -138,6 +143,10 @@ class DeviceListPanel(
             JBColor(0xF5F9FF, 0x36393B)
         )
         private val HEADER_FOREGROUND_COLOR = JBColor(0x787878, 0xBBBBBB)
+
+        private val HEADER_BORDER_EXPANDED = BorderFactory.createMatteBorder(1, 0, 0, 0, JBColor.border())
+        private val HEADER_BORDER_COLLAPSED = BorderFactory.createMatteBorder(1, 0, 1, 0, JBColor.border())
+
         private val ICON_EXPANDED = AllIcons.General.ArrowUp
         private val ICON_COLLAPSED = AllIcons.General.ArrowDown
     }
