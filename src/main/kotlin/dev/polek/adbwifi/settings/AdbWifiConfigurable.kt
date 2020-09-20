@@ -1,5 +1,6 @@
 package dev.polek.adbwifi.settings
 
+import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
@@ -8,6 +9,7 @@ import com.intellij.openapi.ui.TextComponentAccessor
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.util.SystemInfo
+import com.intellij.ui.ContextHelpLabel
 import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.JBColor
 import com.intellij.ui.TitledSeparator
@@ -61,9 +63,9 @@ class AdbWifiConfigurable : Configurable {
     }
 
     private fun createAdbSettings(panel: JPanel) {
-        val adbSeparator = TitledSeparator(PluginBundle.message("adbSettingsTitle"))
+        val separator = TitledSeparator(PluginBundle.message("adbSettingsTitle"))
         panel.add(
-            adbSeparator,
+            separator,
             GridBagConstraints().apply {
                 gridx = 0
                 gridy = 0
@@ -166,9 +168,32 @@ class AdbWifiConfigurable : Configurable {
     }
 
     private fun createScrcpySettings(panel: JPanel) {
-        val scrcpySeparator = TitledSeparator(PluginBundle.message("scrcpySettingsTitle"))
+        val helpButton = ContextHelpLabel.createWithLink(
+            PluginBundle.message("scrcpyHelpTitle"),
+            PluginBundle.message("scrcpyHelpDescription"),
+            PluginBundle.message("scrcpyHelpLinkText")
+        ) {
+            BrowserUtil.browse(installScrcpyUrl)
+        }
+        val header = GridBagLayoutPanel().apply {
+            add(JBLabel(PluginBundle.message("scrcpySettingsTitle")), GridBagConstraints())
+            add(
+                helpButton,
+                GridBagConstraints().apply {
+                    insets = Insets(0, 5, 0, 0)
+                }
+            )
+            add(
+                TitledSeparator(),
+                GridBagConstraints().apply {
+                    fill = GridBagConstraints.HORIZONTAL
+                    weightx = 1.0
+                }
+            )
+        }
+
         panel.add(
-            scrcpySeparator,
+            header,
             GridBagConstraints().apply {
                 gridx = 0
                 gridy = 4
@@ -377,5 +402,14 @@ class AdbWifiConfigurable : Configurable {
         private val VERIFIED_MESSAGE = PluginBundle.message("adbPathVerifiedMessage")
         private val ADB_VERIFICATION_ERROR_MESSAGE = PluginBundle.message("adbPathVerificationErrorMessage")
         private val SCRCPY_VERIFICATION_ERROR_MESSAGE = PluginBundle.message("scrcpyPathVerificationErrorMessage")
+
+        private val installScrcpyUrl: String by lazy {
+            when {
+                SystemInfo.isLinux -> "https://github.com/Genymobile/scrcpy#linux"
+                SystemInfo.isWindows -> "https://github.com/Genymobile/scrcpy#windows"
+                SystemInfo.isMac -> "https://github.com/Genymobile/scrcpy#macos"
+                else -> "https://github.com/Genymobile/scrcpy"
+            }
+        }
     }
 }
