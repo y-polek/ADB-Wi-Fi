@@ -34,6 +34,7 @@ class DeviceListPanel(
             rebuildUi()
         }
 
+    private var headerLabel: JBLabel? = null
     private var headerIcon: JBLabel? = null
 
     private val devicePanelListener = object : DevicePanel.Listener {
@@ -76,10 +77,11 @@ class DeviceListPanel(
     private fun buildHeader() {
         val header = OpaquePanel(GridBagLayout())
 
-        val headerLabel = JBLabel(title.orEmpty())
-        headerLabel.foreground = HEADER_FOREGROUND_COLOR
+        headerLabel = JBLabel().apply {
+            foreground = HEADER_FOREGROUND_COLOR
+        }
         header.add(
-            headerLabel,
+            headerLabel!!,
             GridBagConstraints().apply {
                 gridx = 0
                 gridy = 0
@@ -113,6 +115,7 @@ class DeviceListPanel(
     }
 
     private fun rebuildUi() {
+        headerLabel?.text = "$title (${devices.size})"
         headerIcon?.icon = if (isExpanded) ICON_EXPANDED else ICON_COLLAPSED
 
         removeIf { child -> child is DevicePanel }
