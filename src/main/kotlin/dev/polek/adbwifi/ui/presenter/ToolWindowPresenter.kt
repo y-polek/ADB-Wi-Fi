@@ -173,6 +173,7 @@ class ToolWindowPresenter {
             .filter { pinnedDevice ->
                 devices.find { device -> device.androidId == pinnedDevice.androidId } == null
             }
+            .sortedBy { it.name }
             .map { it.toViewModel() }
             .toList()
     }
