@@ -41,7 +41,11 @@ class AdbWiFiToolWindow(
 
     private val splitter = JBSplitter(true, "AdbWifi.ShellPaneProportion", DEFAULT_PANEL_PROPORTION)
     private val deviceListPanel = DeviceListPanel(presenter)
-    private val pinnedDeviceListPanel = DeviceListPanel(presenter, showHeader = true, title = "Pinned")
+    private val pinnedDeviceListPanel = DeviceListPanel(
+        presenter,
+        showHeader = true,
+        title = PluginBundle.message("previouslyConnectedTitle")
+    )
     private val logPanel = LogPanel()
     private val topPanel = JBScrollPane().apply {
         val panel = JPanel()
