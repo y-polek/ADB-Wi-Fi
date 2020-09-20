@@ -11,7 +11,7 @@ complexity:
     ignorePrivate: true
   LongMethod:
     active: true
-    threshold: 90
+    threshold: 100
 style:
   MagicNumber:
     active: false

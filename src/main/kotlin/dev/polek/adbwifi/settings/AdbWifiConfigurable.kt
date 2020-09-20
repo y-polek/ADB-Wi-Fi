@@ -107,17 +107,9 @@ class AdbWifiConfigurable : Configurable {
         adbLocationField = TextFieldWithBrowseButton()
         adbLocationField.text = properties.adbLocation
         adbLocationField.textField.document.addDocumentListener(object : DocumentListener {
-            override fun insertUpdate(e: DocumentEvent) {
-                verifyAdbLocation()
-            }
-
-            override fun removeUpdate(e: DocumentEvent) {
-                verifyAdbLocation()
-            }
-
-            override fun changedUpdate(e: DocumentEvent) {
-                verifyAdbLocation()
-            }
+            override fun insertUpdate(e: DocumentEvent) = verifyAdbLocation()
+            override fun removeUpdate(e: DocumentEvent) = verifyAdbLocation()
+            override fun changedUpdate(e: DocumentEvent) = verifyAdbLocation()
         })
         adbLocationField.addBrowseFolderListener(
             null,
@@ -235,17 +227,9 @@ class AdbWifiConfigurable : Configurable {
         scrcpyLocationField = TextFieldWithBrowseButton()
         scrcpyLocationField.text = properties.scrcpyLocation
         scrcpyLocationField.textField.document.addDocumentListener(object : DocumentListener {
-            override fun insertUpdate(e: DocumentEvent) {
-                verifyScrcpyLocation()
-            }
-
-            override fun removeUpdate(e: DocumentEvent) {
-                verifyScrcpyLocation()
-            }
-
-            override fun changedUpdate(e: DocumentEvent) {
-                verifyScrcpyLocation()
-            }
+            override fun insertUpdate(e: DocumentEvent) = verifyScrcpyLocation()
+            override fun removeUpdate(e: DocumentEvent) = verifyScrcpyLocation()
+            override fun changedUpdate(e: DocumentEvent) = verifyScrcpyLocation()
         })
         scrcpyLocationField.addBrowseFolderListener(
             null,
