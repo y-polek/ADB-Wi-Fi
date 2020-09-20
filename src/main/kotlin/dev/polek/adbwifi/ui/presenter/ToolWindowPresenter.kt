@@ -3,8 +3,8 @@ package dev.polek.adbwifi.ui.presenter
 import com.intellij.openapi.components.service
 import dev.polek.adbwifi.model.CommandHistory
 import dev.polek.adbwifi.model.LogEntry
+import dev.polek.adbwifi.model.PinnedDevice
 import dev.polek.adbwifi.services.*
-import dev.polek.adbwifi.services.PinDeviceService.Companion.contains
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.Companion.toViewModel
 import dev.polek.adbwifi.ui.view.ToolWindowView
@@ -54,7 +54,8 @@ class ToolWindowPresenter {
     fun onConnectButtonClicked(device: DeviceViewModel) {
         devices.findById(device.id)?.isInProgress = true
         pinnedDevices.findById(device.id)?.isInProgress = true
-        view?.showDevices(devices, pinnedDevices)
+        view?.showDevices(devices)
+        view?.showPinnedDevices(pinnedDevices)
 
         adbService.connect(device.device)
     }
@@ -62,13 +63,10 @@ class ToolWindowPresenter {
     fun onDisconnectButtonClicked(device: DeviceViewModel) {
         devices.findById(device.id)?.isInProgress = true
         pinnedDevices.findById(device.id)?.isInProgress = true
-        view?.showDevices(devices, pinnedDevices)
+        view?.showDevices(devices)
+        view?.showPinnedDevices(pinnedDevices)
 
         adbService.disconnect(device.device)
-    }
-
-    fun onPinButtonClicked(@Suppress("UNUSED_PARAMETER") device: DeviceViewModel) {
-        TODO("Not implemented")
     }
 
     fun onShareScreenButtonClicked(device: DeviceViewModel) {
@@ -77,6 +75,12 @@ class ToolWindowPresenter {
         } else {
             view?.showInvalidScrcpyLocationError()
         }
+    }
+
+    fun onRemoveDeviceButtonClicked(device: DeviceViewModel) {
+        pinDeviceService.removePreviouslyConnectedDevice(device.device)
+        pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
+        view?.showPinnedDevices(pinnedDevices)
     }
 
     fun onCopyDeviceIdClicked(device: DeviceViewModel) {
@@ -97,16 +101,13 @@ class ToolWindowPresenter {
             val oldDevices = devices
             devices = model.map { it.toViewModel() }
             if (!oldDevices.contentDeepEquals(devices)) {
-                pinnedDevices = pinDeviceService.pinnedDevices
-                    .asSequence()
-                    .filter { !model.contains(it) }
-                    .map { it.toViewModel() }
-                    .toList()
+                pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
 
                 if (devices.isEmpty() && pinnedDevices.isEmpty()) {
                     view?.showEmptyMessage()
                 } else {
-                    view?.showDevices(devices, pinnedDevices)
+                    view?.showDevices(devices)
+                    view?.showPinnedDevices(pinnedDevices)
                 }
             }
         }
@@ -153,7 +154,8 @@ class ToolWindowPresenter {
                 if (devices.isEmpty() && pinnedDevices.isEmpty()) {
                     view?.showEmptyMessage()
                 } else {
-                    view?.showDevices(devices, pinnedDevices)
+                    view?.showDevices(devices)
+                    view?.showPinnedDevices(pinnedDevices)
                 }
                 if (isViewOpen) {
                     subscribeToDeviceList()
@@ -164,6 +166,15 @@ class ToolWindowPresenter {
 
     private fun unsubscribeFromAdbLocationChanges() {
         propertiesService.adbLocationListener = null
+    }
+
+    private fun List<PinnedDevice>.toViewModel(): List<DeviceViewModel> {
+        return this.asSequence()
+            .filter { pinnedDevice ->
+                devices.find { device -> device.androidId == pinnedDevice.androidId } == null
+            }
+            .map { it.toViewModel() }
+            .toList()
     }
 
     private companion object {

@@ -5,7 +5,9 @@ import dev.polek.adbwifi.ui.model.DeviceViewModel
 
 interface ToolWindowView {
 
-    fun showDevices(devices: List<DeviceViewModel>, pinnedDevices: List<DeviceViewModel>)
+    fun showDevices(devices: List<DeviceViewModel>)
+
+    fun showPinnedDevices(devices: List<DeviceViewModel>)
 
     fun showEmptyMessage()
 

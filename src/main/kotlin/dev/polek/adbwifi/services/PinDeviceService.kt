@@ -22,9 +22,14 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
     fun addPreviouslyConnectedDevices(devices: List<Device>) {
         for (device in devices) {
             if (device.connectionType != WIFI) continue
+            if (device.address.isNullOrBlank()) continue
             if (pinnedDevices.contains(device)) continue
             pinnedDevices = pinnedDevices.add(device)
         }
+    }
+
+    fun removePreviouslyConnectedDevice(device: Device) {
+        pinnedDevices = pinnedDevices.remove(device)
     }
 
     override fun getState() = this
@@ -33,12 +38,9 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
         XmlSerializerUtil.copyBean(state, this)
     }
 
-    companion object {
-        fun List<PinnedDevice>.contains(device: Device): Boolean {
-            return this.find { it.androidId == device.androidId } != null
-        }
+    private companion object {
 
-        fun List<Device>.contains(device: PinnedDevice): Boolean {
+        private fun List<PinnedDevice>.contains(device: Device): Boolean {
             return this.find { it.androidId == device.androidId } != null
         }
 

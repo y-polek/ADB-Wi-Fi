@@ -50,7 +50,7 @@
         <action
             id="AdbWifi.ClearLog"
             class="dev.polek.adbwifi.actions.ClearLogAction"
-            icon="/icons/clearLogIcon.svg"
+            icon="/icons/deleteIcon.svg"
             text="Clear Log" />
         <group id="AdbWifi.LogToolbarActions">
             <reference id="AdbWifi.ClearLog" />

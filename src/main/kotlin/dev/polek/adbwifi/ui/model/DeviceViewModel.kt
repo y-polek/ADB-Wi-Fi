@@ -14,10 +14,14 @@ data class DeviceViewModel(
     val hasAddress: Boolean,
     val buttonType: ButtonType,
     val isShareScreenButtonVisible: Boolean,
+    val isRemoveButtonVisible: Boolean,
     var isInProgress: Boolean = false
 ) {
     val id: String
         get() = device.id
+
+    val androidId: String
+        get() = device.androidId
 
     enum class ButtonType {
         CONNECT, CONNECT_DISABLED, DISCONNECT
@@ -37,7 +41,8 @@ data class DeviceViewModel(
                 icon = device.icon(),
                 hasAddress = device.hasAddress(),
                 buttonType = device.buttonType(),
-                isShareScreenButtonVisible = true
+                isShareScreenButtonVisible = true,
+                isRemoveButtonVisible = false
             )
         }
 
@@ -58,7 +63,8 @@ data class DeviceViewModel(
                 icon = device.icon(),
                 hasAddress = device.hasAddress(),
                 buttonType = device.buttonType(),
-                isShareScreenButtonVisible = false
+                isShareScreenButtonVisible = false,
+                isRemoveButtonVisible = true
             )
         }
 

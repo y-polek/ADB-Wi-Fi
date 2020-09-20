@@ -156,6 +156,15 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             actionButtons.add(shareScreenButton)
         }
 
+        if (device.isRemoveButtonVisible) {
+            val removeButton = IconButton(ICON_REMOVE, PluginBundle.message("removeDeviceTooltip"))
+            removeButton.onClickedListener = {
+                listener?.onRemoveDeviceClicked(device)
+            }
+            removeButton.addMouseListener(hoverListener)
+            actionButtons.add(removeButton)
+        }
+
         val menuButton = IconButton(ICON_MENU)
         menuButton.onClickedListener = { event ->
             openDeviceMenu(device, event)
@@ -203,8 +212,8 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
     interface Listener {
         fun onConnectButtonClicked(device: DeviceViewModel)
         fun onDisconnectButtonClicked(device: DeviceViewModel)
-        fun onPinButtonClicked(device: DeviceViewModel)
         fun onShareScreenClicked(device: DeviceViewModel)
+        fun onRemoveDeviceClicked(device: DeviceViewModel)
         fun onCopyDeviceIdClicked(device: DeviceViewModel)
         fun onCopyDeviceAddressClicked(device: DeviceViewModel)
     }
@@ -218,6 +227,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         )
         private val ICON_MENU = IconLoader.getIcon("/icons/menuIcon.svg")
         private val ICON_SHARE_SCREEN = IconLoader.getIcon("/icons/shareScreen.svg")
+        private val ICON_REMOVE = IconLoader.getIcon("/icons/deleteIcon.svg")
         private val ICON_NO_WIFI = IconLoader.getIcon("/icons/noWifi.svg")
     }
 }

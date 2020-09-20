@@ -47,12 +47,12 @@ class DeviceListPanel(
             presenter.onDisconnectButtonClicked(device)
         }
 
-        override fun onPinButtonClicked(device: DeviceViewModel) {
-            presenter.onPinButtonClicked(device)
-        }
-
         override fun onShareScreenClicked(device: DeviceViewModel) {
             presenter.onShareScreenButtonClicked(device)
+        }
+
+        override fun onRemoveDeviceClicked(device: DeviceViewModel) {
+            presenter.onRemoveDeviceButtonClicked(device)
         }
 
         override fun onCopyDeviceIdClicked(device: DeviceViewModel) {
