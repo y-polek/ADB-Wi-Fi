@@ -153,6 +153,7 @@ class AdbWiFiToolWindow(
         splitter.firstComponent = topPanel
         deviceListPanel.devices = devices
         pinnedDeviceListPanel.devices = pinnedDevices
+        pinnedDeviceListPanel.isVisible = pinnedDevices.isNotEmpty()
     }
 
     override fun showEmptyMessage() {
