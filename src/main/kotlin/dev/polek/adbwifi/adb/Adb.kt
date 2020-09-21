@@ -6,10 +6,12 @@ import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.PropertiesService
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withTimeout
 import java.io.IOException
 
 @OptIn(FlowPreview::class)
@@ -56,14 +58,26 @@ class Adb(
         return devices.sortedWith(DEVICE_COMPARATOR)
     }
 
-    fun connect(device: Device): Flow<LogEntry> = flow {
-        "-s ${device.id} tcpip 5555".execAndLog(this)
+    fun connect(device: Device): Flow<LogEntry> = flow<LogEntry> {
+        "-s ${device.id} tcpip 5555".execAndLogAsync(this)
         delay(1000)
-        "connect ${device.address}:5555".execAndLog(this)
+        try {
+            withTimeout(10_000L) {
+                "connect ${device.address}:5555".execAndLogAsync(this@flow)
+            }
+        } catch (e: TimeoutCancellationException) {
+            emit(LogEntry.Output("Timed out"))
+        }
     }
 
-    fun disconnect(device: Device): Flow<LogEntry> = flow {
-        "disconnect ${device.address}:5555".execAndLog(this)
+    fun disconnect(device: Device): Flow<LogEntry> = flow<LogEntry> {
+        try {
+            withTimeout(10_000L) {
+                "disconnect ${device.address}:5555".execAndLogAsync(this@flow)
+            }
+        } catch (e: TimeoutCancellationException) {
+            emit(LogEntry.Output("Timed out"))
+        }
     }
 
     fun killServer(): Flow<LogEntry> = flow {
@@ -122,6 +136,13 @@ class Adb(
         val output = this.exec().joinToString(separator = "\n")
         logCollector.emit(LogEntry.Output(output))
         return output
+    }
+
+    private suspend fun String.execAndLogAsync(logCollector: FlowCollector<LogEntry>) {
+        val command = adbCommand(this)
+        logCollector.emit(LogEntry.Command(command))
+        val output = commandExecutor.execAsync(command)
+        logCollector.emit(LogEntry.Output(output))
     }
 
     companion object {
