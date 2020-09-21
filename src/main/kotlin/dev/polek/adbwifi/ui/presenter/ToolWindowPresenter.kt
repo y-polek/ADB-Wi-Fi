@@ -99,10 +99,10 @@ class ToolWindowPresenter {
         }
         adbService.deviceListListener = { model ->
             val oldDevices = devices
+            val oldPinnedDevices = pinnedDevices
             devices = model.map { it.toViewModel() }
-            if (!oldDevices.contentDeepEquals(devices)) {
-                pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
-
+            pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
+            if (!oldDevices.contentDeepEquals(devices) || !oldPinnedDevices.contentDeepEquals(pinnedDevices)) {
                 if (devices.isEmpty() && pinnedDevices.isEmpty()) {
                     view?.showEmptyMessage()
                 } else {
