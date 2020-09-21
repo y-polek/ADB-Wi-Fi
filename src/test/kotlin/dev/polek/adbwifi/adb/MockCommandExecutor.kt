@@ -8,6 +8,10 @@ abstract class MockCommandExecutor : CommandExecutor {
         return mockOutput(command).splitToSequence('\n')
     }
 
+    override suspend fun execAsync(command: String): String {
+        return mockOutput(command)
+    }
+
     override fun textExec(command: String) = true
 
     abstract fun mockOutput(command: String): String
