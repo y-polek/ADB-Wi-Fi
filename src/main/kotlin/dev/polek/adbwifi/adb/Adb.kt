@@ -62,7 +62,7 @@ class Adb(
         "-s ${device.id} tcpip 5555".execAndLogAsync(this)
         delay(1000)
         try {
-            withTimeout(10_000L) {
+            withTimeout(15_000L) {
                 "connect ${device.address}:5555".execAndLogAsync(this@flow)
             }
         } catch (e: TimeoutCancellationException) {
@@ -72,7 +72,7 @@ class Adb(
 
     fun disconnect(device: Device): Flow<LogEntry> = flow<LogEntry> {
         try {
-            withTimeout(10_000L) {
+            withTimeout(15_000L) {
                 "disconnect ${device.address}:5555".execAndLogAsync(this@flow)
             }
         } catch (e: TimeoutCancellationException) {
@@ -140,7 +140,7 @@ class Adb(
 
     private suspend fun String.execAndLogAsync(logCollector: FlowCollector<LogEntry>) {
         val command = adbCommand(this)
-        logCollector.emit(LogEntry.Command(command))
+        logCollector.emit(LogEntry.Command(this))
         val output = commandExecutor.execAsync(command)
         logCollector.emit(LogEntry.Output(output))
     }
