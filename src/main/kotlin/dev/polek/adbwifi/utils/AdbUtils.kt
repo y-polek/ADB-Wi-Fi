@@ -1,7 +1,11 @@
 package dev.polek.adbwifi.utils
 
 import com.intellij.openapi.util.SystemInfo
+import com.intellij.util.EnvironmentUtil
 import java.io.File
+
+private val SYSTEM_PATH: String
+    get() = EnvironmentUtil.getEnvironmentMap()["PATH"] ?: System.getenv("PATH") ?: ""
 
 /**
  * @param dirPath directory to lookup executable in, or `null` if executable should be looked up in system PATH
@@ -15,7 +19,7 @@ private fun isValidExecPath(dirPath: String?, execName: String): Boolean {
     val dirs = if (dirPath != null) {
         sequenceOf(dirPath)
     } else {
-        System.getenv("PATH").splitToSequence(File.pathSeparatorChar)
+        SYSTEM_PATH.splitToSequence(File.pathSeparatorChar)
     }
 
     return dirs.any { pathDir ->
