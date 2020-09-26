@@ -3,6 +3,7 @@ package dev.polek.adbwifi.adb
 import dev.polek.adbwifi.LOG
 import dev.polek.adbwifi.commandexecutor.CommandExecutor
 import dev.polek.adbwifi.model.Device
+import dev.polek.adbwifi.model.Device.ConnectionType.USB
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.utils.adbExec
@@ -61,8 +62,10 @@ class Adb(
     }
 
     fun connect(device: Device): Flow<LogEntry> = flow<LogEntry> {
-        "-s ${device.id} tcpip 5555".execAndLogAsync(this)
-        delay(1000)
+        if (device.connectionType == USB) {
+            "-s ${device.id} tcpip 5555".execAndLogAsync(this)
+            delay(1000)
+        }
         try {
             withTimeout(15_000L) {
                 "connect ${device.address}:5555".execAndLogAsync(this@flow)
@@ -114,7 +117,7 @@ class Adb(
     private fun connectionType(deviceId: String): Device.ConnectionType {
         return when {
             IS_IP_ADDRESS_REGEX.matches(deviceId) -> Device.ConnectionType.WIFI
-            else -> Device.ConnectionType.USB
+            else -> USB
         }
     }
 
