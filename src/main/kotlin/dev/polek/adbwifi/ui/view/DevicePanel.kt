@@ -11,7 +11,6 @@ import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.ButtonType
-import dev.polek.adbwifi.utils.AbstractMouseListener
 import dev.polek.adbwifi.utils.flowPanel
 import dev.polek.adbwifi.utils.makeBold
 import dev.polek.adbwifi.utils.panel
@@ -19,6 +18,7 @@ import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Insets
+import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.JComponent
 import javax.swing.JProgressBar
@@ -28,7 +28,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
 
     var listener: Listener? = null
 
-    private val hoverListener = object : AbstractMouseListener() {
+    private val hoverListener = object : MouseAdapter() {
         override fun mouseEntered(e: MouseEvent) {
             background = HOVER_COLOR
         }

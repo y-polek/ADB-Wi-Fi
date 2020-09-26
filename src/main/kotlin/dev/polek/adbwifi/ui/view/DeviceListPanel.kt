@@ -6,12 +6,12 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
 import com.intellij.ui.components.panels.OpaquePanel
 import dev.polek.adbwifi.ui.model.DeviceViewModel
-import dev.polek.adbwifi.utils.AbstractMouseListener
 import dev.polek.adbwifi.utils.removeIf
 import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Insets
+import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.BorderFactory
 import javax.swing.BoxLayout
@@ -86,7 +86,7 @@ class DeviceListPanel(
         header.background = HEADER_BACKGROUND_COLOR
         add(header)
 
-        header.addMouseListener(object : AbstractMouseListener() {
+        header.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
                 isExpanded = !isExpanded
             }

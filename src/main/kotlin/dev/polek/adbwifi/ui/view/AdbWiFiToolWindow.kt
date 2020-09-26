@@ -25,12 +25,12 @@ import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.presenter.ToolWindowPresenter
-import dev.polek.adbwifi.utils.AbstractMouseListener
 import dev.polek.adbwifi.utils.GridBagLayoutPanel
 import dev.polek.adbwifi.utils.panel
 import dev.polek.adbwifi.utils.setFontSize
 import java.awt.GridBagConstraints
 import java.awt.Insets
+import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.*
 
@@ -124,7 +124,7 @@ class AdbWiFiToolWindow(
 
         val settingsButton = HyperlinkLabel(PluginBundle.message("goToSettingsButton")).apply {
             setFontSize(16f)
-            addMouseListener(object : AbstractMouseListener() {
+            addMouseListener(object : MouseAdapter() {
                 override fun mouseClicked(e: MouseEvent) {
                     ShowSettingsUtil.getInstance().showSettingsDialog(
                         null,

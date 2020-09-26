@@ -20,6 +20,7 @@ import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.utils.*
 import java.awt.GridBagConstraints
 import java.awt.Insets
+import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.io.File
 import javax.swing.JComponent
@@ -143,7 +144,7 @@ class AdbWifiConfigurable : Configurable {
         )
 
         defaultAdbLocationButton = HyperlinkLabel(PluginBundle.message("defaultAdbLocationButton"))
-        defaultAdbLocationButton.addMouseListener(object : AbstractMouseListener() {
+        defaultAdbLocationButton.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
                 adbLocationField.text = properties.defaultAdbLocation
             }
