@@ -22,15 +22,32 @@ private fun isValidExecPath(dirPath: String?, execName: String): Boolean {
         SYSTEM_PATH.splitToSequence(File.pathSeparatorChar)
     }
 
-    return dirs.any { pathDir ->
-        File("$pathDir/$execFileName").isFile
-    }
+    return dirs
+        .map { it.removeSuffix("/") }
+        .any { dir ->
+            File("$dir/$execFileName").isFile
+        }
+}
+
+private fun exec(dir: String, execName: String): String = "${dir.removeSuffix("/")}/$execName"
+
+private fun findExecInSystemPath(execName: String): String? {
+    val file = SYSTEM_PATH.splitToSequence(File.pathSeparatorChar)
+        .map { it.removeSuffix("/") }
+        .map { dir ->
+            File("$dir/$execName")
+        }
+        .firstOrNull(File::isFile)
+
+    return file?.absolutePath
 }
 
 fun isValidAdbLocation(dirPath: String): Boolean = isValidExecPath(dirPath, "adb")
-
 fun hasAdbInSystemPath(): Boolean = isValidExecPath(null, "adb")
+fun adbExec(dir: String): String = exec(dir, "adb")
+fun findAdbExecInSystemPath(): String? = findExecInSystemPath("adb")
 
 fun isValidScrcpyLocation(dirPath: String): Boolean = isValidExecPath(dirPath, "scrcpy")
-
 fun hasScrcpyInSystemPath(): Boolean = isValidExecPath(null, "scrcpy")
+fun scrcpyExec(dir: String): String = exec(dir, "scrcpy")
+fun findScrcpyExecInSystemPath(): String? = findExecInSystemPath("scrcpy")

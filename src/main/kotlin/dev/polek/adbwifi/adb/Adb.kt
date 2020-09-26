@@ -5,6 +5,8 @@ import dev.polek.adbwifi.commandexecutor.CommandExecutor
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.PropertiesService
+import dev.polek.adbwifi.utils.adbExec
+import dev.polek.adbwifi.utils.findAdbExecInSystemPath
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
@@ -117,7 +119,11 @@ class Adb(
     }
 
     private fun adbCommand(args: String): String {
-        val adb = if (properties.useAdbFromPath) "adb" else "${properties.adbLocation}/adb"
+        val adb = if (properties.useAdbFromPath) {
+            findAdbExecInSystemPath() ?: throw IllegalStateException("Cannot find 'adb' executable in system PATH")
+        } else {
+            adbExec(properties.adbLocation)
+        }
         return "$adb $args"
     }
 

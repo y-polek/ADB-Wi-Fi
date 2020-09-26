@@ -4,6 +4,8 @@ import dev.polek.adbwifi.LOG
 import dev.polek.adbwifi.commandexecutor.CommandExecutor
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.services.PropertiesService
+import dev.polek.adbwifi.utils.findScrcpyExecInSystemPath
+import dev.polek.adbwifi.utils.scrcpyExec
 import java.io.IOException
 
 class Scrcpy(
@@ -11,7 +13,14 @@ class Scrcpy(
     private val properties: PropertiesService
 ) {
     private val exe: String
-        get() = if (properties.useScrcpyFromPath) "scrcpy" else "${properties.scrcpyLocation}/scrcpy"
+        get() {
+            return if (properties.useScrcpyFromPath) {
+                findScrcpyExecInSystemPath()
+                    ?: throw IllegalStateException("Cannot find 'scrcpy' executable in system PATH")
+            } else {
+                scrcpyExec(properties.scrcpyLocation)
+            }
+        }
 
     val isValid: Boolean
         get() {
