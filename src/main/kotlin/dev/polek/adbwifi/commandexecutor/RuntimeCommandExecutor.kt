@@ -9,14 +9,14 @@ class RuntimeCommandExecutor : CommandExecutor {
 
     private val runtime = Runtime.getRuntime()
 
-    override fun exec(command: String): Sequence<String> {
-        val process = runtime.exec(command)
+    override fun exec(command: String, vararg envp: String): Sequence<String> {
+        val process = runtime.exec(command, envp)
         return BufferedReader(InputStreamReader(process.inputStream)).lineSequence()
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
-    override suspend fun execAsync(command: String): String {
-        val process = runtime.exec(command)
+    override suspend fun execAsync(command: String, vararg envp: String): String {
+        val process = runtime.exec(command, envp)
         while (process.isAlive) {
             delay(500L)
         }
@@ -25,9 +25,9 @@ class RuntimeCommandExecutor : CommandExecutor {
             .joinToString(separator = "\n")
     }
 
-    override fun textExec(command: String): Boolean {
+    override fun textExec(command: String, vararg envp: String): Boolean {
         val process = try {
-            runtime.exec(command)
+            runtime.exec(command, envp)
         } catch (e: IOException) {
             return false
         }
