@@ -2,6 +2,7 @@ package dev.polek.adbwifi.ui.presenter
 
 import com.intellij.openapi.components.service
 import dev.polek.adbwifi.model.CommandHistory
+import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.model.PinnedDevice
 import dev.polek.adbwifi.services.*
@@ -65,6 +66,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
             withContext(IO) {
                 adbService.connect(device.device)
             }
+            onDevicesUpdated(adbService.devices())
         }.invokeOnCompletion {
             connectingDevices.remove(device.uniqueId)
             updateDeviceLists()
@@ -79,6 +81,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
             withContext(IO) {
                 adbService.disconnect(device.device)
             }
+            onDevicesUpdated(adbService.devices())
         }.invokeOnCompletion {
             connectingDevices.remove(device.uniqueId)
             updateDeviceLists()
@@ -108,6 +111,13 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
         copyToClipboard(address)
     }
 
+    private fun onDevicesUpdated(model: List<Device>) {
+        devices = model.map { it.toViewModel() }
+        pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
+
+        updateDeviceLists()
+    }
+
     private fun updateDeviceLists() {
         devices.forEach {
             it.isInProgress = connectingDevices.contains(it.uniqueId)
@@ -129,12 +139,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
             // Already subscribed
             return
         }
-        adbService.deviceListListener = { model ->
-            devices = model.map { it.toViewModel() }
-            pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
-
-            updateDeviceLists()
-        }
+        adbService.deviceListListener = ::onDevicesUpdated
     }
 
     private fun unsubscribeFromDeviceList() {
@@ -175,12 +180,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
                 devices = emptyList()
                 view?.showInvalidAdbLocationError()
             } else {
-                if (devices.isEmpty() && pinnedDevices.isEmpty()) {
-                    view?.showEmptyMessage()
-                } else {
-                    view?.showDevices(devices)
-                    view?.showPinnedDevices(pinnedDevices)
-                }
+                updateDeviceLists()
                 if (isViewOpen) {
                     subscribeToDeviceList()
                 }

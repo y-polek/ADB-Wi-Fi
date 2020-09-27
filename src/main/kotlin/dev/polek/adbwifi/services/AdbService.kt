@@ -11,7 +11,6 @@ import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 
 @OptIn(FlowPreview::class)
 class AdbService : Disposable {
@@ -30,6 +29,14 @@ class AdbService : Disposable {
     private var devicePollingJob: Job? = null
     private val logService by lazy { service<LogService>() }
     private val pinDeviceService by lazy { service<PinDeviceService>() }
+
+    suspend fun devices(): List<Device> {
+        val devices = withContext(ADB_DISPATCHER) {
+            adb.devices()
+        }
+        pinDeviceService.addPreviouslyConnectedDevices(devices)
+        return devices
+    }
 
     suspend fun connect(device: Device) {
         adb.connect(device).collect { logEntry ->
@@ -59,9 +66,7 @@ class AdbService : Disposable {
         devicePollingJob?.cancel()
         devicePollingJob = GlobalScope.launch(Main) {
             devicesFlow()
-                .flowOn(ADB_DISPATCHER)
                 .collect { devices ->
-                    pinDeviceService.addPreviouslyConnectedDevices(devices)
                     deviceListListener?.invoke(devices)
                 }
         }
@@ -74,7 +79,7 @@ class AdbService : Disposable {
 
     private fun devicesFlow(): Flow<List<Device>> = flow {
         while (true) {
-            emit(adb.devices())
+            emit(devices())
             delay(POLLING_INTERVAL_MILLIS)
         }
     }
