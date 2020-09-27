@@ -22,7 +22,7 @@ class ToolWindowPresenter {
     private var isViewOpen: Boolean = false
     private var isAdbValid: Boolean = true
     private var devices: List<DeviceViewModel> = emptyList()
-    private var pinnedDevices: List<DeviceViewModel> = pinDeviceService.pinnedDevices.map { it.toViewModel() }
+    private var pinnedDevices: List<DeviceViewModel> = pinDeviceService.pinnedDevices.toViewModel()
 
     fun attach(view: ToolWindowView) {
         this.view = view
