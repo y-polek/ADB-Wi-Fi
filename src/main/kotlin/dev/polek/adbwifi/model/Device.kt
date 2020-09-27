@@ -13,7 +13,7 @@ data class Device(
     val isUsbDevice = connectionType == ConnectionType.USB
     val isWifiDevice = connectionType == ConnectionType.WIFI
 
-    val uniqueId: String = "$androidId-${address.orEmpty()}"
+    val uniqueId: String = "$androidId-$id"
 
     enum class ConnectionType {
         USB, WIFI, NONE
