@@ -20,8 +20,8 @@ data class DeviceViewModel(
     val id: String
         get() = device.id
 
-    val androidId: String
-        get() = device.androidId
+    val serialNumber: String
+        get() = device.serialNumber
 
     val address: String?
         get() = device.address
@@ -55,7 +55,7 @@ data class DeviceViewModel(
         fun PinnedDevice.toViewModel(): DeviceViewModel {
             val device = Device(
                 id = this.id,
-                androidId = this.androidId,
+                serialNumber = this.serialNumber,
                 name = this.name,
                 address = this.address,
                 androidVersion = this.androidVersion,

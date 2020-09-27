@@ -196,7 +196,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
         return this.asSequence()
             .filter { pinnedDevice ->
                 devices.find { device ->
-                    device.androidId == pinnedDevice.androidId && device.address == pinnedDevice.address
+                    device.serialNumber == pinnedDevice.serialNumber && device.address == pinnedDevice.address
                 } == null
             }
             .sortedBy { it.name }

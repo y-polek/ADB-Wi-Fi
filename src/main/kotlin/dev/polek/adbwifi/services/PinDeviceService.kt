@@ -42,14 +42,14 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
 
         private fun List<PinnedDevice>.contains(device: Device): Boolean {
             return this.find {
-                it.androidId == device.androidId && it.address == device.address
+                it.serialNumber == device.serialNumber && it.address == device.address
             } != null
         }
 
         private fun List<PinnedDevice>.add(device: Device): List<PinnedDevice> {
             return this + PinnedDevice(
                 id = device.id,
-                androidId = device.androidId,
+                serialNumber = device.serialNumber,
                 name = device.name,
                 address = device.address.orEmpty(),
                 androidVersion = device.androidVersion,
@@ -59,7 +59,7 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
 
         private fun List<PinnedDevice>.remove(device: Device): List<PinnedDevice> {
             return this.filter {
-                it.androidId != device.androidId || it.address != device.address
+                it.serialNumber != device.serialNumber || it.address != device.address
             }
         }
     }

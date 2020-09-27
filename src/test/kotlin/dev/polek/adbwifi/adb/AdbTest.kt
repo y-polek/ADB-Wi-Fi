@@ -48,7 +48,7 @@ class AdbTest {
 
         val device1 = devices[0]
         assertThat(device1.id).isEqualTo("ce0717171c16e33b03")
-        assertThat(device1.androidId).isEqualTo("c51c1b1f0a05ce61")
+        assertThat(device1.serialNumber).isEqualTo("c51c1b1f0a05ce61")
         assertThat(device1.name).isEqualTo("samsung SM-G930F")
         assertThat(device1.address).isEqualTo("192.168.1.159")
         assertThat(device1.androidVersion).isEqualTo("8.0.0")
@@ -58,7 +58,7 @@ class AdbTest {
 
         val device2 = devices[1]
         assertThat(device2.id).isEqualTo("R28M51Y8E0H")
-        assertThat(device2.androidId).isEqualTo("3987ac205a864cc6")
+        assertThat(device2.serialNumber).isEqualTo("3987ac205a864cc6")
         assertThat(device2.name).isEqualTo("samsung SM-G9700")
         assertThat(device2.address).isEqualTo("192.168.1.179")
         assertThat(device2.androidVersion).isEqualTo("10")

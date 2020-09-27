@@ -2,7 +2,7 @@ package dev.polek.adbwifi.model
 
 data class Device(
     val id: String,
-    val androidId: String,
+    val serialNumber: String,
     val name: String,
     val address: String?,
     val androidVersion: String,
@@ -13,7 +13,7 @@ data class Device(
     val isUsbDevice = connectionType == ConnectionType.USB
     val isWifiDevice = connectionType == ConnectionType.WIFI
 
-    val uniqueId: String = "$androidId-$id"
+    val uniqueId: String = "$serialNumber-$id"
 
     enum class ConnectionType {
         USB, WIFI, NONE

@@ -28,15 +28,13 @@ class Adb(
                 DEVICE_ID_REGEX.matchEntire(line)?.groupValues?.get(1)?.trim()
             }
             .map { deviceId ->
-                val androidId = androidId(deviceId)
-                val model = model(deviceId)
-                val manufacturer = manufacturer(deviceId)
-                val address = address(deviceId)
+                val model = model(deviceId).trim()
+                val manufacturer = manufacturer(deviceId).trim()
                 Device(
                     id = deviceId,
-                    androidId = androidId,
-                    name = "$manufacturer $model".trim(),
-                    address = address,
+                    serialNumber = serialNumber(deviceId),
+                    name = "$manufacturer $model",
+                    address = address(deviceId),
                     androidVersion = androidVersion(deviceId),
                     apiLevel = apiLevel(deviceId),
                     connectionType = connectionType(deviceId)
@@ -47,10 +45,10 @@ class Adb(
         devices.forEach { device ->
             device.isConnected = when {
                 device.isWifiDevice -> true
-                device.androidId.isBlank() -> false
+                device.serialNumber.isBlank() -> false
                 else -> {
                     val wifiDevice = devices.firstOrNull {
-                        it.isWifiDevice && it.androidId == device.androidId
+                        it.isWifiDevice && it.serialNumber == device.serialNumber
                     }
                     wifiDevice != null
                 }
@@ -84,8 +82,8 @@ class Adb(
         "kill-server".execAndLog(this)
     }
 
-    private fun androidId(deviceId: String): String {
-        return "-s $deviceId shell settings get secure android_id".exec().firstLine()
+    private fun serialNumber(deviceId: String): String {
+        return "-s $deviceId shell getprop ro.serialno".exec().firstLine()
     }
 
     private fun model(deviceId: String): String {
