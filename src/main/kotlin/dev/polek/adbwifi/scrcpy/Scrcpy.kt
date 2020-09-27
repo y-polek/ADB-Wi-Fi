@@ -49,7 +49,7 @@ class Scrcpy(
         val scrcpyExe = scrcpyExe ?: throw IllegalStateException("'scrcpy' executable not found")
         val command = "$scrcpyExe -s ${device.id}"
         try {
-            commandExecutor.exec(command, "ADB=$adbExe")
+            commandExecutor.execSilently(command, "ADB=$adbExe")
         } catch (e: IOException) {
             LOG.warn("Failed to execute command '$command': ${e.message}")
         }
