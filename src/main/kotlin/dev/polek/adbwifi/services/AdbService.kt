@@ -7,6 +7,7 @@ import dev.polek.adbwifi.adb.Adb
 import dev.polek.adbwifi.commandexecutor.RuntimeCommandExecutor
 import dev.polek.adbwifi.model.Device
 import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
@@ -30,31 +31,15 @@ class AdbService : Disposable {
     private val logService by lazy { service<LogService>() }
     private val pinDeviceService by lazy { service<PinDeviceService>() }
 
-    fun connect(device: Device) {
-        stopPollingDevices()
-
-        GlobalScope.launch(ADB_DISPATCHER) {
-            adb.connect(device).collect { logEntry ->
-                logService.commandHistory.add(logEntry)
-            }
-            withContext(Dispatchers.Main) {
-                delay(1000)
-                startPollingDevices()
-            }
+    suspend fun connect(device: Device) {
+        adb.connect(device).collect { logEntry ->
+            logService.commandHistory.add(logEntry)
         }
     }
 
-    fun disconnect(device: Device) {
-        stopPollingDevices()
-
-        GlobalScope.launch(ADB_DISPATCHER) {
-            adb.disconnect(device).collect { logEntry ->
-                logService.commandHistory.add(logEntry)
-            }
-            withContext(Dispatchers.Main) {
-                delay(1000)
-                startPollingDevices()
-            }
+    suspend fun disconnect(device: Device) {
+        adb.disconnect(device).collect { logEntry ->
+            logService.commandHistory.add(logEntry)
         }
     }
 
@@ -72,7 +57,7 @@ class AdbService : Disposable {
 
     private fun startPollingDevices() {
         devicePollingJob?.cancel()
-        devicePollingJob = GlobalScope.launch(Dispatchers.Main) {
+        devicePollingJob = GlobalScope.launch(Main) {
             devicesFlow()
                 .flowOn(ADB_DISPATCHER)
                 .collect { devices ->

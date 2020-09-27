@@ -26,6 +26,9 @@ data class DeviceViewModel(
     val address: String?
         get() = device.address
 
+    val uniqueId: String
+        get() = device.uniqueId
+
     enum class ButtonType {
         CONNECT, CONNECT_DISABLED, DISCONNECT
     }

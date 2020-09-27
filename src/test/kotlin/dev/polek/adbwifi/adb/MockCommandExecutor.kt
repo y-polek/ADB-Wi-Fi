@@ -4,8 +4,8 @@ import dev.polek.adbwifi.commandexecutor.CommandExecutor
 
 abstract class MockCommandExecutor : CommandExecutor {
 
-    override fun exec(command: String, vararg envp: String): String {
-        return mockOutput(command)
+    override fun exec(command: String, vararg envp: String): Sequence<String> {
+        return mockOutput(command).lineSequence()
     }
 
     override fun execSilently(command: String, vararg envp: String) {

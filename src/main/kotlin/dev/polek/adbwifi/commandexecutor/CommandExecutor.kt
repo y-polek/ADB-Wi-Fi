@@ -5,7 +5,7 @@ import java.io.IOException
 interface CommandExecutor {
 
     @Throws(IOException::class)
-    fun exec(command: String, vararg envp: String): String
+    fun exec(command: String, vararg envp: String): Sequence<String>
 
     @Throws(IOException::class)
     fun execSilently(command: String, vararg envp: String)

@@ -3,72 +3,54 @@ package dev.polek.adbwifi.commandexecutor
 import dev.polek.adbwifi.LOG
 import kotlinx.coroutines.delay
 import java.io.IOException
-import java.lang.StringBuilder
 
 class RuntimeCommandExecutor : CommandExecutor {
 
     private val runtime = Runtime.getRuntime()
 
-    override fun exec(command: String, vararg envp: String): String {
+    override fun exec(command: String, vararg envp: String): Sequence<String> {
+        log { "exec> $command ${envp.joinToString()}" }
+
         val process = runtime.exec(command, envp)
-        val output = process.output()
-        log {
-            appendln("exec> $command ${envp.joinToString()}")
-            appendln(output)
-        }
-        return output
+        return process.inputStream.bufferedReader().lineSequence()
     }
 
     override fun execSilently(command: String, vararg envp: String) {
-        val process = runtime.exec(command, envp)
-        log {
-            appendln("execSilently> $command ${envp.joinToString()}")
-            appendln(process.output())
-        }
+        log { "execSilently> $command ${envp.joinToString()}" }
+
+        runtime.exec(command, envp)
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun execAsync(command: String, vararg envp: String): String {
+        log { "execAsync> $command ${envp.joinToString()}" }
+
         val process = runtime.exec(command, envp)
         while (process.isAlive) {
             delay(500L)
         }
-        val output = process.output()
-        log {
-            appendln("execAsync> $command ${envp.joinToString()}")
-            appendln(output)
-        }
-        return output
+        return process.output()
     }
 
     override fun testExec(command: String, vararg envp: String): Boolean {
+        log { "testExec> $command ${envp.joinToString()}" }
+
         val process = try {
             runtime.exec(command, envp)
         } catch (e: IOException) {
             return false
         }
         process.waitFor()
-        val exitValue = process.exitValue()
-        log {
-            val output = process.output()
-            appendln("testExec> $command ${envp.joinToString()}")
-            appendln(output)
-            appendln("-> $exitValue")
-        }
-        return exitValue == 0
+        return process.exitValue() == 0
     }
 
     private companion object {
 
-        private const val DEBUG_ENABLED = false
+        private const val DEBUG_ENABLED = true
 
-        private inline fun log(buildMessage: StringBuilder.() -> Unit) {
+        private inline fun log(lazyMessage: () -> String) {
             if (DEBUG_ENABLED) {
-                val text = buildString {
-                    appendln("RuntimeCommandExecutor")
-                    this.buildMessage()
-                }
-                LOG.warn(text)
+                LOG.warn(lazyMessage())
             }
         }
 

@@ -8,11 +8,15 @@ import dev.polek.adbwifi.services.*
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.Companion.toViewModel
 import dev.polek.adbwifi.ui.view.ToolWindowView
+import dev.polek.adbwifi.utils.BasePresenter
 import dev.polek.adbwifi.utils.copyToClipboard
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class ToolWindowPresenter {
+class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
 
-    private var view: ToolWindowView? = null
     private val adbService by lazy { service<AdbService>() }
     private val scrcpyService by lazy { service<ScrcpyService>() }
     private val logService by lazy { service<LogService>() }
@@ -24,19 +28,21 @@ class ToolWindowPresenter {
     private var devices: List<DeviceViewModel> = emptyList()
     private var pinnedDevices: List<DeviceViewModel> = pinDeviceService.pinnedDevices.toViewModel()
 
-    fun attach(view: ToolWindowView) {
-        this.view = view
+    private var connectingDevices = mutableSetOf<String/*Device's unique ID*/>()
+
+    override fun attach(view: ToolWindowView) {
+        super.attach(view)
         view.showEmptyMessage()
         subscribeToDeviceList()
         subscribeToLogEvents()
         subscribeToAdbLocationChanges()
     }
 
-    fun detach() {
+    override fun detach() {
         unsubscribeFromDeviceList()
         unsubscribeFromLogEvents()
         unsubscribeFromAdbLocationChanges()
-        view = null
+        super.detach()
     }
 
     fun onViewOpen() {
@@ -52,21 +58,31 @@ class ToolWindowPresenter {
     }
 
     fun onConnectButtonClicked(device: DeviceViewModel) {
-        devices.findById(device.id)?.isInProgress = true
-        pinnedDevices.findById(device.id)?.isInProgress = true
-        view?.showDevices(devices)
-        view?.showPinnedDevices(pinnedDevices)
+        connectingDevices.add(device.uniqueId)
+        updateDeviceLists()
 
-        adbService.connect(device.device)
+        launch(Main) {
+            withContext(IO) {
+                adbService.connect(device.device)
+            }
+        }.invokeOnCompletion {
+            connectingDevices.remove(device.uniqueId)
+            updateDeviceLists()
+        }
     }
 
     fun onDisconnectButtonClicked(device: DeviceViewModel) {
-        devices.findById(device.id)?.isInProgress = true
-        pinnedDevices.findById(device.id)?.isInProgress = true
-        view?.showDevices(devices)
-        view?.showPinnedDevices(pinnedDevices)
+        connectingDevices.add(device.uniqueId)
+        updateDeviceLists()
 
-        adbService.disconnect(device.device)
+        launch(Main) {
+            withContext(IO) {
+                adbService.disconnect(device.device)
+            }
+        }.invokeOnCompletion {
+            connectingDevices.remove(device.uniqueId)
+            updateDeviceLists()
+        }
     }
 
     fun onShareScreenButtonClicked(device: DeviceViewModel) {
@@ -92,24 +108,32 @@ class ToolWindowPresenter {
         copyToClipboard(address)
     }
 
+    private fun updateDeviceLists() {
+        devices.forEach {
+            it.isInProgress = connectingDevices.contains(it.uniqueId)
+        }
+        pinnedDevices.forEach {
+            it.isInProgress = connectingDevices.contains(it.uniqueId)
+        }
+
+        if (devices.isEmpty() && pinnedDevices.isEmpty()) {
+            view?.showEmptyMessage()
+        } else {
+            view?.showDevices(devices)
+            view?.showPinnedDevices(pinnedDevices)
+        }
+    }
+
     private fun subscribeToDeviceList() {
         if (adbService.deviceListListener != null) {
             // Already subscribed
             return
         }
         adbService.deviceListListener = { model ->
-            val oldDevices = devices
-            val oldPinnedDevices = pinnedDevices
             devices = model.map { it.toViewModel() }
             pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
-            if (!oldDevices.contentDeepEquals(devices) || !oldPinnedDevices.contentDeepEquals(pinnedDevices)) {
-                if (devices.isEmpty() && pinnedDevices.isEmpty()) {
-                    view?.showEmptyMessage()
-                } else {
-                    view?.showDevices(devices)
-                    view?.showPinnedDevices(pinnedDevices)
-                }
-            }
+
+            updateDeviceLists()
         }
     }
 
@@ -178,15 +202,5 @@ class ToolWindowPresenter {
             .sortedBy { it.name }
             .map { it.toViewModel() }
             .toList()
-    }
-
-    private companion object {
-        private fun List<DeviceViewModel>.contentDeepEquals(other: List<DeviceViewModel>): Boolean {
-            return this.toTypedArray().contentDeepEquals(other.toTypedArray())
-        }
-
-        private fun List<DeviceViewModel>.findById(id: String): DeviceViewModel? {
-            return this.find { it.id == id }
-        }
     }
 }

@@ -14,7 +14,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withTimeout
 import java.io.IOException
 
 @OptIn(FlowPreview::class)
@@ -24,7 +23,6 @@ class Adb(
 ) {
     fun devices(): List<Device> {
         val devices = "devices".exec()
-            .lineSequence()
             .drop(1)
             .mapNotNull { line ->
                 DEVICE_ID_REGEX.matchEntire(line)?.groupValues?.get(1)?.trim()
@@ -68,9 +66,7 @@ class Adb(
             delay(1000)
         }
         try {
-            withTimeout(15_000L) {
-                "connect ${device.address}:5555".execAndLogAsync(this@flow)
-            }
+            "connect ${device.address}:5555".execAndLogAsync(this@flow)
         } catch (e: TimeoutCancellationException) {
             emit(LogEntry.Output("Timed out"))
         }
@@ -78,9 +74,7 @@ class Adb(
 
     fun disconnect(device: Device): Flow<LogEntry> = flow<LogEntry> {
         try {
-            withTimeout(15_000L) {
-                "disconnect ${device.address}:5555".execAndLogAsync(this@flow)
-            }
+            "disconnect ${device.address}:5555".execAndLogAsync(this@flow)
         } catch (e: TimeoutCancellationException) {
             emit(LogEntry.Output("Timed out"))
         }
@@ -131,19 +125,19 @@ class Adb(
         return "$adb $args"
     }
 
-    private fun String.exec(): String {
+    private fun String.exec(): Sequence<String> {
         val command = adbCommand(this)
         return try {
             commandExecutor.exec(command)
         } catch (e: IOException) {
             LOG.warn("Failed to execute command '$command': ${e.message}")
-            ""
+            emptySequence()
         }
     }
 
     private suspend fun String.execAndLog(logCollector: FlowCollector<LogEntry>): String {
         logCollector.emit(LogEntry.Command(this))
-        val output = this.exec()
+        val output = this.exec().joinToString("\n")
         logCollector.emit(LogEntry.Output(output))
         return output
     }
@@ -169,6 +163,5 @@ class Adb(
         private val DEVICE_COMPARATOR = compareBy<Device>({ it.name }, { it.isWifiDevice })
 
         private fun Sequence<String>.firstLine(): String = this.firstOrNull().orEmpty()
-        private fun String.firstLine(): String = this.lineSequence().firstLine()
     }
 }
