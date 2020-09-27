@@ -38,7 +38,7 @@ class Scrcpy(
             val scrcpyExe = scrcpyExe ?: return false
             val command = "$scrcpyExe --version"
             return try {
-                commandExecutor.textExec(command, "ADB=$adbExe")
+                commandExecutor.testExec(command, "ADB=$adbExe")
             } catch (e: IOException) {
                 LOG.warn("Failed to execute command '$command': ${e.message}")
                 false

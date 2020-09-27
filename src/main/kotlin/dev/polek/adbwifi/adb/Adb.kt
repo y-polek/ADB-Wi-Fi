@@ -24,6 +24,7 @@ class Adb(
 ) {
     fun devices(): List<Device> {
         val devices = "devices".exec()
+            .lineSequence()
             .drop(1)
             .mapNotNull { line ->
                 DEVICE_ID_REGEX.matchEntire(line)?.groupValues?.get(1)?.trim()
@@ -130,19 +131,19 @@ class Adb(
         return "$adb $args"
     }
 
-    private fun String.exec(): Sequence<String> {
+    private fun String.exec(): String {
         val command = adbCommand(this)
         return try {
             commandExecutor.exec(command)
         } catch (e: IOException) {
             LOG.warn("Failed to execute command '$command': ${e.message}")
-            emptySequence()
+            ""
         }
     }
 
     private suspend fun String.execAndLog(logCollector: FlowCollector<LogEntry>): String {
         logCollector.emit(LogEntry.Command(this))
-        val output = this.exec().joinToString(separator = "\n")
+        val output = this.exec()
         logCollector.emit(LogEntry.Output(output))
         return output
     }
@@ -150,7 +151,12 @@ class Adb(
     private suspend fun String.execAndLogAsync(logCollector: FlowCollector<LogEntry>) {
         val command = adbCommand(this)
         logCollector.emit(LogEntry.Command(this))
-        val output = commandExecutor.execAsync(command)
+        val output = try {
+            commandExecutor.execAsync(command)
+        } catch (e: IOException) {
+            LOG.warn("Failed to execute command '$command': ${e.message}")
+            e.message ?: "Failed to execute command"
+        }
         logCollector.emit(LogEntry.Output(output))
     }
 
@@ -163,5 +169,6 @@ class Adb(
         private val DEVICE_COMPARATOR = compareBy<Device>({ it.name }, { it.isWifiDevice })
 
         private fun Sequence<String>.firstLine(): String = this.firstOrNull().orEmpty()
+        private fun String.firstLine(): String = this.lineSequence().firstLine()
     }
 }
