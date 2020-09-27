@@ -99,7 +99,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     fun onRemoveDeviceButtonClicked(device: DeviceViewModel) {
         pinDeviceService.removePreviouslyConnectedDevice(device.device)
         pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
-        view?.showPinnedDevices(pinnedDevices)
+        updateDeviceLists()
     }
 
     fun onCopyDeviceIdClicked(device: DeviceViewModel) {

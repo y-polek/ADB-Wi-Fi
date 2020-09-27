@@ -59,7 +59,7 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
 
         private fun List<PinnedDevice>.remove(device: Device): List<PinnedDevice> {
             return this.filter {
-                it.androidId != device.androidId && it.address == device.address
+                it.androidId != device.androidId || it.address != device.address
             }
         }
     }
