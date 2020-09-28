@@ -116,7 +116,10 @@ class Adb(
 
     private fun adbCommand(args: String): String {
         val adb = if (properties.useAdbFromPath) {
-            findAdbExecInSystemPath() ?: throw IllegalStateException("Cannot find 'adb' executable in system PATH")
+            findAdbExecInSystemPath() ?: run {
+                LOG.warn("Cannot find 'adb' executable in system PATH")
+                "adb"
+            }
         } else {
             adbExec(properties.adbLocation)
         }
