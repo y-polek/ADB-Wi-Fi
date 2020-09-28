@@ -46,7 +46,7 @@ class RuntimeCommandExecutor : CommandExecutor {
 
     private companion object {
 
-        private const val DEBUG_ENABLED = true
+        private const val DEBUG_ENABLED = false
 
         private inline fun log(lazyMessage: () -> String) {
             if (DEBUG_ENABLED) {
