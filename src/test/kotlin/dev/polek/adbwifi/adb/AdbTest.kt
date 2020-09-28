@@ -1,6 +1,7 @@
 package dev.polek.adbwifi.adb
 
 import dev.polek.adbwifi.model.Device
+import dev.polek.adbwifi.utils.adbExec
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -9,7 +10,7 @@ class AdbTest {
     private val propertiesService = MockPropertiesService()
 
     private val commandExecutor = object : MockCommandExecutor() {
-        private val adb = "${propertiesService.adbLocation}/adb"
+        private val adb = adbExec(propertiesService.adbLocation)
 
         override fun mockOutput(command: String): String {
             return when (command) {
