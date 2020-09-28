@@ -15,6 +15,7 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.TitledSeparator
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
+import dev.polek.adbwifi.SCRCPY_FEATURE_ENABLED
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.utils.*
@@ -52,13 +53,17 @@ class AdbWifiConfigurable : Configurable {
         val panel = GridBagLayoutPanel()
 
         createAdbSettings(panel)
-        createScrcpySettings(panel)
+        if (SCRCPY_FEATURE_ENABLED) {
+            createScrcpySettings(panel)
+        }
 
         verifyAdbLocation()
         updateAdbLocationSettingsState()
 
-        verifyScrcpyLocation()
-        updateScrcpyLocationSettingsState()
+        if (SCRCPY_FEATURE_ENABLED) {
+            verifyScrcpyLocation()
+            updateScrcpyLocationSettingsState()
+        }
 
         return panel(top = panel)
     }
@@ -268,8 +273,10 @@ class AdbWifiConfigurable : Configurable {
         if (adbSystemPathCheckbox.isSelected != properties.useAdbFromPath) return true
         if (adbLocationField.text != properties.adbLocation) return true
 
-        if (scrcpySystemPathCheckbox.isSelected != properties.useScrcpyFromPath) return true
-        if (scrcpyLocationField.text != properties.scrcpyLocation) return true
+        if (SCRCPY_FEATURE_ENABLED) {
+            if (scrcpySystemPathCheckbox.isSelected != properties.useScrcpyFromPath) return true
+            if (scrcpyLocationField.text != properties.scrcpyLocation) return true
+        }
 
         return false
     }
@@ -278,16 +285,20 @@ class AdbWifiConfigurable : Configurable {
         properties.adbLocation = adbLocationField.text
         properties.useAdbFromPath = adbSystemPathCheckbox.isSelected
 
-        properties.scrcpyLocation = scrcpyLocationField.text
-        properties.useScrcpyFromPath = scrcpySystemPathCheckbox.isSelected
+        if (SCRCPY_FEATURE_ENABLED) {
+            properties.scrcpyLocation = scrcpyLocationField.text
+            properties.useScrcpyFromPath = scrcpySystemPathCheckbox.isSelected
+        }
     }
 
     override fun reset() {
         adbSystemPathCheckbox.isSelected = properties.useAdbFromPath
         adbLocationField.text = properties.adbLocation
 
-        scrcpySystemPathCheckbox.isSelected = properties.useScrcpyFromPath
-        scrcpyLocationField.text = properties.scrcpyLocation
+        if (SCRCPY_FEATURE_ENABLED) {
+            scrcpySystemPathCheckbox.isSelected = properties.useScrcpyFromPath
+            scrcpyLocationField.text = properties.scrcpyLocation
+        }
     }
 
     private fun executableChooserDescriptor(): FileChooserDescriptor = when {

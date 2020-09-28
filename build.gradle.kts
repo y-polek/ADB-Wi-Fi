@@ -78,7 +78,7 @@ detekt {
 // Read more: https://github.com/JLLeitschuh/ktlint-gradle
 ktlint {
     version.set("0.37.2")
-    disabledRules.set(setOf("no-wildcard-imports"))
+    disabledRules.set(setOf("no-wildcard-imports", "import-ordering"))
 }
 
 tasks {
