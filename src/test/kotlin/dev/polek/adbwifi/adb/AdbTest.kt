@@ -25,7 +25,14 @@ class AdbTest {
                 "$adb -s R28M51Y8E0H shell getprop ro.product.manufacturer" -> "samsung"
                 "$adb -s R28M51Y8E0H shell getprop ro.build.version.release" -> "10"
                 "$adb -s R28M51Y8E0H shell getprop ro.build.version.sdk" -> "29"
-                "$adb -s R28M51Y8E0H shell ip route" -> "192.168.1.0/24 dev wlan0 proto kernel scope link src 192.168.1.179"
+                "$adb -s R28M51Y8E0H shell ip route" -> {
+                    """
+                        100.118.14.208/29 dev rmnet_data0 proto kernel scope link src 100.118.15.213
+                        192.168.1.0/24 dev wlan0 proto kernel scope link src 192.168.1.179
+                        10.0.2.2 dev eth0  scope link
+                        216.58.215.110 via 10.0.2.2 dev eth0
+                    """.trimIndent()
+                }
 
                 "$adb -s ce0717171c16e33b03 shell getprop ro.serialno" -> "ce0717171c16e33b03"
                 "$adb -s ce0717171c16e33b03 shell getprop ro.product.model" -> "SM-G930F"

@@ -103,8 +103,15 @@ class Adb(
     }
 
     private fun address(deviceId: String): String? {
-        val firstLine = "-s $deviceId shell ip route".exec().firstLine()
-        return DEVICE_ADDRESS_REGEX.matchEntire(firstLine)?.groupValues?.get(1)
+        val address = "-s $deviceId shell ip route".exec()
+            .mapNotNull {
+                val groups = Address.REGEX.matchEntire(it)?.groupValues ?: return@mapNotNull null
+                if (groups.size < 3) return@mapNotNull null
+                return@mapNotNull Address(interfaceName = groups[1], ip = groups[2])
+            }
+            .sortedWith(Address.COMPARATOR)
+            .firstOrNull()
+        return address?.ip
     }
 
     private fun connectionType(deviceId: String): Device.ConnectionType {
@@ -155,10 +162,18 @@ class Adb(
         logCollector.emit(LogEntry.Output(output))
     }
 
+    private class Address(val interfaceName: String, val ip: String) {
+        val isWlan: Boolean = interfaceName.startsWith("wlan", ignoreCase = true)
+
+        companion object {
+            val REGEX = ".*dev\\s*(\\S+)\\s*.*\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b.*".toRegex()
+            val COMPARATOR = compareBy<Address> { it.isWlan }.reversed().thenBy { it.interfaceName }
+        }
+    }
+
     companion object {
 
         private val DEVICE_ID_REGEX = "(.*?)\\s+device".toRegex()
-        private val DEVICE_ADDRESS_REGEX = ".*\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b.*".toRegex()
         private val IS_IP_ADDRESS_REGEX = "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(:\\d{1,5})?".toRegex()
 
         private val DEVICE_COMPARATOR = compareBy<Device>({ it.name }, { it.isWifiDevice })
