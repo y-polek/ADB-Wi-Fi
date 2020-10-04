@@ -90,7 +90,9 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
 
     fun onShareScreenButtonClicked(device: DeviceViewModel) {
         if (scrcpyService.isScrcpyValid()) {
-            scrcpyService.share(device.device)
+            launch(IO) {
+                scrcpyService.share(device.device)
+            }
         } else {
             view?.showInvalidScrcpyLocationError()
         }

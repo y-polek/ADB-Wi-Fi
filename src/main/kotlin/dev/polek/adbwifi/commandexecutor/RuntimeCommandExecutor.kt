@@ -15,12 +15,6 @@ class RuntimeCommandExecutor : CommandExecutor {
         return process.inputStream.bufferedReader().lineSequence()
     }
 
-    override fun execSilently(command: String, vararg envp: String) {
-        log { "execSilently> $command ${envp.joinToString()}" }
-
-        runtime.exec(command, envp)
-    }
-
     @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun execAsync(command: String, vararg envp: String): String {
         log { "execAsync> $command ${envp.joinToString()}" }

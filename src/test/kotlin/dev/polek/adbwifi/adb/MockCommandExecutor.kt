@@ -8,10 +8,6 @@ abstract class MockCommandExecutor : CommandExecutor {
         return mockOutput(command).lineSequence()
     }
 
-    override fun execSilently(command: String, vararg envp: String) {
-        /* no-op */
-    }
-
     override suspend fun execAsync(command: String, vararg envp: String): String {
         return mockOutput(command)
     }
