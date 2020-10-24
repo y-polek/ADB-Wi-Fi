@@ -41,6 +41,7 @@ class PropertiesServiceImpl : PropertiesService {
         get() = properties.getBoolean(SCRCPY_ENABLED, defaultScrcpyEnabled)
         set(value) {
             properties.setValue(SCRCPY_ENABLED, value, defaultScrcpyEnabled)
+            notifyAdbLocationListener()
         }
 
     override val defaultScrcpyEnabled: Boolean
@@ -84,6 +85,16 @@ class PropertiesServiceImpl : PropertiesService {
             else -> isValidAdbLocation(adbLocation)
         }
         adbLocationListener?.invoke(isValid)
+    }
+
+    override var scrcpyEnabledListener: ((isEnabled: Boolean) -> Unit)? = null
+        set(value) {
+            field = value
+            notifyScrcpyEnabledListener()
+        }
+
+    private fun notifyScrcpyEnabledListener() {
+        scrcpyEnabledListener?.invoke(scrcpyEnabled)
     }
 
     private companion object {

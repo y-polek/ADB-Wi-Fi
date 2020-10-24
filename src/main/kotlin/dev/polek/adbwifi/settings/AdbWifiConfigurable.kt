@@ -219,6 +219,10 @@ class AdbWifiConfigurable : Configurable {
             }
         )
 
+        createScrcpyLocationSettings(panel)
+    }
+
+    private fun createScrcpyLocationSettings(panel: JPanel) {
         scrcpySystemPathCheckbox = JBCheckBox(PluginBundle.message("scrcpyUseSystemPath"))
         scrcpySystemPathCheckbox.isSelected = properties.useScrcpyFromPath
         scrcpySystemPathCheckbox.addItemListener {

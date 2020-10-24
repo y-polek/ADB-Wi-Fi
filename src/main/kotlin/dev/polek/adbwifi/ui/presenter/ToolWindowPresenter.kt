@@ -37,11 +37,13 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
         subscribeToDeviceList()
         subscribeToLogEvents()
         subscribeToAdbLocationChanges()
+        subscribeToScrcpyEnabledState()
     }
 
     override fun detach() {
         unsubscribeFromDeviceList()
         unsubscribeFromLogEvents()
+        unsubscribeFromAdbLocationChanges()
         unsubscribeFromAdbLocationChanges()
         super.detach()
     }
@@ -121,8 +123,11 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     }
 
     private fun updateDeviceLists() {
+        val isScrcpyEnabled = propertiesService.scrcpyEnabled
+
         devices.forEach {
             it.isInProgress = connectingDevices.contains(it.uniqueId)
+            it.isShareScreenButtonVisible = isScrcpyEnabled
         }
         pinnedDevices.forEach {
             it.isInProgress = connectingDevices.contains(it.uniqueId)
@@ -158,6 +163,16 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
 
     private fun unsubscribeFromLogEvents() {
         logService.logVisibilityListener = null
+    }
+
+    private fun subscribeToScrcpyEnabledState() {
+        propertiesService.scrcpyEnabledListener = {
+            updateDeviceLists()
+        }
+    }
+
+    private fun unsubscribeFromScrcpyEnabledState() {
+        propertiesService.scrcpyEnabledListener = null
     }
 
     private fun updateLogVisibility(isLogVisible: Boolean) {

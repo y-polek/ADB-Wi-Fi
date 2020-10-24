@@ -13,7 +13,7 @@ data class DeviceViewModel(
     val icon: Icon,
     val hasAddress: Boolean,
     val buttonType: ButtonType,
-    val isShareScreenButtonVisible: Boolean,
+    var isShareScreenButtonVisible: Boolean,
     val isRemoveButtonVisible: Boolean,
     var isInProgress: Boolean = false
 ) {
@@ -47,7 +47,7 @@ data class DeviceViewModel(
                 icon = device.icon(),
                 hasAddress = device.hasAddress(),
                 buttonType = device.buttonType(),
-                isShareScreenButtonVisible = true,
+                isShareScreenButtonVisible = false,
                 isRemoveButtonVisible = false
             )
         }

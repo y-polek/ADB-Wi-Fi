@@ -16,4 +16,5 @@ interface PropertiesService {
     val defaultScrcpyLocation: String
 
     var adbLocationListener: ((isValid: Boolean) -> Unit)?
+    var scrcpyEnabledListener: ((isEnabled: Boolean) -> Unit)?
 }
