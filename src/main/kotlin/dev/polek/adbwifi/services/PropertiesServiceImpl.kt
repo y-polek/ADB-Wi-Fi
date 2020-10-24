@@ -2,6 +2,7 @@ package dev.polek.adbwifi.services
 
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.util.SystemInfo
+import dev.polek.adbwifi.utils.findScrcpyExecInSystemPath
 import dev.polek.adbwifi.utils.hasAdbInSystemPath
 import dev.polek.adbwifi.utils.isValidAdbLocation
 import java.io.File
@@ -34,6 +35,17 @@ class PropertiesServiceImpl : PropertiesService {
         set(value) {
             properties.setValue(ADB_LOCATION_PROPERTY, value)
             notifyAdbLocationListener()
+        }
+
+    override var scrcpyEnabled: Boolean
+        get() = properties.getBoolean(SCRCPY_ENABLED, defaultScrcpyEnabled)
+        set(value) {
+            properties.setValue(SCRCPY_ENABLED, value, defaultScrcpyEnabled)
+        }
+
+    override val defaultScrcpyEnabled: Boolean
+        get() {
+            return findScrcpyExecInSystemPath() != null
         }
 
     override var useScrcpyFromPath: Boolean
@@ -83,6 +95,7 @@ class PropertiesServiceImpl : PropertiesService {
         private const val ADB_FROM_SYSTEM_PATH = "dev.polek.adbwifi.ADB_FROM_SYSTEM_PATH"
         private const val ADB_LOCATION_PROPERTY = "dev.polek.adbwifi.ADB_LOCATION_PROPERTY"
 
+        private const val SCRCPY_ENABLED = "dev.polek.adbwifi.SCRCPY_ENABLED"
         private const val SCRCPY_FROM_SYSTEM_PATH = "dev.polek.adbwifi.SCRCPY_FROM_SYSTEM_PATH"
         private const val SCRCPY_LOCATION_PROPERTY = "dev.polek.adbwifi.SCRCPY_LOCATION_PROPERTY"
     }

@@ -40,6 +40,7 @@ class AdbWifiConfigurable : Configurable {
     private lateinit var adbStatusLabel: JBLabel
     private lateinit var defaultAdbLocationButton: HyperlinkLabel
 
+    private lateinit var scrcpyEnabledCheckbox: JBCheckBox
     private lateinit var scrcpySystemPathCheckbox: JBCheckBox
     private lateinit var scrcpyLocationTitle: JBLabel
     private lateinit var scrcpyLocationField: TextFieldWithBrowseButton
@@ -62,7 +63,7 @@ class AdbWifiConfigurable : Configurable {
 
         if (SCRCPY_FEATURE_ENABLED) {
             verifyScrcpyLocation()
-            updateScrcpyLocationSettingsState()
+            updateScrcpySettingsState()
         }
 
         return panel(top = panel)
@@ -202,16 +203,32 @@ class AdbWifiConfigurable : Configurable {
             }
         )
 
+        scrcpyEnabledCheckbox = JBCheckBox(PluginBundle.message("scrcpyEnabled"))
+        scrcpyEnabledCheckbox.isSelected = properties.scrcpyEnabled
+        scrcpyEnabledCheckbox.addItemListener {
+            updateScrcpySettingsState()
+        }
+        panel.add(
+            scrcpyEnabledCheckbox,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 5
+                gridwidth = 3
+                anchor = GridBagConstraints.LINE_START
+                insets = Insets(0, GROUP_LEFT_INSET, 4, 0)
+            }
+        )
+
         scrcpySystemPathCheckbox = JBCheckBox(PluginBundle.message("scrcpyUseSystemPath"))
         scrcpySystemPathCheckbox.isSelected = properties.useScrcpyFromPath
         scrcpySystemPathCheckbox.addItemListener {
-            updateScrcpyLocationSettingsState()
+            updateScrcpySettingsState()
         }
         panel.add(
             scrcpySystemPathCheckbox,
             GridBagConstraints().apply {
                 gridx = 0
-                gridy = 5
+                gridy = 6
                 gridwidth = 3
                 anchor = GridBagConstraints.LINE_START
                 insets = Insets(0, GROUP_LEFT_INSET, 4, 0)
@@ -223,7 +240,7 @@ class AdbWifiConfigurable : Configurable {
             scrcpyLocationTitle,
             GridBagConstraints().apply {
                 gridx = 0
-                gridy = 6
+                gridy = 7
                 gridwidth = 1
                 anchor = GridBagConstraints.LINE_START
                 insets = Insets(0, GROUP_LEFT_INSET, 0, 8)
@@ -248,7 +265,7 @@ class AdbWifiConfigurable : Configurable {
             scrcpyLocationField,
             GridBagConstraints().apply {
                 gridx = 1
-                gridy = 6
+                gridy = 7
                 gridwidth = 2
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
@@ -260,7 +277,7 @@ class AdbWifiConfigurable : Configurable {
             scrcpyStatusLabel,
             GridBagConstraints().apply {
                 gridx = 1
-                gridy = 7
+                gridy = 8
                 gridwidth = 1
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
@@ -274,6 +291,7 @@ class AdbWifiConfigurable : Configurable {
         if (adbLocationField.text != properties.adbLocation) return true
 
         if (SCRCPY_FEATURE_ENABLED) {
+            if (scrcpyEnabledCheckbox.isSelected != properties.scrcpyEnabled) return true
             if (scrcpySystemPathCheckbox.isSelected != properties.useScrcpyFromPath) return true
             if (scrcpyLocationField.text != properties.scrcpyLocation) return true
         }
@@ -286,6 +304,7 @@ class AdbWifiConfigurable : Configurable {
         properties.useAdbFromPath = adbSystemPathCheckbox.isSelected
 
         if (SCRCPY_FEATURE_ENABLED) {
+            properties.scrcpyEnabled = scrcpyEnabledCheckbox.isSelected
             properties.scrcpyLocation = scrcpyLocationField.text
             properties.useScrcpyFromPath = scrcpySystemPathCheckbox.isSelected
         }
@@ -296,6 +315,7 @@ class AdbWifiConfigurable : Configurable {
         adbLocationField.text = properties.adbLocation
 
         if (SCRCPY_FEATURE_ENABLED) {
+            scrcpyEnabledCheckbox.isSelected = properties.scrcpyEnabled
             scrcpySystemPathCheckbox.isSelected = properties.useScrcpyFromPath
             scrcpyLocationField.text = properties.scrcpyLocation
         }
@@ -368,11 +388,14 @@ class AdbWifiConfigurable : Configurable {
         defaultAdbLocationButton.isVisible = enabled && adbStatusLabel.icon == ERROR_ICON
     }
 
-    private fun updateScrcpyLocationSettingsState() {
-        val enabled = !scrcpySystemPathCheckbox.isSelected
-        scrcpyLocationTitle.isEnabled = enabled
-        scrcpyLocationField.isEnabled = enabled
-        scrcpyStatusLabel.isVisible = enabled
+    private fun updateScrcpySettingsState() {
+        val scrcpyEnabled = scrcpyEnabledCheckbox.isSelected
+        scrcpySystemPathCheckbox.isEnabled = scrcpyEnabled
+
+        val locationEnabled = scrcpyEnabled && !scrcpySystemPathCheckbox.isSelected
+        scrcpyLocationTitle.isEnabled = locationEnabled
+        scrcpyLocationField.isEnabled = locationEnabled
+        scrcpyStatusLabel.isVisible = locationEnabled
     }
 
     private class ExecutablePathTextComponentAccessor(

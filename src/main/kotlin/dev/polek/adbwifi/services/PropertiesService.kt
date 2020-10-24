@@ -9,6 +9,8 @@ interface PropertiesService {
     var adbLocation: String
     val defaultAdbLocation: String
 
+    var scrcpyEnabled: Boolean
+    val defaultScrcpyEnabled: Boolean
     var useScrcpyFromPath: Boolean
     var scrcpyLocation: String
     val defaultScrcpyLocation: String

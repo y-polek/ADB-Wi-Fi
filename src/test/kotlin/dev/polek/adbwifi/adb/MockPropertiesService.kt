@@ -9,6 +9,8 @@ class MockPropertiesService(
     override var adbLocation: String = "/bin",
     override var defaultAdbLocation: String = "/bin",
     override var adbLocationListener: ((isValid: Boolean) -> Unit)? = null,
+    override var scrcpyEnabled: Boolean = true,
+    override val defaultScrcpyEnabled: Boolean = true,
     override var useScrcpyFromPath: Boolean = true,
     override var scrcpyLocation: String = "/bin",
     override val defaultScrcpyLocation: String = ""
