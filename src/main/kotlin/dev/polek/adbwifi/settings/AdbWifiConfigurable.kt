@@ -15,10 +15,15 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.TitledSeparator
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
-import dev.polek.adbwifi.SCRCPY_FEATURE_ENABLED
+import com.intellij.ui.components.JBTextArea
+import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
+import dev.polek.adbwifi.SCRCPY_FEATURE_ENABLED
 import dev.polek.adbwifi.services.PropertiesService
-import dev.polek.adbwifi.utils.*
+import dev.polek.adbwifi.utils.GridBagLayoutPanel
+import dev.polek.adbwifi.utils.isValidAdbLocation
+import dev.polek.adbwifi.utils.isValidScrcpyLocation
+import dev.polek.adbwifi.utils.panel
 import java.awt.GridBagConstraints
 import java.awt.Insets
 import java.awt.event.MouseAdapter
@@ -220,6 +225,18 @@ class AdbWifiConfigurable : Configurable {
         )
 
         createScrcpyLocationSettings(panel)
+
+        panel.add(
+            createScrcpyOptionsPanel(),
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 9
+                gridwidth = 3
+                fill = GridBagConstraints.HORIZONTAL
+                weightx = 1.0
+                insets = Insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
+            }
+        )
     }
 
     private fun createScrcpyLocationSettings(panel: JPanel) {
@@ -288,6 +305,64 @@ class AdbWifiConfigurable : Configurable {
                 insets = Insets(4, 0, 0, 0)
             }
         )
+    }
+
+    private fun createScrcpyOptionsPanel(): JComponent {
+        val panel = GridBagLayoutPanel()
+
+        val title = JBLabel(PluginBundle.message("scrcpyFlagsTitle"))
+        panel.add(
+            title,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 0
+                gridwidth = 2
+                anchor = GridBagConstraints.LINE_START
+            }
+        )
+
+        val textArea = JBTextArea(3, 1)
+        textArea.lineWrap = true
+        textArea.margin = Insets(8, 8, 8, 8)
+        panel.add(
+            textArea,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 1
+                gridwidth = 2
+                fill = GridBagConstraints.HORIZONTAL
+                weightx = 1.0
+                weighty = 1.0
+                insets = Insets(4, 0, 0, 0)
+            }
+        )
+
+        val subtitle = JBLabel(PluginBundle.message("scrcpyFlagsSubtitle"))
+        subtitle.componentStyle = UIUtil.ComponentStyle.SMALL
+        subtitle.fontColor = UIUtil.FontColor.BRIGHTER
+        panel.add(
+            subtitle,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 2
+                anchor = GridBagConstraints.LINE_START
+                insets = Insets(4, 0, 0, 0)
+            }
+        )
+
+        val docLink = HyperlinkLabel(PluginBundle.message("scrcpyDocLabel"))
+        docLink.setHyperlinkTarget("https://github.com/Genymobile/scrcpy#features")
+        panel.add(
+            docLink,
+            GridBagConstraints().apply {
+                gridx = 1
+                gridy = 2
+                anchor = GridBagConstraints.LINE_END
+                insets = Insets(4, 0, 0, 0)
+            }
+        )
+
+        return panel
     }
 
     override fun isModified(): Boolean {
