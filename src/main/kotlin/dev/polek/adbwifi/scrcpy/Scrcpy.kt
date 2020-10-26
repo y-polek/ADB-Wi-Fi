@@ -1,13 +1,12 @@
 package dev.polek.adbwifi.scrcpy
 
 import dev.polek.adbwifi.LOG
+import dev.polek.adbwifi.commandexecutor.CmdResult
 import dev.polek.adbwifi.commandexecutor.CommandExecutor
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.services.PropertiesService
-import dev.polek.adbwifi.utils.adbExec
-import dev.polek.adbwifi.utils.findAdbExecInSystemPath
-import dev.polek.adbwifi.utils.findScrcpyExecInSystemPath
-import dev.polek.adbwifi.utils.scrcpyExec
+import dev.polek.adbwifi.utils.*
+import kotlinx.coroutines.delay
 import java.io.IOException
 
 class Scrcpy(
@@ -45,19 +44,30 @@ class Scrcpy(
             }
         }
 
-    fun share(device: Device) {
+    suspend fun share(device: Device): CmdResult {
         val scrcpyExe = scrcpyExe ?: throw IllegalStateException("'scrcpy' executable not found")
         val processBuilder = ProcessBuilder(listOf(scrcpyExe, "-s", device.id) + cmdFlags())
+            .redirectErrorStream(true)
         processBuilder.environment()["ADB"] = adbExe
-        try {
-            processBuilder.start()
+
+        return try {
+            val process = processBuilder.start()
+            while (process.isAlive) {
+                delay(1000)
+            }
+            val exitCode = process.exitValue()
+            val output = process.output()
+            LOG.info("scrcpy finished ($exitCode): $output")
+            CmdResult(exitCode, output)
         } catch (e: IOException) {
             LOG.warn("Failed to execute command '${processBuilder.command().joinToString(" ")}': ${e.message}")
+            CmdResult(-1, e.message.orEmpty())
         }
     }
 
     private fun cmdFlags(): List<String> {
         return properties.scrcpyCmdFlags.split(WHITESPACE_REGEX)
+            .filter(String::isNotBlank)
     }
 
     private companion object {

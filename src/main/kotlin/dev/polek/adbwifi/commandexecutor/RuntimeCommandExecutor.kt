@@ -1,6 +1,7 @@
 package dev.polek.adbwifi.commandexecutor
 
 import dev.polek.adbwifi.LOG
+import dev.polek.adbwifi.utils.output
 import kotlinx.coroutines.delay
 import java.io.IOException
 
@@ -47,7 +48,5 @@ class RuntimeCommandExecutor : CommandExecutor {
                 LOG.warn(lazyMessage())
             }
         }
-
-        private fun Process.output(): String = this.inputStream.bufferedReader().readText().trim('\n')
     }
 }

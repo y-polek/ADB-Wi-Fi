@@ -228,6 +228,17 @@ class AdbWiFiToolWindow(
         notification.notify(project)
     }
 
+    override fun showScrcpyError(error: String) {
+        val notification = NOTIFICATION_GROUP.createNotification(
+            PluginBundle.message("name"),
+            null,
+            error,
+            NotificationType.ERROR
+        )
+        notification.addAction(OpenSettingsNotificationAction())
+        notification.notify(project)
+    }
+
     private companion object {
         private const val DEFAULT_PANEL_PROPORTION = 0.6f
         private val NOTIFICATION_GROUP = NotificationGroup(

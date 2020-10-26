@@ -15,6 +15,8 @@ interface ToolWindowView {
 
     fun showInvalidScrcpyLocationError()
 
+    fun showScrcpyError(error: String)
+
     fun openLog()
 
     fun closeLog()
