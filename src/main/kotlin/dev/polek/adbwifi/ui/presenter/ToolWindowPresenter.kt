@@ -44,7 +44,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
         unsubscribeFromDeviceList()
         unsubscribeFromLogEvents()
         unsubscribeFromAdbLocationChanges()
-        unsubscribeFromAdbLocationChanges()
+        unsubscribeFromScrcpyEnabledState()
         super.detach()
     }
 
@@ -104,6 +104,20 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     }
 
     fun onRemoveDeviceButtonClicked(device: DeviceViewModel) {
+        if (propertiesService.doNotShowRemoveDeviceConfirmation) {
+            removeDevice(device)
+        } else {
+            view?.showRemoveDeviceConfirmation(device)
+        }
+    }
+
+    fun onRemoveDeviceConfirmed(device: DeviceViewModel, doNotAskAgain: Boolean) {
+        propertiesService.doNotShowRemoveDeviceConfirmation = doNotAskAgain
+
+        removeDevice(device)
+    }
+
+    private fun removeDevice(device: DeviceViewModel) {
         pinDeviceService.removePreviouslyConnectedDevice(device.device)
         pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
         updateDeviceLists()

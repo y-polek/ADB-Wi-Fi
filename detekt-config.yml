@@ -8,7 +8,10 @@ formatting:
     active: false
 complexity:
   TooManyFunctions:
+    thresholdInClasses: 20
+    ignoreDeprecated: true
     ignorePrivate: true
+    ignoreOverridden: true
   LongMethod:
     active: true
     threshold: 100

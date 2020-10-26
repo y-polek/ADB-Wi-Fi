@@ -10,6 +10,8 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.DialogWrapper
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ex.ToolWindowManagerListener
@@ -237,6 +239,29 @@ class AdbWiFiToolWindow(
         )
         notification.addAction(OpenSettingsNotificationAction())
         notification.notify(project)
+    }
+
+    override fun showRemoveDeviceConfirmation(device: DeviceViewModel) {
+        val doNotAskAgain = object : DialogWrapper.DoNotAskOption.Adapter() {
+            override fun rememberChoice(isSelected: Boolean, exitCode: Int) {
+                if (exitCode == Messages.OK) {
+                    presenter.onRemoveDeviceConfirmed(device, doNotAskAgain = isSelected)
+                }
+            }
+
+            override fun getDoNotShowMessage(): String {
+                return PluginBundle.message("doNotAskAgain")
+            }
+        }
+        Messages.showOkCancelDialog(
+            project,
+            PluginBundle.message("removeDeviceConfirmation"),
+            device.titleText,
+            PluginBundle.message("removeButton"),
+            PluginBundle.message("cancelButton"),
+            null,
+            doNotAskAgain
+        )
     }
 
     private companion object {
