@@ -18,20 +18,18 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
-import dev.polek.adbwifi.SCRCPY_FEATURE_ENABLED
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.utils.GridBagLayoutPanel
 import dev.polek.adbwifi.utils.isValidAdbLocation
 import dev.polek.adbwifi.utils.isValidScrcpyLocation
 import dev.polek.adbwifi.utils.panel
+import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.Insets
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.io.File
-import javax.swing.JComponent
-import javax.swing.JPanel
-import javax.swing.JTextField
+import javax.swing.*
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
@@ -56,25 +54,25 @@ class AdbWifiConfigurable : Configurable {
     }
 
     override fun createComponent(): JComponent? {
-        val panel = GridBagLayoutPanel()
+        val panel = JPanel()
+        panel.layout = BoxLayout(panel, BoxLayout.PAGE_AXIS)
 
-        createAdbSettings(panel)
-        if (SCRCPY_FEATURE_ENABLED) {
-            createScrcpySettings(panel)
-        }
+        panel.add(createAdbSettingsPanel())
+        panel.add(Box.createRigidArea(Dimension(0, GROUP_VERTICAL_INSET)))
+        panel.add(createScrcpySettingsPanel())
 
         verifyAdbLocation()
         updateAdbLocationSettingsState()
 
-        if (SCRCPY_FEATURE_ENABLED) {
-            verifyScrcpyLocation()
-            updateScrcpySettingsState()
-        }
+        verifyScrcpyLocation()
+        updateScrcpySettingsState()
 
         return panel(top = panel)
     }
 
-    private fun createAdbSettings(panel: JPanel) {
+    private fun createAdbSettingsPanel(): JPanel {
+        val panel = GridBagLayoutPanel()
+
         val separator = TitledSeparator(PluginBundle.message("adbSettingsTitle"))
         panel.add(
             separator,
@@ -84,7 +82,6 @@ class AdbWifiConfigurable : Configurable {
                 gridwidth = 3
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
-                insets = Insets(0, 0, GROUP_VERTICAL_INSET, 0)
             }
         )
 
@@ -100,7 +97,7 @@ class AdbWifiConfigurable : Configurable {
                 gridy = 1
                 gridwidth = 3
                 anchor = GridBagConstraints.LINE_START
-                insets = Insets(0, GROUP_LEFT_INSET, 4, 0)
+                insets = Insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
             }
         )
 
@@ -112,7 +109,7 @@ class AdbWifiConfigurable : Configurable {
                 gridy = 2
                 gridwidth = 1
                 anchor = GridBagConstraints.LINE_START
-                insets = Insets(0, GROUP_LEFT_INSET, 0, 8)
+                insets = Insets(COMPONENT_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 8)
             }
         )
 
@@ -138,6 +135,7 @@ class AdbWifiConfigurable : Configurable {
                 gridwidth = 2
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
+                insets = Insets(COMPONENT_VERTICAL_INSET, 0, 0, 0)
             }
         )
 
@@ -150,7 +148,7 @@ class AdbWifiConfigurable : Configurable {
                 gridwidth = 1
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
-                insets = Insets(4, 0, 0, 0)
+                insets = Insets(COMPONENT_VERTICAL_INSET, 0, 0, 0)
             }
         )
 
@@ -169,9 +167,13 @@ class AdbWifiConfigurable : Configurable {
                 insets = Insets(4, 0, 0, 0)
             }
         )
+
+        return panel
     }
 
-    private fun createScrcpySettings(panel: JPanel) {
+    private fun createScrcpySettingsPanel(): JPanel {
+        val panel = GridBagLayoutPanel()
+
         val helpButton = ContextHelpLabel.createWithLink(
             PluginBundle.message("scrcpyHelpTitle"),
             PluginBundle.message("scrcpyHelpDescription"),
@@ -180,6 +182,8 @@ class AdbWifiConfigurable : Configurable {
             BrowserUtil.browse(installScrcpyUrl)
         }
         val header = GridBagLayoutPanel().apply {
+            withMinimumHeight(28)
+
             add(JBLabel(PluginBundle.message("scrcpySettingsTitle")), GridBagConstraints())
             add(
                 helpButton,
@@ -200,11 +204,10 @@ class AdbWifiConfigurable : Configurable {
             header,
             GridBagConstraints().apply {
                 gridx = 0
-                gridy = 4
+                gridy = 0
                 gridwidth = 3
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
-                insets = Insets(GROUP_VERTICAL_INSET, 0, GROUP_VERTICAL_INSET, 0)
             }
         )
 
@@ -217,29 +220,43 @@ class AdbWifiConfigurable : Configurable {
             scrcpyEnabledCheckbox,
             GridBagConstraints().apply {
                 gridx = 0
-                gridy = 5
+                gridy = 1
                 gridwidth = 3
                 anchor = GridBagConstraints.LINE_START
-                insets = Insets(0, GROUP_LEFT_INSET, 4, 0)
+                insets = Insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
             }
         )
 
-        createScrcpyLocationSettings(panel)
-
         panel.add(
-            createScrcpyOptionsPanel(),
+            createScrcpyLocationSettingsPanel(),
             GridBagConstraints().apply {
                 gridx = 0
-                gridy = 9
+                gridy = 2
                 gridwidth = 3
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
                 insets = Insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
             }
         )
+
+        panel.add(
+            createScrcpyOptionsPanel(),
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 3
+                gridwidth = 3
+                fill = GridBagConstraints.HORIZONTAL
+                weightx = 1.0
+                insets = Insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
+            }
+        )
+
+        return panel
     }
 
-    private fun createScrcpyLocationSettings(panel: JPanel) {
+    private fun createScrcpyLocationSettingsPanel(): JPanel {
+        val panel = GridBagLayoutPanel()
+
         scrcpySystemPathCheckbox = JBCheckBox(PluginBundle.message("scrcpyUseSystemPath"))
         scrcpySystemPathCheckbox.isSelected = properties.useScrcpyFromPath
         scrcpySystemPathCheckbox.addItemListener {
@@ -249,10 +266,9 @@ class AdbWifiConfigurable : Configurable {
             scrcpySystemPathCheckbox,
             GridBagConstraints().apply {
                 gridx = 0
-                gridy = 6
+                gridy = 0
                 gridwidth = 3
                 anchor = GridBagConstraints.LINE_START
-                insets = Insets(0, GROUP_LEFT_INSET, 4, 0)
             }
         )
 
@@ -261,10 +277,10 @@ class AdbWifiConfigurable : Configurable {
             scrcpyLocationTitle,
             GridBagConstraints().apply {
                 gridx = 0
-                gridy = 7
+                gridy = 1
                 gridwidth = 1
                 anchor = GridBagConstraints.LINE_START
-                insets = Insets(0, GROUP_LEFT_INSET, 0, 8)
+                insets = Insets(COMPONENT_VERTICAL_INSET, 0, 0, 8)
             }
         )
 
@@ -286,10 +302,11 @@ class AdbWifiConfigurable : Configurable {
             scrcpyLocationField,
             GridBagConstraints().apply {
                 gridx = 1
-                gridy = 7
+                gridy = 1
                 gridwidth = 2
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
+                insets = Insets(COMPONENT_VERTICAL_INSET, 0, 0, 0)
             }
         )
 
@@ -298,13 +315,15 @@ class AdbWifiConfigurable : Configurable {
             scrcpyStatusLabel,
             GridBagConstraints().apply {
                 gridx = 1
-                gridy = 8
+                gridy = 2
                 gridwidth = 1
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
-                insets = Insets(4, 0, 0, 0)
+                insets = Insets(COMPONENT_VERTICAL_INSET, 0, 0, 0)
             }
         )
+
+        return panel
     }
 
     private fun createScrcpyOptionsPanel(): JComponent {
@@ -369,11 +388,9 @@ class AdbWifiConfigurable : Configurable {
         if (adbSystemPathCheckbox.isSelected != properties.useAdbFromPath) return true
         if (adbLocationField.text != properties.adbLocation) return true
 
-        if (SCRCPY_FEATURE_ENABLED) {
-            if (scrcpyEnabledCheckbox.isSelected != properties.scrcpyEnabled) return true
-            if (scrcpySystemPathCheckbox.isSelected != properties.useScrcpyFromPath) return true
-            if (scrcpyLocationField.text != properties.scrcpyLocation) return true
-        }
+        if (scrcpyEnabledCheckbox.isSelected != properties.scrcpyEnabled) return true
+        if (scrcpySystemPathCheckbox.isSelected != properties.useScrcpyFromPath) return true
+        if (scrcpyLocationField.text != properties.scrcpyLocation) return true
 
         return false
     }
@@ -382,22 +399,18 @@ class AdbWifiConfigurable : Configurable {
         properties.adbLocation = adbLocationField.text
         properties.useAdbFromPath = adbSystemPathCheckbox.isSelected
 
-        if (SCRCPY_FEATURE_ENABLED) {
-            properties.scrcpyEnabled = scrcpyEnabledCheckbox.isSelected
-            properties.scrcpyLocation = scrcpyLocationField.text
-            properties.useScrcpyFromPath = scrcpySystemPathCheckbox.isSelected
-        }
+        properties.scrcpyEnabled = scrcpyEnabledCheckbox.isSelected
+        properties.scrcpyLocation = scrcpyLocationField.text
+        properties.useScrcpyFromPath = scrcpySystemPathCheckbox.isSelected
     }
 
     override fun reset() {
         adbSystemPathCheckbox.isSelected = properties.useAdbFromPath
         adbLocationField.text = properties.adbLocation
 
-        if (SCRCPY_FEATURE_ENABLED) {
-            scrcpyEnabledCheckbox.isSelected = properties.scrcpyEnabled
-            scrcpySystemPathCheckbox.isSelected = properties.useScrcpyFromPath
-            scrcpyLocationField.text = properties.scrcpyLocation
-        }
+        scrcpyEnabledCheckbox.isSelected = properties.scrcpyEnabled
+        scrcpySystemPathCheckbox.isSelected = properties.useScrcpyFromPath
+        scrcpyLocationField.text = properties.scrcpyLocation
     }
 
     private fun executableChooserDescriptor(): FileChooserDescriptor = when {
@@ -495,6 +508,7 @@ class AdbWifiConfigurable : Configurable {
     private companion object {
         private const val GROUP_VERTICAL_INSET = 10
         private const val GROUP_LEFT_INSET = 20
+        private const val COMPONENT_VERTICAL_INSET = 4
         private val OK_ICON = IconLoader.getIcon("AllIcons.General.InspectionsOK")
         private val ERROR_ICON = IconLoader.getIcon("AllIcons.General.Error")
         private val VERIFIED_MESSAGE = PluginBundle.message("adbPathVerifiedMessage")
