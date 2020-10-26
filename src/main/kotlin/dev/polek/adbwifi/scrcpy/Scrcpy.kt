@@ -47,12 +47,20 @@ class Scrcpy(
 
     fun share(device: Device) {
         val scrcpyExe = scrcpyExe ?: throw IllegalStateException("'scrcpy' executable not found")
-        val processBuilder = ProcessBuilder(scrcpyExe, "-s", device.id)
+        val processBuilder = ProcessBuilder(listOf(scrcpyExe, "-s", device.id) + cmdFlags())
         processBuilder.environment()["ADB"] = adbExe
         try {
             processBuilder.start()
         } catch (e: IOException) {
             LOG.warn("Failed to execute command '${processBuilder.command().joinToString(" ")}': ${e.message}")
         }
+    }
+
+    private fun cmdFlags(): List<String> {
+        return properties.scrcpyCmdFlags.split(WHITESPACE_REGEX)
+    }
+
+    private companion object {
+        private val WHITESPACE_REGEX = "\\s+".toRegex()
     }
 }
