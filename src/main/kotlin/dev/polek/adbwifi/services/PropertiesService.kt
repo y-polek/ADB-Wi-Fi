@@ -14,6 +14,7 @@ interface PropertiesService {
     var useScrcpyFromPath: Boolean
     var scrcpyLocation: String
     val defaultScrcpyLocation: String
+    var scrcpyCmdFlags: String
 
     var adbLocationListener: ((isValid: Boolean) -> Unit)?
     var scrcpyEnabledListener: ((isEnabled: Boolean) -> Unit)?

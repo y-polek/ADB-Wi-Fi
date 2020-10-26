@@ -61,6 +61,12 @@ class PropertiesServiceImpl : PropertiesService {
             properties.setValue(SCRCPY_LOCATION_PROPERTY, value)
         }
 
+    override var scrcpyCmdFlags: String
+        get() = properties.getValue(SCRCPY_CMD_FLAGS, "")
+        set(value) {
+            properties.setValue(SCRCPY_CMD_FLAGS, value)
+        }
+
     override val defaultAdbLocation: String by lazy {
         val home = System.getProperty("user.home")
         val path = when {
@@ -109,5 +115,6 @@ class PropertiesServiceImpl : PropertiesService {
         private const val SCRCPY_ENABLED = "dev.polek.adbwifi.SCRCPY_ENABLED"
         private const val SCRCPY_FROM_SYSTEM_PATH = "dev.polek.adbwifi.SCRCPY_FROM_SYSTEM_PATH"
         private const val SCRCPY_LOCATION_PROPERTY = "dev.polek.adbwifi.SCRCPY_LOCATION_PROPERTY"
+        private const val SCRCPY_CMD_FLAGS = "dev.polek.adbwifi.SCRCPY_CMD_FLAGS"
     }
 }

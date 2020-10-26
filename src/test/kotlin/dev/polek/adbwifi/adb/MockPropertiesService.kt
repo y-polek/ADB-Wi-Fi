@@ -14,5 +14,6 @@ class MockPropertiesService(
     override var useScrcpyFromPath: Boolean = true,
     override var scrcpyLocation: String = "/bin",
     override val defaultScrcpyLocation: String = "",
+    override var scrcpyCmdFlags: String = "",
     override var scrcpyEnabledListener: ((isEnabled: Boolean) -> Unit)? = null
 ) : PropertiesService

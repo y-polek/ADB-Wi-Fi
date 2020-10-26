@@ -394,6 +394,7 @@ class AdbWifiConfigurable : Configurable {
         if (scrcpyEnabledCheckbox.isSelected != properties.scrcpyEnabled) return true
         if (scrcpySystemPathCheckbox.isSelected != properties.useScrcpyFromPath) return true
         if (scrcpyLocationField.text != properties.scrcpyLocation) return true
+        if (scrcpyCmdFlagsTextArea.text.trim() != properties.scrcpyCmdFlags) return true
 
         return false
     }
@@ -405,6 +406,7 @@ class AdbWifiConfigurable : Configurable {
         properties.scrcpyEnabled = scrcpyEnabledCheckbox.isSelected
         properties.scrcpyLocation = scrcpyLocationField.text
         properties.useScrcpyFromPath = scrcpySystemPathCheckbox.isSelected
+        properties.scrcpyCmdFlags = scrcpyCmdFlagsTextArea.text.trim()
     }
 
     override fun reset() {
@@ -414,6 +416,7 @@ class AdbWifiConfigurable : Configurable {
         scrcpyEnabledCheckbox.isSelected = properties.scrcpyEnabled
         scrcpySystemPathCheckbox.isSelected = properties.useScrcpyFromPath
         scrcpyLocationField.text = properties.scrcpyLocation
+        scrcpyCmdFlagsTextArea.text = properties.scrcpyCmdFlags
     }
 
     private fun executableChooserDescriptor(): FileChooserDescriptor = when {
