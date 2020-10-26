@@ -48,6 +48,8 @@ class AdbWifiConfigurable : Configurable {
     private lateinit var scrcpyLocationTitle: JBLabel
     private lateinit var scrcpyLocationField: TextFieldWithBrowseButton
     private lateinit var scrcpyStatusLabel: JBLabel
+    private lateinit var scrcpyCmdFlagsTitle: JBLabel
+    private lateinit var scrcpyCmdFlagsTextArea: JBTextArea
 
     override fun getDisplayName(): String {
         return PluginBundle.message("settingsPageName")
@@ -329,9 +331,9 @@ class AdbWifiConfigurable : Configurable {
     private fun createScrcpyOptionsPanel(): JComponent {
         val panel = GridBagLayoutPanel()
 
-        val title = JBLabel(PluginBundle.message("scrcpyFlagsTitle"))
+        scrcpyCmdFlagsTitle = JBLabel(PluginBundle.message("scrcpyFlagsTitle"))
         panel.add(
-            title,
+            scrcpyCmdFlagsTitle,
             GridBagConstraints().apply {
                 gridx = 0
                 gridy = 0
@@ -340,11 +342,12 @@ class AdbWifiConfigurable : Configurable {
             }
         )
 
-        val textArea = JBTextArea(3, 1)
-        textArea.lineWrap = true
-        textArea.margin = Insets(8, 8, 8, 8)
+        scrcpyCmdFlagsTextArea = JBTextArea(3, 1).apply {
+            lineWrap = true
+            margin = Insets(8, 8, 8, 8)
+        }
         panel.add(
-            textArea,
+            scrcpyCmdFlagsTextArea,
             GridBagConstraints().apply {
                 gridx = 0
                 gridy = 1
@@ -483,6 +486,8 @@ class AdbWifiConfigurable : Configurable {
     private fun updateScrcpySettingsState() {
         val scrcpyEnabled = scrcpyEnabledCheckbox.isSelected
         scrcpySystemPathCheckbox.isEnabled = scrcpyEnabled
+        scrcpyCmdFlagsTitle.isEnabled = scrcpyEnabled
+        scrcpyCmdFlagsTextArea.isEnabled = scrcpyEnabled
 
         val locationEnabled = scrcpyEnabled && !scrcpySystemPathCheckbox.isSelected
         scrcpyLocationTitle.isEnabled = locationEnabled
