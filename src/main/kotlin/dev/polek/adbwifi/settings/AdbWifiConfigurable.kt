@@ -51,6 +51,8 @@ class AdbWifiConfigurable : Configurable {
     private lateinit var scrcpyCmdFlagsTitle: JBLabel
     private lateinit var scrcpyCmdFlagsTextArea: JBTextArea
 
+    private lateinit var confirmDeviceRemovalCheckbox: JBCheckBox
+
     override fun getDisplayName(): String {
         return PluginBundle.message("settingsPageName")
     }
@@ -62,6 +64,8 @@ class AdbWifiConfigurable : Configurable {
         panel.add(createAdbSettingsPanel())
         panel.add(Box.createRigidArea(Dimension(0, GROUP_VERTICAL_INSET)))
         panel.add(createScrcpySettingsPanel())
+        panel.add(Box.createRigidArea(Dimension(0, GROUP_VERTICAL_INSET)))
+        panel.add(createGeneralSettingsPanel())
 
         verifyAdbLocation()
         updateAdbLocationSettingsState()
@@ -328,7 +332,7 @@ class AdbWifiConfigurable : Configurable {
         return panel
     }
 
-    private fun createScrcpyOptionsPanel(): JComponent {
+    private fun createScrcpyOptionsPanel(): JPanel {
         val panel = GridBagLayoutPanel()
 
         scrcpyCmdFlagsTitle = JBLabel(PluginBundle.message("scrcpyFlagsTitle"))
@@ -387,6 +391,35 @@ class AdbWifiConfigurable : Configurable {
         return panel
     }
 
+    private fun createGeneralSettingsPanel(): JPanel {
+        val panel = GridBagLayoutPanel()
+
+        val separator = TitledSeparator(PluginBundle.message("generalSettingsTitle"))
+        panel.add(
+            separator,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 0
+                fill = GridBagConstraints.HORIZONTAL
+                weightx = 1.0
+            }
+        )
+
+        confirmDeviceRemovalCheckbox = JBCheckBox(PluginBundle.message("confirmDeviceRemoval"))
+        confirmDeviceRemovalCheckbox.isSelected = properties.confirmDeviceRemoval
+        panel.add(
+            confirmDeviceRemovalCheckbox,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 1
+                anchor = GridBagConstraints.LINE_START
+                insets = Insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
+            }
+        )
+
+        return panel
+    }
+
     override fun isModified(): Boolean {
         if (adbSystemPathCheckbox.isSelected != properties.useAdbFromPath) return true
         if (adbLocationField.text != properties.adbLocation) return true
@@ -395,6 +428,8 @@ class AdbWifiConfigurable : Configurable {
         if (scrcpySystemPathCheckbox.isSelected != properties.useScrcpyFromPath) return true
         if (scrcpyLocationField.text != properties.scrcpyLocation) return true
         if (scrcpyCmdFlagsTextArea.text.trim() != properties.scrcpyCmdFlags) return true
+
+        if (confirmDeviceRemovalCheckbox.isSelected != properties.confirmDeviceRemoval) return true
 
         return false
     }
@@ -407,6 +442,8 @@ class AdbWifiConfigurable : Configurable {
         properties.scrcpyLocation = scrcpyLocationField.text
         properties.useScrcpyFromPath = scrcpySystemPathCheckbox.isSelected
         properties.scrcpyCmdFlags = scrcpyCmdFlagsTextArea.text.trim()
+
+        properties.confirmDeviceRemoval = confirmDeviceRemovalCheckbox.isSelected
     }
 
     override fun reset() {
@@ -417,6 +454,8 @@ class AdbWifiConfigurable : Configurable {
         scrcpySystemPathCheckbox.isSelected = properties.useScrcpyFromPath
         scrcpyLocationField.text = properties.scrcpyLocation
         scrcpyCmdFlagsTextArea.text = properties.scrcpyCmdFlags
+
+        confirmDeviceRemovalCheckbox.isSelected = properties.confirmDeviceRemoval
     }
 
     private fun executableChooserDescriptor(): FileChooserDescriptor = when {

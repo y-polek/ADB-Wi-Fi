@@ -23,10 +23,10 @@ class PropertiesServiceImpl : PropertiesService {
             properties.setValue(IS_PREVIOUSLY_CONNECTED_DEVICES_EXPANDED, value, true)
         }
 
-    override var doNotShowRemoveDeviceConfirmation: Boolean
-        get() = properties.getBoolean(DO_NOT_SHOW_REMOVE_DEVICE_CONFIRMATION, false)
+    override var confirmDeviceRemoval: Boolean
+        get() = properties.getBoolean(CONFIRM_DEVICE_REMOVAL, true)
         set(value) {
-            properties.setValue(DO_NOT_SHOW_REMOVE_DEVICE_CONFIRMATION, value, false)
+            properties.setValue(CONFIRM_DEVICE_REMOVAL, value, true)
         }
 
     override var useAdbFromPath: Boolean
@@ -115,8 +115,7 @@ class PropertiesServiceImpl : PropertiesService {
         private const val IS_PREVIOUSLY_CONNECTED_DEVICES_EXPANDED =
             "dev.polek.adbwifi.IS_PREVIOUSLY_CONNECTED_DEVICES_EXPANDED"
 
-        private const val DO_NOT_SHOW_REMOVE_DEVICE_CONFIRMATION =
-            "dev.polek.adbwifi.DO_NOT_SHOW_REMOVE_DEVICE_CONFIRMATION"
+        private const val CONFIRM_DEVICE_REMOVAL = "dev.polek.adbwifi.CONFIRM_DEVICE_REMOVAL"
 
         private const val ADB_FROM_SYSTEM_PATH = "dev.polek.adbwifi.ADB_FROM_SYSTEM_PATH"
         private const val ADB_LOCATION_PROPERTY = "dev.polek.adbwifi.ADB_LOCATION_PROPERTY"

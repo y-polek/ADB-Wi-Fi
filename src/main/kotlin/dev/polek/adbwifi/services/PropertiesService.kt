@@ -4,7 +4,7 @@ interface PropertiesService {
     var isLogVisible: Boolean
 
     var isPreviouslyConnectedDevicesExpanded: Boolean
-    var doNotShowRemoveDeviceConfirmation: Boolean
+    var confirmDeviceRemoval: Boolean
 
     var useAdbFromPath: Boolean
     var adbLocation: String

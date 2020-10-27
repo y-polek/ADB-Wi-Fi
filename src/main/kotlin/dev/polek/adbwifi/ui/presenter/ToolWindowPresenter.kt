@@ -104,15 +104,15 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     }
 
     fun onRemoveDeviceButtonClicked(device: DeviceViewModel) {
-        if (propertiesService.doNotShowRemoveDeviceConfirmation) {
-            removeDevice(device)
-        } else {
+        if (propertiesService.confirmDeviceRemoval) {
             view?.showRemoveDeviceConfirmation(device)
+        } else {
+            removeDevice(device)
         }
     }
 
     fun onRemoveDeviceConfirmed(device: DeviceViewModel, doNotAskAgain: Boolean) {
-        propertiesService.doNotShowRemoveDeviceConfirmation = doNotAskAgain
+        propertiesService.confirmDeviceRemoval = !doNotAskAgain
 
         removeDevice(device)
     }
