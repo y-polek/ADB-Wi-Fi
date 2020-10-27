@@ -75,27 +75,6 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             }
         )
 
-        val subtitleLabel = JBLabel(device.subtitleText)
-        if (!device.hasAddress) {
-            subtitleLabel.icon = ICON_NO_WIFI
-        }
-        subtitleLabel.horizontalTextPosition = SwingConstants.LEFT
-        subtitleLabel.componentStyle = UIUtil.ComponentStyle.REGULAR
-        subtitleLabel.fontColor = UIUtil.FontColor.BRIGHTER
-        add(
-            panel(top = subtitleLabel),
-            GridBagConstraints().apply {
-                gridx = 1
-                gridy = 1
-                gridwidth = 3
-                fill = GridBagConstraints.BOTH
-                anchor = GridBagConstraints.PAGE_END
-                weightx = 1.0
-                weighty = 1.0
-                insets = Insets(0, 0, 0, 70)
-            }
-        )
-
         if (device.isInProgress) {
             val progressBar = JProgressBar()
             progressBar.isIndeterminate = true
@@ -176,7 +155,27 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
                 gridwidth = 1
                 gridheight = 1
                 anchor = GridBagConstraints.LINE_END
-                insets = Insets(0, 0, 0, 5)
+            }
+        )
+
+        val subtitleLabel = JBLabel(device.subtitleText)
+        if (!device.hasAddress) {
+            subtitleLabel.icon = ICON_NO_WIFI
+        }
+        subtitleLabel.horizontalTextPosition = SwingConstants.LEFT
+        subtitleLabel.componentStyle = UIUtil.ComponentStyle.REGULAR
+        subtitleLabel.fontColor = UIUtil.FontColor.BRIGHTER
+        add(
+            panel(top = subtitleLabel),
+            GridBagConstraints().apply {
+                gridx = 1
+                gridy = 1
+                gridwidth = 3
+                fill = GridBagConstraints.BOTH
+                anchor = GridBagConstraints.PAGE_END
+                weightx = 1.0
+                weighty = 1.0
+                insets = Insets(0, 0, 0, actionsPanel.preferredSize.width)
             }
         )
 
