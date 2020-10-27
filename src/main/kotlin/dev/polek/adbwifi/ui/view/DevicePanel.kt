@@ -9,7 +9,6 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
-import dev.polek.adbwifi.SCRCPY_FEATURE_ENABLED
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.ButtonType
 import dev.polek.adbwifi.utils.flowPanel
@@ -147,7 +146,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
 
         val actionButtons = arrayListOf<JComponent>()
 
-        if (SCRCPY_FEATURE_ENABLED && device.isShareScreenButtonVisible) {
+        if (device.isShareScreenButtonVisible) {
             val shareScreenButton = IconButton(ICON_SHARE_SCREEN, PluginBundle.message("shareScreenTooltip"))
             shareScreenButton.onClickedListener = {
                 listener?.onShareScreenClicked(device)
