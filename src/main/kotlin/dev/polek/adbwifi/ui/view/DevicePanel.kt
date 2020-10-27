@@ -67,8 +67,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             GridBagConstraints().apply {
                 gridx = 1
                 gridy = 0
-                gridwidth = 2
-                gridheight = 1
+                gridwidth = 1
                 fill = GridBagConstraints.BOTH
                 anchor = GridBagConstraints.PAGE_START
                 weightx = 1.0
@@ -89,12 +88,11 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
                 gridx = 1
                 gridy = 1
                 gridwidth = 3
-                gridheight = 1
                 fill = GridBagConstraints.BOTH
                 anchor = GridBagConstraints.PAGE_END
                 weightx = 1.0
                 weighty = 1.0
-                insets = Insets(0, 0, 0, 10)
+                insets = Insets(0, 0, 0, 70)
             }
         )
 
@@ -107,12 +105,10 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             add(
                 progressBar,
                 GridBagConstraints().apply {
-                    gridx = 3
+                    gridx = 2
                     gridy = 0
-                    gridwidth = 1
-                    gridheight = 1
+                    gridwidth = 2
                     weighty = 1.0
-                    anchor = GridBagConstraints.CENTER
                     insets = Insets(vInset, 10, vInset, 10)
                 }
             )
@@ -133,12 +129,10 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             add(
                 button,
                 GridBagConstraints().apply {
-                    gridx = 3
+                    gridx = 2
                     gridy = 0
-                    gridwidth = 1
-                    gridheight = 1
+                    gridwidth = 2
                     weighty = 1.0
-                    anchor = GridBagConstraints.CENTER
                     insets = Insets(vInset, 10, vInset, 10)
                 }
             )
