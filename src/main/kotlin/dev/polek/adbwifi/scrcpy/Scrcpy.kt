@@ -8,6 +8,7 @@ import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.utils.*
 import kotlinx.coroutines.delay
 import java.io.IOException
+import java.io.OutputStream
 
 class Scrcpy(
     private val commandExecutor: CommandExecutor,
@@ -54,13 +55,16 @@ class Scrcpy(
             val process = processBuilder.start()
             while (process.isAlive) {
                 delay(1000)
+
+                // Write new-line symbol to unblock process in case of "Press any key to continue..." prompt
+                process.outputStream.writeNewLine()
             }
             val exitCode = process.exitValue()
             val output = process.output()
             LOG.info("scrcpy finished ($exitCode): $output")
             CmdResult(exitCode, output)
         } catch (e: IOException) {
-            LOG.warn("Failed to execute command '${processBuilder.command().joinToString(" ")}': ${e.message}")
+            LOG.warn("Failed to execute command '${processBuilder.command().joinToString(" ")}': ${e.message}", e)
             CmdResult(-1, e.message.orEmpty())
         }
     }
@@ -72,5 +76,12 @@ class Scrcpy(
 
     private companion object {
         private val WHITESPACE_REGEX = "\\s+".toRegex()
+
+        private fun OutputStream.writeNewLine() = try {
+            this.write(System.lineSeparator().toByteArray())
+            this.flush()
+        } catch (e: IOException) {
+            /* no-op */
+        }
     }
 }
