@@ -5,7 +5,7 @@
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/14969.svg)](https://plugins.jetbrains.com/plugin/14969)
 
 <!-- Plugin description -->
-This plugin simplifies the usage of [ADB](https://developer.android.com/studio/command-line/adb )'s ["Connect over Wi-Fi"](https://developer.android.com/studio/command-line/adb#wireless) feature.  
+This plugin simplifies the usage of ADB's ["Connect over Wi-Fi"](https://developer.android.com/studio/command-line/adb#wireless) feature.  
 \
 ![Connect device](https://raw.githubusercontent.com/y-polek/ADB-Wi-Fi/main/docs/connect.gif)  
 <!-- Plugin description end -->

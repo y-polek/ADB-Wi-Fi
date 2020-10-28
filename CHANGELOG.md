@@ -2,6 +2,10 @@
 
 # ADB Wi-Fi Changelog
 
+## [1.2.0]
+### Added
+- [scrcpy](https://github.com/Genymobile/scrcpy) integration
+
 ## [1.1.1]
 ### Fixed
 - Fixed obtaining of IP Address when Wi-Fi and mobile network are turned on simultaneously ([Issue #2](https://github.com/y-polek/ADB-Wi-Fi/issues/2)).
