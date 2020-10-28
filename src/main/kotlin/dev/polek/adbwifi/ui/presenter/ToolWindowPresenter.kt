@@ -150,7 +150,9 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
             it.isInProgress = connectingDevices.contains(it.uniqueId)
         }
 
-        if (devices.isEmpty() && pinnedDevices.isEmpty()) {
+        if (!isAdbValid) {
+            view?.showInvalidAdbLocationError()
+        } else if (devices.isEmpty() && pinnedDevices.isEmpty()) {
             view?.showEmptyMessage()
         } else {
             view?.showDevices(devices)
