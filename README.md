@@ -27,3 +27,24 @@ This plugin simplifies the usage of ADB's ["Connect over Wi-Fi"](https://develop
 
   Download the [latest release](https://github.com/y-polek/ADB-Wi-Fi/releases/latest) and install it manually using
   <kbd>Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
+
+## How to run code
+Open project in Intellij IDEA.
+
+Available gradle tasks:
+* `runIde` - launches a new instance of IDE with the plugin installed:
+  * Execute `./gradlew runIde` command in terminal  
+OR
+  * Press `Ctrl` twice to open the Run Anything window and execute `gradle runIde` command
+* `check` - runs linters and tests
+* `buildPlugin` packages installable zip file  
+  Distribution zip file will be available under `./build/distributions/`
+
+You can choose which version of IDE `runIde` task launches by modifying `alternativeIdePath` variable in `./build.gradle.kts`:  
+```
+intellij {
+    ...
+
+    alternativeIdePath = "/Applications/Android Studio.app"
+}
+```
