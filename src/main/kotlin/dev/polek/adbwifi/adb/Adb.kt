@@ -163,7 +163,7 @@ class Adb(
     }
 
     private class Address(val interfaceName: String, val ip: String) {
-        val isWlan: Boolean = interfaceName.startsWith("wlan", ignoreCase = true)
+        val isWlan: Boolean = interfaceName.contains("wlan", ignoreCase = true)
 
         companion object {
             val REGEX = ".*dev\\s*(\\S+)\\s*.*\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b.*".toRegex()

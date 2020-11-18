@@ -9,16 +9,19 @@ class AdbTest {
 
     private val propertiesService = MockPropertiesService()
 
-    private val commandExecutor = object : MockCommandExecutor() {
-        private val adb = adbExec(propertiesService.adbLocation)
+    @Test
+    fun `test multiple devices()`() {
+        val commandExecutor = object : MockCommandExecutor() {
+            private val adb = adbExec(propertiesService.adbLocation)
 
-        override fun mockOutput(command: String): String {
-            return when (command) {
-                "$adb devices" -> """
+            override fun mockOutput(command: String): String = when (command) {
+                "$adb devices" -> {
+                    """
                     List of devices attached
                     R28M51Y8E0H	device
                     ce0717171c16e33b03	device
-                """.trimIndent()
+                    """.trimIndent()
+                }
 
                 "$adb -s R28M51Y8E0H shell getprop ro.serialno" -> "R28M51Y8E0H"
                 "$adb -s R28M51Y8E0H shell getprop ro.product.model" -> "SM-G9700"
@@ -27,10 +30,10 @@ class AdbTest {
                 "$adb -s R28M51Y8E0H shell getprop ro.build.version.sdk" -> "29"
                 "$adb -s R28M51Y8E0H shell ip route" -> {
                     """
-                        100.118.14.208/29 dev rmnet_data0 proto kernel scope link src 100.118.15.213
-                        192.168.1.0/24 dev wlan0 proto kernel scope link src 192.168.1.179
-                        10.0.2.2 dev eth0  scope link
-                        216.58.215.110 via 10.0.2.2 dev eth0
+                    100.118.14.208/29 dev rmnet_data0 proto kernel scope link src 100.118.15.213
+                    192.168.1.0/24 dev wlan0 proto kernel scope link src 192.168.1.179
+                    10.0.2.2 dev eth0  scope link
+                    216.58.215.110 via 10.0.2.2 dev eth0
                     """.trimIndent()
                 }
 
@@ -44,13 +47,8 @@ class AdbTest {
                 else -> throw NotImplementedError("Unknown command: '$command'")
             }
         }
-    }
 
-    private val adb = Adb(commandExecutor, propertiesService)
-
-    @Test
-    fun `test devices()`() {
-        val devices = adb.devices()
+        val devices = Adb(commandExecutor, propertiesService).devices()
 
         assertThat(devices).hasSize(2)
 
@@ -73,5 +71,50 @@ class AdbTest {
         assertThat(device2.apiLevel).isEqualTo("29")
         assertThat(device2.connectionType).isEqualTo(Device.ConnectionType.USB)
         assertThat(device2.isConnected).isFalse()
+    }
+
+    @Test
+    fun `test WiFi+Mobile network device`() {
+        val commandExecutor = object : MockCommandExecutor() {
+            private val adb = adbExec(propertiesService.adbLocation)
+
+            override fun mockOutput(command: String): String = when (command) {
+                "$adb devices" -> {
+                    """
+                    List of devices attached
+                    R28M51Y8E0H	device
+                    """.trimIndent()
+                }
+
+                "$adb -s R28M51Y8E0H shell getprop ro.serialno" -> "R28M51Y8E0H"
+                "$adb -s R28M51Y8E0H shell getprop ro.product.model" -> "SM-G9700"
+                "$adb -s R28M51Y8E0H shell getprop ro.product.manufacturer" -> "samsung"
+                "$adb -s R28M51Y8E0H shell getprop ro.build.version.release" -> "10"
+                "$adb -s R28M51Y8E0H shell getprop ro.build.version.sdk" -> "29"
+                "$adb -s R28M51Y8E0H shell ip route" -> {
+                    """
+                    100.106.57.0/29 dev rmnet_data0 proto kernel scope link src 100.106.57.3
+                    192.168.1.0/24 dev wlan0 proto kernel scope link src 192.168.1.188
+                    192.168.43.0/24 dev swlan0 proto kernel scope link src 192.168.43.1
+                    """.trimIndent()
+                }
+
+                else -> throw NotImplementedError("Unknown command: '$command'")
+            }
+        }
+
+        val devices = Adb(commandExecutor, propertiesService).devices()
+
+        assertThat(devices).hasSize(1)
+
+        val device = devices[0]
+        assertThat(device.id).isEqualTo("R28M51Y8E0H")
+        assertThat(device.serialNumber).isEqualTo("R28M51Y8E0H")
+        assertThat(device.name).isEqualTo("samsung SM-G9700")
+        assertThat(device.address).isEqualTo("192.168.43.1")
+        assertThat(device.androidVersion).isEqualTo("10")
+        assertThat(device.apiLevel).isEqualTo("29")
+        assertThat(device.connectionType).isEqualTo(Device.ConnectionType.USB)
+        assertThat(device.isConnected).isFalse()
     }
 }
