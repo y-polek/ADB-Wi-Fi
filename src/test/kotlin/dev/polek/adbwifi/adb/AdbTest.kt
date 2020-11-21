@@ -1,7 +1,7 @@
 package dev.polek.adbwifi.adb
 
+import dev.polek.adbwifi.model.Address
 import dev.polek.adbwifi.model.Device
-import dev.polek.adbwifi.utils.adbExec
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -11,9 +11,7 @@ class AdbTest {
 
     @Test
     fun `test multiple devices()`() {
-        val commandExecutor = object : MockCommandExecutor() {
-            private val adb = adbExec(propertiesService.adbLocation)
-
+        val commandExecutor = object : MockCommandExecutor(propertiesService.adbLocation) {
             override fun mockOutput(command: String): String = when (command) {
                 "$adb devices" -> {
                     """
@@ -22,7 +20,6 @@ class AdbTest {
                     ce0717171c16e33b03	device
                     """.trimIndent()
                 }
-
                 "$adb -s R28M51Y8E0H shell getprop ro.serialno" -> "R28M51Y8E0H"
                 "$adb -s R28M51Y8E0H shell getprop ro.product.model" -> "SM-G9700"
                 "$adb -s R28M51Y8E0H shell getprop ro.product.manufacturer" -> "samsung"
@@ -36,14 +33,12 @@ class AdbTest {
                     216.58.215.110 via 10.0.2.2 dev eth0
                     """.trimIndent()
                 }
-
                 "$adb -s ce0717171c16e33b03 shell getprop ro.serialno" -> "ce0717171c16e33b03"
                 "$adb -s ce0717171c16e33b03 shell getprop ro.product.model" -> "SM-G930F"
                 "$adb -s ce0717171c16e33b03 shell getprop ro.product.manufacturer" -> "samsung"
                 "$adb -s ce0717171c16e33b03 shell getprop ro.build.version.release" -> "8.0.0"
                 "$adb -s ce0717171c16e33b03 shell getprop ro.build.version.sdk" -> "26"
                 "$adb -s ce0717171c16e33b03 shell ip route" -> "192.168.1.0/24 dev wlan0  proto kernel  scope link  src 192.168.1.159"
-
                 else -> throw NotImplementedError("Unknown command: '$command'")
             }
         }
@@ -74,10 +69,8 @@ class AdbTest {
     }
 
     @Test
-    fun `test WiFi+Mobile network device`() {
-        val commandExecutor = object : MockCommandExecutor() {
-            private val adb = adbExec(propertiesService.adbLocation)
-
+    fun `test multiple networks device`() {
+        val commandExecutor = object : MockCommandExecutor(propertiesService.adbLocation) {
             override fun mockOutput(command: String): String = when (command) {
                 "$adb devices" -> {
                     """
@@ -85,7 +78,6 @@ class AdbTest {
                     R28M51Y8E0H	device
                     """.trimIndent()
                 }
-
                 "$adb -s R28M51Y8E0H shell getprop ro.serialno" -> "R28M51Y8E0H"
                 "$adb -s R28M51Y8E0H shell getprop ro.product.model" -> "SM-G9700"
                 "$adb -s R28M51Y8E0H shell getprop ro.product.manufacturer" -> "samsung"
@@ -98,7 +90,6 @@ class AdbTest {
                     192.168.43.0/24 dev swlan0 proto kernel scope link src 192.168.43.1
                     """.trimIndent()
                 }
-
                 else -> throw NotImplementedError("Unknown command: '$command'")
             }
         }
@@ -116,5 +107,30 @@ class AdbTest {
         assertThat(device.apiLevel).isEqualTo("29")
         assertThat(device.connectionType).isEqualTo(Device.ConnectionType.USB)
         assertThat(device.isConnected).isFalse()
+    }
+
+    @Test
+    fun `test address parsing`() {
+        val commandExecutor = MockCommandExecutor(propertiesService.adbLocation) { command ->
+            when (command) {
+                "$adb -s R28M51Y8E0H shell ip route" -> {
+                    """
+                    100.106.57.0/29 dev rmnet_data0 proto kernel scope link src 100.106.57.3
+                    192.168.1.0/24 dev wlan0 proto kernel scope link src 192.168.1.188
+                    192.168.43.0/24 dev swlan0 proto kernel scope link src 192.168.43.1
+                    """.trimIndent()
+                }
+                else -> throw NotImplementedError("Unknown command: '$command'")
+            }
+        }
+        val adb = Adb(commandExecutor, propertiesService)
+
+        val addresses = adb.addresses("R28M51Y8E0H")
+
+        assertThat(addresses).containsExactly(
+            Address("swlan0", "192.168.43.1"),
+            Address("wlan0", "192.168.1.188"),
+            Address("rmnet_data0", "100.106.57.3")
+        )
     }
 }

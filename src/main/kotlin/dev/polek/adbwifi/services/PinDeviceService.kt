@@ -42,16 +42,17 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
 
         private fun List<PinnedDevice>.contains(device: Device): Boolean {
             return this.find {
-                it.serialNumber == device.serialNumber && it.address == device.address
+                it.serialNumber == device.serialNumber && it.address == device.selectedAddress?.ip
             } != null
         }
 
         private fun List<PinnedDevice>.add(device: Device): List<PinnedDevice> {
+            val address = device.selectedAddress ?: return this
             return this + PinnedDevice(
                 id = device.id,
                 serialNumber = device.serialNumber,
                 name = device.name,
-                address = device.address.orEmpty(),
+                address = address.ip,
                 androidVersion = device.androidVersion,
                 apiLevel = device.apiLevel
             )
@@ -59,7 +60,7 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
 
         private fun List<PinnedDevice>.remove(device: Device): List<PinnedDevice> {
             return this.filter {
-                it.serialNumber != device.serialNumber || it.address != device.address
+                it.serialNumber != device.serialNumber || it.address != device.selectedAddress?.ip
             }
         }
     }

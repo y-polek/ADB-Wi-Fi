@@ -1,6 +1,7 @@
 package dev.polek.adbwifi.ui.model
 
 import com.intellij.openapi.util.IconLoader
+import dev.polek.adbwifi.model.Address
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.Device.ConnectionType.*
 import dev.polek.adbwifi.model.PinnedDevice
@@ -57,10 +58,10 @@ data class DeviceViewModel(
                 id = this.id,
                 serialNumber = this.serialNumber,
                 name = this.name,
-                address = this.address,
+                addresses = listOf(Address("", this.address)),
                 androidVersion = this.androidVersion,
                 apiLevel = this.apiLevel,
-                connectionType = NONE
+                isPinnedDevice = true
             )
             return DeviceViewModel(
                 device = device,

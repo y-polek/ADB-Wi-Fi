@@ -2,6 +2,7 @@ package dev.polek.adbwifi.adb
 
 import dev.polek.adbwifi.LOG
 import dev.polek.adbwifi.commandexecutor.CommandExecutor
+import dev.polek.adbwifi.model.Address
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.Device.ConnectionType.USB
 import dev.polek.adbwifi.model.LogEntry
@@ -14,6 +15,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
+import org.jetbrains.annotations.TestOnly
 import java.io.IOException
 
 @OptIn(FlowPreview::class)
@@ -34,10 +36,9 @@ class Adb(
                     id = deviceId,
                     serialNumber = serialNumber(deviceId),
                     name = "$manufacturer $model",
-                    address = address(deviceId),
+                    addresses = addresses(deviceId),
                     androidVersion = androidVersion(deviceId),
-                    apiLevel = apiLevel(deviceId),
-                    connectionType = connectionType(deviceId)
+                    apiLevel = apiLevel(deviceId)
                 )
             }
             .toList()
@@ -102,23 +103,16 @@ class Adb(
         return "-s $deviceId shell getprop ro.build.version.sdk".exec().firstLine().trim()
     }
 
-    private fun address(deviceId: String): String? {
-        val address = "-s $deviceId shell ip route".exec()
+    @TestOnly
+    fun addresses(deviceId: String): List<Address> {
+        return "-s $deviceId shell ip route".exec()
             .mapNotNull {
-                val groups = Address.REGEX.matchEntire(it)?.groupValues ?: return@mapNotNull null
+                val groups = ADDRESS_LINE_REGEX.matchEntire(it)?.groupValues ?: return@mapNotNull null
                 if (groups.size < 3) return@mapNotNull null
                 return@mapNotNull Address(interfaceName = groups[1], ip = groups[2])
             }
-            .sortedWith(Address.COMPARATOR)
-            .firstOrNull()
-        return address?.ip
-    }
-
-    private fun connectionType(deviceId: String): Device.ConnectionType {
-        return when {
-            IS_IP_ADDRESS_REGEX.matches(deviceId) -> Device.ConnectionType.WIFI
-            else -> USB
-        }
+            .sortedWith(ADDRESS_COMPARATOR)
+            .toList()
     }
 
     private fun adbCommand(args: String): String {
@@ -162,19 +156,12 @@ class Adb(
         logCollector.emit(LogEntry.Output(output))
     }
 
-    private class Address(val interfaceName: String, val ip: String) {
-        val isWlan: Boolean = interfaceName.contains("wlan", ignoreCase = true)
-
-        companion object {
-            val REGEX = ".*dev\\s*(\\S+)\\s*.*\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b.*".toRegex()
-            val COMPARATOR = compareBy<Address> { it.isWlan }.reversed().thenBy { it.interfaceName }
-        }
-    }
-
     companion object {
 
         private val DEVICE_ID_REGEX = "(.*?)\\s+device".toRegex()
-        private val IS_IP_ADDRESS_REGEX = "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(:\\d{1,5})?".toRegex()
+        private val ADDRESS_LINE_REGEX =
+            ".*dev\\s*(\\S+)\\s*.*\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b.*".toRegex()
+        private val ADDRESS_COMPARATOR = compareBy<Address> { it.isWlan }.reversed().thenBy { it.interfaceName }
 
         private val DEVICE_COMPARATOR = compareBy<Device>({ it.name }, { it.isWifiDevice })
 
