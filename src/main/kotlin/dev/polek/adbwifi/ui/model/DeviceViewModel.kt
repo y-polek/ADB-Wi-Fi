@@ -61,6 +61,7 @@ data class DeviceViewModel(
                 address = Address("", this.address),
                 androidVersion = this.androidVersion,
                 apiLevel = this.apiLevel,
+                connectionType = NONE,
                 isPinnedDevice = true
             )
             return DeviceViewModel(

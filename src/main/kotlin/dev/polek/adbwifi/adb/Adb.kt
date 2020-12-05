@@ -4,7 +4,7 @@ import dev.polek.adbwifi.LOG
 import dev.polek.adbwifi.commandexecutor.CommandExecutor
 import dev.polek.adbwifi.model.Address
 import dev.polek.adbwifi.model.Device
-import dev.polek.adbwifi.model.Device.ConnectionType.USB
+import dev.polek.adbwifi.model.Device.ConnectionType.*
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.utils.adbExec
@@ -32,7 +32,14 @@ class Adb(
             .flatMap { deviceId ->
                 addresses(deviceId).asSequence().map { address -> deviceId to address }
             }
-            .map { (deviceId, address) ->
+            .mapNotNull { (deviceId, address) ->
+                val addressFromId = IP_ADDRESS_REGEX.matchEntire(deviceId)?.groupValues?.getOrNull(1)
+                val connectionType = when {
+                    addressFromId != null -> WIFI
+                    else -> USB
+                }
+                if (connectionType == WIFI && address.ip != addressFromId) return@mapNotNull null
+
                 val model = model(deviceId).trim()
                 val manufacturer = manufacturer(deviceId).trim()
                 Device(
@@ -41,7 +48,8 @@ class Adb(
                     name = "$manufacturer $model",
                     address = address,
                     androidVersion = androidVersion(deviceId),
-                    apiLevel = apiLevel(deviceId)
+                    apiLevel = apiLevel(deviceId),
+                    connectionType = connectionType
                 )
             }
             .toList()
@@ -164,6 +172,7 @@ class Adb(
         private val DEVICE_ID_REGEX = "(.*?)\\s+device".toRegex()
         private val ADDRESS_LINE_REGEX =
             ".*dev\\s*(\\S+)\\s*.*\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b.*".toRegex()
+        private val IP_ADDRESS_REGEX = "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(:\\d{1,5})".toRegex()
         private val ADDRESS_COMPARATOR = compareBy<Address> { it.isWlan }.reversed().thenBy { it.interfaceName }
 
         private val DEVICE_COMPARATOR = compareBy<Device>({ it.name }, { it.isWifiDevice })
