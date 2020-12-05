@@ -22,7 +22,7 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
     fun addPreviouslyConnectedDevices(devices: List<Device>) {
         for (device in devices) {
             if (device.connectionType != WIFI) continue
-            if (device.address.isNullOrBlank()) continue
+            if (device.address?.ip.isNullOrBlank()) continue
             if (pinnedDevices.contains(device)) continue
             pinnedDevices = pinnedDevices.add(device)
         }
@@ -42,17 +42,17 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
 
         private fun List<PinnedDevice>.contains(device: Device): Boolean {
             return this.find {
-                it.serialNumber == device.serialNumber && it.address == device.selectedAddress?.ip
+                it.serialNumber == device.serialNumber && it.address == device.address?.ip
             } != null
         }
 
         private fun List<PinnedDevice>.add(device: Device): List<PinnedDevice> {
-            val address = device.selectedAddress ?: return this
+            val address = device.address?.ip ?: return this
             return this + PinnedDevice(
                 id = device.id,
                 serialNumber = device.serialNumber,
                 name = device.name,
-                address = address.ip,
+                address = address,
                 androidVersion = device.androidVersion,
                 apiLevel = device.apiLevel
             )
@@ -60,7 +60,7 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
 
         private fun List<PinnedDevice>.remove(device: Device): List<PinnedDevice> {
             return this.filter {
-                it.serialNumber != device.serialNumber || it.address != device.selectedAddress?.ip
+                it.serialNumber != device.serialNumber || it.address != device.address?.ip
             }
         }
     }

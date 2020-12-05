@@ -129,7 +129,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
 
     fun onCopyDeviceAddressClicked(device: DeviceViewModel) {
         val address = device.device.address ?: return
-        copyToClipboard(address)
+        copyToClipboard(address.ip)
     }
 
     private fun onDevicesUpdated(model: List<Device>) {

@@ -25,7 +25,7 @@ data class DeviceViewModel(
         get() = device.serialNumber
 
     val address: String?
-        get() = device.address
+        get() = device.address?.ip
 
     val uniqueId: String
         get() = device.uniqueId
@@ -58,7 +58,7 @@ data class DeviceViewModel(
                 id = this.id,
                 serialNumber = this.serialNumber,
                 name = this.name,
-                addresses = listOf(Address("", this.address)),
+                address = Address("", this.address),
                 androidVersion = this.androidVersion,
                 apiLevel = this.apiLevel,
                 isPinnedDevice = true
@@ -79,7 +79,7 @@ data class DeviceViewModel(
             val device = this@subtitleText
             append("Android ${device.androidVersion} (API ${device.apiLevel}) -")
             if (device.address != null) {
-                append(" ${device.address}")
+                append(" ${device.address.ip}")
             }
         }
 
@@ -95,7 +95,7 @@ data class DeviceViewModel(
             val device = this
             return when {
                 device.isWifiDevice -> ButtonType.DISCONNECT
-                device.address.isNullOrBlank() -> ButtonType.CONNECT_DISABLED
+                device.address?.ip.isNullOrBlank() -> ButtonType.CONNECT_DISABLED
                 device.isUsbDevice && device.isConnected -> ButtonType.CONNECT_DISABLED
                 else -> ButtonType.CONNECT
             }

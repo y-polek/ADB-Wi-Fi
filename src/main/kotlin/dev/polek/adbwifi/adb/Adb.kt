@@ -29,14 +29,17 @@ class Adb(
             .mapNotNull { line ->
                 DEVICE_ID_REGEX.matchEntire(line)?.groupValues?.get(1)?.trim()
             }
-            .map { deviceId ->
+            .flatMap { deviceId ->
+                addresses(deviceId).asSequence().map { address -> deviceId to address }
+            }
+            .map { (deviceId, address) ->
                 val model = model(deviceId).trim()
                 val manufacturer = manufacturer(deviceId).trim()
                 Device(
                     id = deviceId,
                     serialNumber = serialNumber(deviceId),
                     name = "$manufacturer $model",
-                    addresses = addresses(deviceId),
+                    address = address,
                     androidVersion = androidVersion(deviceId),
                     apiLevel = apiLevel(deviceId)
                 )
@@ -65,7 +68,7 @@ class Adb(
             delay(1000)
         }
         try {
-            "connect ${device.address}:5555".execAndLogAsync(this@flow)
+            "connect ${device.address?.ip}:5555".execAndLogAsync(this@flow)
         } catch (e: TimeoutCancellationException) {
             emit(LogEntry.Output("Timed out"))
         }
@@ -73,7 +76,7 @@ class Adb(
 
     fun disconnect(device: Device): Flow<LogEntry> = flow<LogEntry> {
         try {
-            "disconnect ${device.address}:5555".execAndLogAsync(this@flow)
+            "disconnect ${device.address?.ip}:5555".execAndLogAsync(this@flow)
         } catch (e: TimeoutCancellationException) {
             emit(LogEntry.Output("Timed out"))
         }
