@@ -29,7 +29,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     private var devices: List<DeviceViewModel> = emptyList()
     private var pinnedDevices: List<DeviceViewModel> = pinDeviceService.pinnedDevices.toViewModel()
 
-    private var connectingDevices = mutableSetOf<String/*Device's unique ID*/>()
+    private var connectingDevices = mutableSetOf<Pair<String/*Device's unique ID*/, String/*IP address*/>>()
 
     override fun attach(view: ToolWindowView) {
         super.attach(view)
@@ -61,7 +61,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     }
 
     fun onConnectButtonClicked(device: DeviceViewModel) {
-        connectingDevices.add(device.uniqueId)
+        connectingDevices.add(device)
         updateDeviceLists()
 
         launch(Main) {
@@ -70,13 +70,13 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
             }
             onDevicesUpdated(adbService.devices())
         }.invokeOnCompletion {
-            connectingDevices.remove(device.uniqueId)
+            connectingDevices.remove(device)
             updateDeviceLists()
         }
     }
 
     fun onDisconnectButtonClicked(device: DeviceViewModel) {
-        connectingDevices.add(device.uniqueId)
+        connectingDevices.add(device)
         updateDeviceLists()
 
         launch(Main) {
@@ -85,7 +85,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
             }
             onDevicesUpdated(adbService.devices())
         }.invokeOnCompletion {
-            connectingDevices.remove(device.uniqueId)
+            connectingDevices.remove(device)
             updateDeviceLists()
         }
     }
@@ -143,11 +143,11 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
         val isScrcpyEnabled = propertiesService.scrcpyEnabled
 
         devices.forEach {
-            it.isInProgress = connectingDevices.contains(it.uniqueId)
+            it.isInProgress = connectingDevices.contains(it)
             it.isShareScreenButtonVisible = isScrcpyEnabled
         }
         pinnedDevices.forEach {
-            it.isInProgress = connectingDevices.contains(it.uniqueId)
+            it.isInProgress = connectingDevices.contains(it)
         }
 
         if (!isAdbValid) {
@@ -238,5 +238,22 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
             .sortedBy { it.name }
             .map { it.toViewModel() }
             .toList()
+    }
+
+    private companion object {
+
+        private fun MutableSet<Pair<String/*Unique ID*/, String/*IP address*/>>.add(device: DeviceViewModel) {
+            this.add(device.uniqueId to device.address.orEmpty())
+        }
+
+        private fun MutableSet<Pair<String/*Unique ID*/, String/*IP address*/>>.remove(device: DeviceViewModel) {
+            this.remove(device.uniqueId to device.address.orEmpty())
+        }
+
+        private fun MutableSet<Pair<String/*Unique ID*/, String/*IP address*/>>.contains(
+            device: DeviceViewModel
+        ): Boolean {
+            return this.find { (uniqueId, address) -> uniqueId == device.uniqueId && address == device.address } != null
+        }
     }
 }
