@@ -60,7 +60,7 @@ class Adb(
                 device.serialNumber.isBlank() -> false
                 else -> {
                     val wifiDevice = devices.firstOrNull {
-                        it.isWifiDevice && it.serialNumber == device.serialNumber
+                        it.isWifiDevice && it.serialNumber == device.serialNumber && it.address == device.address
                     }
                     wifiDevice != null
                 }
