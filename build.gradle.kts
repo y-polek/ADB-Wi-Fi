@@ -1,7 +1,10 @@
+import com.jetbrains.plugin.structure.base.utils.createParentDirs
 import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.changelog.closure
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.io.FileInputStream
+import java.util.*
 
 plugins {
     // Java support
@@ -40,6 +43,7 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.2.1")
+    implementation("io.sentry:sentry:3.1.0")
 
     testImplementation("org.assertj:assertj-core:3.16.1")
 
@@ -59,6 +63,14 @@ intellij {
 //  https://www.jetbrains.org/intellij/sdk/docs/basics/plugin_structure/plugin_dependencies.html
 //
 //  setPlugins("java")
+}
+
+kotlin {
+    sourceSets {
+        main {
+            kotlin.srcDir("build/generated/src/")
+        }
+    }
 }
 
 // Configure detekt plugin.
@@ -96,6 +108,29 @@ tasks {
 
     withType<Detekt> {
         jvmTarget = "1.8"
+    }
+
+    register("loadSentryProperties") {
+        val secretsFile = file("build/generated/src/SentryProperties.kt").apply {
+            createParentDirs()
+            createNewFile()
+        }
+        secretsFile.printWriter().use { writer ->
+            writer.println("package dev.polek.adbwifi")
+            writer.println()
+
+            val propertiesFile = file("sentry.properties")
+            val sentryDns = if (propertiesFile.isFile) {
+                val properties = Properties().apply {
+                    load(FileInputStream(propertiesFile))
+                }
+                properties["SENTRY_DNS"]
+            } else {
+                null
+            }
+            val sentryDnsStr = if (sentryDns != null) "\"$sentryDns\"" else "null"
+            writer.println("val SENTRY_DNS: String? = $sentryDnsStr")
+        }
     }
 
     patchPluginXml {

@@ -22,6 +22,7 @@
             icon="/icons/toolWindowIcon.svg"
             factoryClass="dev.polek.adbwifi.ui.view.WindowFactory"/>
         <applicationConfigurable instance="dev.polek.adbwifi.settings.AdbWifiConfigurable" />
+        <errorHandler implementation="dev.polek.adbwifi.report.ReportSubmitter" />
     </extensions>
 
     <actions>
