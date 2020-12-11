@@ -3,8 +3,6 @@ import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.changelog.closure
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.io.FileInputStream
-import java.util.*
 
 plugins {
     // Java support
@@ -119,15 +117,7 @@ tasks {
             writer.println("package dev.polek.adbwifi")
             writer.println()
 
-            val propertiesFile = file("sentry.properties")
-            val sentryDns = if (propertiesFile.isFile) {
-                val properties = Properties().apply {
-                    load(FileInputStream(propertiesFile))
-                }
-                properties["SENTRY_DNS"]
-            } else {
-                null
-            }
+            val sentryDns = System.getenv("SENTRY_DNS")
             val sentryDnsStr = if (sentryDns != null) "\"$sentryDns\"" else "null"
             writer.println("val SENTRY_DNS: String? = $sentryDnsStr")
         }

@@ -36,6 +36,8 @@ jobs:
   test:
     name: Test
     needs: gradleValidation
+    env:
+      SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
     runs-on: ubuntu-latest
     steps:
 
@@ -74,6 +76,8 @@ jobs:
   build:
     name: Build
     needs: test
+    env:
+      SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
     runs-on: ubuntu-latest
     outputs:
       name: ${{ steps.properties.outputs.name }}
