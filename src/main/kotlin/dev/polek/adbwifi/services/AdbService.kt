@@ -44,6 +44,10 @@ class AdbService : Disposable {
         }
     }
 
+    fun connect(ip: String): String {
+        return adb.connect(ip)
+    }
+
     suspend fun disconnect(device: Device) {
         adb.disconnect(device).collect { logEntry ->
             logService.commandHistory.add(logEntry)

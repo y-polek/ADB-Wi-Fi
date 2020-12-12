@@ -41,11 +41,19 @@
             class="dev.polek.adbwifi.actions.OpenSettingsAction"
             icon="AllIcons.General.Settings"
             text="Open Settings" />
+        <action
+            id="AdbWifi.ConnectDevice"
+            class="dev.polek.adbwifi.actions.ConnectDeviceAction"
+            icon="AllIcons.General.Add"
+            text="Connect Device"
+        />
         <group id="AdbWifi.ToolbarActions">
             <reference id="AdbWifi.Refresh" />
             <separator />
             <reference id="AdbWifi.ToggleLog" />
             <reference id="AdbWifi.OpenSettings" />
+            <separator />
+            <reference id="AdbWifi.ConnectDevice" />
         </group>
 
         <action

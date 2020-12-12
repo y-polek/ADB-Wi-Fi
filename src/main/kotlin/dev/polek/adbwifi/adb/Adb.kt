@@ -75,7 +75,7 @@ class Adb(
         return devices.sortedWith(DEVICE_COMPARATOR)
     }
 
-    fun connect(device: Device): Flow<LogEntry> = flow<LogEntry> {
+    fun connect(device: Device): Flow<LogEntry> = flow {
         if (device.connectionType == USB) {
             "-s ${device.id} tcpip 5555".execAndLogAsync(this)
             delay(1000)
@@ -87,7 +87,15 @@ class Adb(
         }
     }
 
-    fun disconnect(device: Device): Flow<LogEntry> = flow<LogEntry> {
+    fun connect(ip: String): String {
+        return try {
+            commandExecutor.exec(adbCommand("connect $ip:5555")).joinToString("\n")
+        } catch (e: IOException) {
+            e.message ?: "Connection failed"
+        }
+    }
+
+    fun disconnect(device: Device): Flow<LogEntry> = flow {
         try {
             "disconnect ${device.address?.ip}:5555".execAndLogAsync(this@flow)
         } catch (e: TimeoutCancellationException) {
