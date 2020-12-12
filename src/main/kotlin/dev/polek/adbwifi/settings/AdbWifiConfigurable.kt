@@ -57,7 +57,7 @@ class AdbWifiConfigurable : Configurable {
         return PluginBundle.message("settingsPageName")
     }
 
-    override fun createComponent(): JComponent? {
+    override fun createComponent(): JComponent {
         val panel = JPanel()
         panel.layout = BoxLayout(panel, BoxLayout.PAGE_AXIS)
 
