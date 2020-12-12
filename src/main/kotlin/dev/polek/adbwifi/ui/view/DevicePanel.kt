@@ -159,9 +159,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         )
 
         val subtitleLabel = JBLabel(device.subtitleText)
-        if (!device.hasAddress) {
-            subtitleLabel.icon = ICON_NO_WIFI
-        }
+        subtitleLabel.icon = device.subtitleIcon
         subtitleLabel.horizontalTextPosition = SwingConstants.LEFT
         subtitleLabel.componentStyle = UIUtil.ComponentStyle.REGULAR
         subtitleLabel.fontColor = UIUtil.FontColor.BRIGHTER
@@ -221,6 +219,5 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         private val ICON_MENU = IconLoader.getIcon("/icons/menuIcon.svg")
         private val ICON_SHARE_SCREEN = IconLoader.getIcon("/icons/shareScreen.svg")
         private val ICON_REMOVE = IconLoader.getIcon("/icons/deleteIcon.svg")
-        private val ICON_NO_WIFI = IconLoader.getIcon("/icons/noWifi.svg")
     }
 }
