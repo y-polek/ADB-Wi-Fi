@@ -174,4 +174,31 @@ class AdbTest {
 
         assertThat(devices[0].address).isEqualTo(Address("wlan0", "192.168.1.188"))
     }
+
+    @Test
+    fun `test USB device with no network`() {
+        val commandExecutor = object : MockCommandExecutor(propertiesService.adbLocation) {
+            override fun mockOutput(command: String): String = when (command) {
+                "$adb devices" -> {
+                    """
+                    List of devices attached
+                    R28M51Y8E0H	device
+                    """.trimIndent()
+                }
+                "$adb -s R28M51Y8E0H shell getprop ro.serialno" -> "R28M51Y8E0H"
+                "$adb -s R28M51Y8E0H shell getprop ro.product.model" -> "SM-G9700"
+                "$adb -s R28M51Y8E0H shell getprop ro.product.manufacturer" -> "samsung"
+                "$adb -s R28M51Y8E0H shell getprop ro.build.version.release" -> "10"
+                "$adb -s R28M51Y8E0H shell getprop ro.build.version.sdk" -> "29"
+                "$adb -s R28M51Y8E0H shell ip route" -> ""
+                else -> throw NotImplementedError("Unknown command: '$command'")
+            }
+        }
+
+        val devices = Adb(commandExecutor, propertiesService).devices()
+
+        assertThat(devices).hasSize(1)
+
+        assertThat(devices[0].address).isNull()
+    }
 }

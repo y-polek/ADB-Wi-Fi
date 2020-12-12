@@ -30,7 +30,12 @@ class Adb(
                 DEVICE_ID_REGEX.matchEntire(line)?.groupValues?.get(1)?.trim()
             }
             .flatMap { deviceId ->
-                addresses(deviceId).asSequence().map { address -> deviceId to address }
+                val addresses = addresses(deviceId)
+                if (addresses.isNotEmpty()) {
+                    addresses.asSequence().map { address -> deviceId to address }
+                } else {
+                    sequenceOf(deviceId to null)
+                }
             }
             .mapNotNull { (deviceId, address) ->
                 val addressFromId = IP_ADDRESS_REGEX.matchEntire(deviceId)?.groupValues?.getOrNull(1)
@@ -38,7 +43,7 @@ class Adb(
                     addressFromId != null -> WIFI
                     else -> USB
                 }
-                if (connectionType == WIFI && address.ip != addressFromId) return@mapNotNull null
+                if (connectionType == WIFI && address?.ip != addressFromId) return@mapNotNull null
 
                 val model = model(deviceId).trim()
                 val manufacturer = manufacturer(deviceId).trim()
