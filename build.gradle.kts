@@ -1,27 +1,29 @@
-import com.jetbrains.plugin.structure.base.utils.createParentDirs
 import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.changelog.closure
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.kotlin.gradle.internal.ensureParentDirsCreated
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     // Java support
     id("java")
     // Kotlin support
-    id("org.jetbrains.kotlin.jvm") version "1.3.72"
+    id("org.jetbrains.kotlin.jvm") version "1.4.21"
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-    id("org.jetbrains.intellij") version "0.4.21"
+    id("org.jetbrains.intellij") version "0.6.5"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
-    id("org.jetbrains.changelog") version "0.4.0"
+    id("org.jetbrains.changelog") version "0.6.2"
     // detekt linter - read more: https://detekt.github.io/detekt/kotlindsl.html
-    id("io.gitlab.arturbosch.detekt") version "1.10.0"
+    id("io.gitlab.arturbosch.detekt") version "1.14.2"
     // ktlint linter - read more: https://github.com/JLLeitschuh/ktlint-gradle
-    id("org.jlleitschuh.gradle.ktlint") version "9.2.1"
+    id("org.jlleitschuh.gradle.ktlint") version "9.4.1"
 }
 
 // Import variables from gradle.properties file
 val pluginGroup: String by project
-val pluginName: String by project
+// `pluginName_` variable ends with `_` because of the collision with Kotlin magic getter in the `intellij` closure.
+// Read more about the issue: https://github.com/JetBrains/intellij-platform-plugin-template/issues/29
+val pluginName_: String by project
 val pluginVersion: String by project
 val pluginSinceBuild: String by project
 val pluginUntilBuild: String by project
@@ -40,18 +42,18 @@ repositories {
 }
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.2.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.4.2")
     implementation("io.sentry:sentry:3.1.0")
 
     testImplementation("org.assertj:assertj-core:3.16.1")
 
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.10.0")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.14.2")
 }
 
 // Configure gradle-intellij-plugin plugin.
 // Read more: https://github.com/JetBrains/gradle-intellij-plugin
 intellij {
-    pluginName = pluginName
+    pluginName = pluginName_
     version = platformVersion
     type = platformType
     downloadSources = platformDownloadSources.toBoolean()
@@ -110,7 +112,7 @@ tasks {
 
     register("loadSentryProperties") {
         val secretsFile = file("build/generated/src/SentryProperties.kt").apply {
-            createParentDirs()
+            ensureParentDirsCreated()
             createNewFile()
         }
         secretsFile.printWriter().use { writer ->
