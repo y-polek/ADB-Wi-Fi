@@ -59,7 +59,7 @@ class AdbTest {
         assertThat(device1.androidVersion).isEqualTo("8.0.0")
         assertThat(device1.apiLevel).isEqualTo("26")
         assertThat(device1.connectionType).isEqualTo(Device.ConnectionType.USB)
-        assertThat(device1.isConnected).isFalse()
+        assertThat(device1.isConnected).isFalse
 
         val device2 = devices[1]
         assertThat(device2.id).isEqualTo("R28M51Y8E0H")
@@ -69,7 +69,7 @@ class AdbTest {
         assertThat(device2.androidVersion).isEqualTo("10")
         assertThat(device2.apiLevel).isEqualTo("29")
         assertThat(device2.connectionType).isEqualTo(Device.ConnectionType.USB)
-        assertThat(device2.isConnected).isFalse()
+        assertThat(device2.isConnected).isFalse
 
         val device3 = devices[2]
         assertThat(device3.id).isEqualTo("R28M51Y8E0H")
@@ -79,7 +79,7 @@ class AdbTest {
         assertThat(device3.androidVersion).isEqualTo("10")
         assertThat(device3.apiLevel).isEqualTo("29")
         assertThat(device3.connectionType).isEqualTo(Device.ConnectionType.USB)
-        assertThat(device3.isConnected).isFalse()
+        assertThat(device3.isConnected).isFalse
     }
 
     @Test
@@ -101,8 +101,8 @@ class AdbTest {
         val addresses = adb.addresses("R28M51Y8E0H")
 
         assertThat(addresses).containsExactly(
-            Address("swlan0", "192.168.43.1"),
             Address("wlan0", "192.168.1.188"),
+            Address("swlan0", "192.168.43.1"),
             Address("rmnet_data0", "100.106.57.3")
         )
     }
@@ -137,8 +137,8 @@ class AdbTest {
 
         assertThat(devices).hasSize(3)
 
-        assertThat(devices[0].address).isEqualTo(Address("swlan0", "192.168.43.1"))
-        assertThat(devices[1].address).isEqualTo(Address("wlan0", "192.168.1.188"))
+        assertThat(devices[0].address).isEqualTo(Address("wlan0", "192.168.1.188"))
+        assertThat(devices[1].address).isEqualTo(Address("swlan0", "192.168.43.1"))
         assertThat(devices[2].address).isEqualTo(Address("rmnet_data0", "100.106.57.3"))
     }
 

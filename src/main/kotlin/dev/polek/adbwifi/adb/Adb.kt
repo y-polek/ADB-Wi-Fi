@@ -186,7 +186,11 @@ class Adb(
         private val ADDRESS_LINE_REGEX =
             ".*dev\\s*(\\S+)\\s*.*\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b.*".toRegex()
         private val IP_ADDRESS_REGEX = "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(:\\d{1,5})".toRegex()
-        private val ADDRESS_COMPARATOR = compareBy<Address> { it.isWlan }.reversed().thenBy { it.interfaceName }
+        private val ADDRESS_COMPARATOR = compareBy(Address::isWifiNetwork)
+            .thenBy(Address::isHotspotNetwork)
+            .thenBy(Address::isMobileNetwork)
+            .reversed()
+            .thenBy(Address::interfaceName)
 
         private val DEVICE_COMPARATOR = compareBy<Device>({ it.name }, { it.isWifiDevice })
 

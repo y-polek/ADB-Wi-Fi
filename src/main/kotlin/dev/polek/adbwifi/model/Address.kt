@@ -6,8 +6,6 @@ data class Address(
     val interfaceName: String,
     val ip: String
 ) {
-    val isWlan: Boolean = interfaceName.contains("wlan", ignoreCase = true)
-
     val isWifiNetwork: Boolean
         get() = interfaceName.startsWith("wlan", ignoreCase = true)
 
