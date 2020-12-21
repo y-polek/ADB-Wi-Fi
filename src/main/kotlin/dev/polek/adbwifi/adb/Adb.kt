@@ -103,6 +103,10 @@ class Adb(
         }
     }
 
+    fun disconnectAllDevices(): Flow<LogEntry> = flow {
+        "disconnect".execAndLog(this)
+    }
+
     fun killServer(): Flow<LogEntry> = flow {
         "kill-server".execAndLog(this)
     }

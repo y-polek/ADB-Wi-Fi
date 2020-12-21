@@ -15,7 +15,7 @@ class RestartAdbAction : AnAction(), DumbAware {
     private val adbService by lazy { ServiceManager.getService(AdbService::class.java) }
 
     override fun actionPerformed(e: AnActionEvent) {
-        adbService.killServer()
+        adbService.restartAdb()
 
         val icon = e.presentation.icon
         e.presentation.icon = AnimatedIcon.Default()

@@ -54,8 +54,11 @@ class AdbService : Disposable {
         }
     }
 
-    fun killServer() {
+    fun restartAdb() {
         GlobalScope.launch(Dispatchers.Default) {
+            adb.disconnectAllDevices().collect { logEntry ->
+                logService.commandHistory.add(logEntry)
+            }
             adb.killServer().collect { logEntry ->
                 logService.commandHistory.add(logEntry)
             }
