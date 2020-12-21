@@ -2,6 +2,14 @@
 
 # ADB Wi-Fi Changelog
 
+## [1.2.1]
+### Added
+- Added "Connect Device" toolbar action which allows connecting devices by IP address ([Issue #7](https://github.com/y-polek/ADB-Wi-Fi/issues/7))
+- Device list contains multiple entries (one for each IP) if the device has multiple IP addresses to make it possible to choose which IP to connect to ([Issue #4](https://github.com/y-polek/ADB-Wi-Fi/issues/4))
+- "Restart ADB" toolbar action disconnects all devices before killing ADB server.
+  It might be helpful in case if device is in "unauthorized" state after being connected.
+- Added implementation of error handler ("Report to Developer" button).
+
 ## [1.2.0]
 ### Added
 - [scrcpy](https://github.com/Genymobile/scrcpy) integration
