@@ -48,12 +48,12 @@
             text="Connect Device"
         />
         <group id="AdbWifi.ToolbarActions">
-            <reference id="AdbWifi.Refresh" />
+            <reference id="AdbWifi.ConnectDevice" />
             <separator />
             <reference id="AdbWifi.ToggleLog" />
             <reference id="AdbWifi.OpenSettings" />
             <separator />
-            <reference id="AdbWifi.ConnectDevice" />
+            <reference id="AdbWifi.Refresh" />
         </group>
 
         <action
