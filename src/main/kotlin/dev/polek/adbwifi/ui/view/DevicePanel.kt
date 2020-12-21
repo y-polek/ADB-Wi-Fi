@@ -210,7 +210,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
     }
 
     private companion object {
-        private const val LIST_ITEM_HEIGHT = 70
+        private const val LIST_ITEM_HEIGHT = 71
         private const val BUTTON_CELL_HEIGHT = 32
         private val HOVER_COLOR = JBColor.namedColor(
             "Plugins.lightSelectionBackground",
