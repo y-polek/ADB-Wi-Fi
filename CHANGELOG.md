@@ -2,6 +2,10 @@
 
 # ADB Wi-Fi Changelog
 
+## [1.2.2]
+### Added
+- Added support of IntelliJ IDEA 2021.1
+
 ## [1.2.1]
 ### Added
 - Added "Connect Device" toolbar action which allows connecting devices by IP address ([Issue #7](https://github.com/y-polek/ADB-Wi-Fi/issues/7))
