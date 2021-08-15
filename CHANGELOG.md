@@ -2,6 +2,10 @@
 
 # ADB Wi-Fi Changelog
 
+## [1.2.3]
+### Added
+- Added support of IntelliJ IDEA 2021.2 (212.*)
+
 ## [1.2.2]
 ### Added
 - Added support of IntelliJ IDEA 2021.1
