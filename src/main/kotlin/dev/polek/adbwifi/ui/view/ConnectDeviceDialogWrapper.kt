@@ -10,13 +10,14 @@ import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.services.AdbService
 import dev.polek.adbwifi.utils.GridBagLayoutPanel
+import dev.polek.adbwifi.utils.MaxLengthNumberDocument
+import dev.polek.adbwifi.utils.makeMonospaced
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.Insets
 import javax.swing.Action
@@ -29,6 +30,7 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
 
     private lateinit var ipLabel: JBLabel
     private lateinit var ipTextField: JBTextField
+    private lateinit var portTextField: JBTextField
     private lateinit var connectButton: JButton
     private lateinit var outputLabel: JBLabel
 
@@ -51,8 +53,8 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
             }
         )
 
-        ipTextField = JBTextField()
-        ipTextField.preferredSize = Dimension(200, ipTextField.preferredSize.height)
+        ipTextField = JBTextField(25)
+        ipTextField.makeMonospaced()
         ipTextField.document.addDocumentListener(object : DocumentListener {
             override fun insertUpdate(e: DocumentEvent) = updateConnectButton()
             override fun removeUpdate(e: DocumentEvent) = updateConnectButton()
@@ -71,6 +73,21 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
             }
         )
 
+        portTextField = JBTextField(7)
+        portTextField.document = MaxLengthNumberDocument(5)
+        portTextField.text = DEFAULT_PORT
+        portTextField.makeMonospaced()
+        portTextField.addActionListener {
+            connectDevice()
+        }
+        panel.add(
+            portTextField,
+            GridBagConstraints().apply {
+                gridx = 2
+                insets = Insets(0, 0, 0, 5)
+            }
+        )
+
         connectButton = JButton(PluginBundle.message("connectButton"))
         connectButton.addActionListener {
             connectDevice()
@@ -78,7 +95,7 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
         panel.add(
             connectButton,
             GridBagConstraints().apply {
-                gridx = 2
+                gridx = 3
             }
         )
 
@@ -117,10 +134,11 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
 
         val ip = ipTextField.text.trim()
         ipTextField.text = ip
+        val port = portTextField.text.ifEmpty { DEFAULT_PORT }.toInt()
 
         val adbService = service<AdbService>()
         connectJob = GlobalScope.launch(IO) {
-            val output = adbService.connect(ip)
+            val output = adbService.connect(ip, port)
             withContext(Main) {
                 hideConnectionProgress()
                 outputLabel.text = output
@@ -150,5 +168,6 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
 
     private companion object {
         private val OUTPUT_TEXT_COLOR = JBColor(0x787878, 0xBBBBBB)
+        private const val DEFAULT_PORT = "5555"
     }
 }

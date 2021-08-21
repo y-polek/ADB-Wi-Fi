@@ -1,6 +1,7 @@
 package dev.polek.adbwifi.utils
 
 import com.intellij.ui.HyperlinkLabel
+import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.components.BorderLayoutPanel
 import java.awt.Component
 import java.awt.Container
@@ -8,6 +9,7 @@ import java.awt.Font
 import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.JTextField
 
 fun panel(
     center: JComponent? = null,
@@ -37,6 +39,11 @@ fun flowPanel(vararg components: JComponent, hgap: Int = 5, vgap: Int = 0): JPan
 fun JLabel.makeBold() {
     val oldFont = this.font
     this.font = oldFont.deriveFont(oldFont.style or Font.BOLD)
+}
+
+fun JTextField.makeMonospaced() {
+    val oldFont = this.font
+    this.font = JBUI.Fonts.create(Font.MONOSPACED, oldFont.size)
 }
 
 fun JLabel.setFontSize(size: Float) {
