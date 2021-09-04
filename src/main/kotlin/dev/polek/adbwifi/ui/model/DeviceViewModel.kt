@@ -88,7 +88,7 @@ data class DeviceViewModel(
             val device = this@subtitleText
             append("Android ${device.androidVersion} (API ${device.apiLevel}) -")
             if (device.address != null) {
-                append(" ${device.address.ip}")
+                append(" ${device.address.ip}:${device.port}")
             }
         }
 
