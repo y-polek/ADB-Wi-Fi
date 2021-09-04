@@ -9,7 +9,7 @@ import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.services.AdbService
-import dev.polek.adbwifi.utils.ADB_DEFAULT_PORT
+import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.utils.GridBagLayoutPanel
 import dev.polek.adbwifi.utils.MaxLengthNumberDocument
 import dev.polek.adbwifi.utils.makeMonospaced
@@ -28,6 +28,8 @@ import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
 class ConnectDeviceDialogWrapper : DialogWrapper(true) {
+
+    private val properties = service<PropertiesService>()
 
     private lateinit var ipLabel: JBLabel
     private lateinit var ipTextField: JBTextField
@@ -76,7 +78,7 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
 
         portTextField = JBTextField(7)
         portTextField.document = MaxLengthNumberDocument(5)
-        portTextField.text = ADB_DEFAULT_PORT.toString()
+        portTextField.text = properties.adbPort.toString()
         portTextField.makeMonospaced()
         portTextField.addActionListener {
             connectDevice()
@@ -135,7 +137,7 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
 
         val ip = ipTextField.text.trim()
         ipTextField.text = ip
-        val port = portTextField.text.toIntOrNull() ?: ADB_DEFAULT_PORT
+        val port = portTextField.text.toIntOrNull() ?: properties.adbPort
 
         val adbService = service<AdbService>()
         connectJob = GlobalScope.launch(IO) {

@@ -2,11 +2,13 @@ package dev.polek.adbwifi.model
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.intellij.openapi.components.service
 import com.intellij.util.xmlb.Converter
-import dev.polek.adbwifi.utils.ADB_DEFAULT_PORT
-import java.util.ArrayList
+import dev.polek.adbwifi.services.PropertiesService
 
 class PinnedDeviceListConverter : Converter<List<PinnedDevice>>() {
+
+    private val properties = service<PropertiesService>()
 
     override fun toString(value: List<PinnedDevice>): String? {
         return gson.toJson(value)
@@ -14,7 +16,7 @@ class PinnedDeviceListConverter : Converter<List<PinnedDevice>>() {
 
     override fun fromString(value: String): List<PinnedDevice>? {
         return gson.fromJson<List<PinnedDevice>?>(value, listType)?.map { device ->
-            if (device.port <= 0) device.copy(port = ADB_DEFAULT_PORT) else device
+            if (device.port <= 0) device.copy(port = properties.adbPort) else device
         }
     }
 

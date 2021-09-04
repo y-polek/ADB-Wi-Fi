@@ -6,7 +6,6 @@ import dev.polek.adbwifi.adb.ADB_DISPATCHER
 import dev.polek.adbwifi.adb.Adb
 import dev.polek.adbwifi.commandexecutor.RuntimeCommandExecutor
 import dev.polek.adbwifi.model.Device
-import dev.polek.adbwifi.utils.ADB_DEFAULT_PORT
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.Flow
@@ -30,6 +29,7 @@ class AdbService : Disposable {
     private var devicePollingJob: Job? = null
     private val logService by lazy { service<LogService>() }
     private val pinDeviceService by lazy { service<PinDeviceService>() }
+    private val properties by lazy { service<PropertiesService>() }
 
     suspend fun devices(): List<Device> {
         val devices = withContext(ADB_DISPATCHER) {
@@ -45,7 +45,7 @@ class AdbService : Disposable {
         }
     }
 
-    fun connect(ip: String, port: Int = ADB_DEFAULT_PORT): String {
+    fun connect(ip: String, port: Int = properties.adbPort): String {
         return adb.connect(ip, port)
     }
 

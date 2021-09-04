@@ -16,13 +16,11 @@ import com.intellij.ui.TitledSeparator
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextArea
+import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.services.PropertiesService
-import dev.polek.adbwifi.utils.GridBagLayoutPanel
-import dev.polek.adbwifi.utils.isValidAdbLocation
-import dev.polek.adbwifi.utils.isValidScrcpyLocation
-import dev.polek.adbwifi.utils.panel
+import dev.polek.adbwifi.utils.*
 import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.Insets
@@ -37,6 +35,7 @@ class AdbWifiConfigurable : Configurable {
 
     private val properties = service<PropertiesService>()
 
+    private lateinit var adbPortField: JTextField
     private lateinit var adbSystemPathCheckbox: JBCheckBox
     private lateinit var adbLocationTitle: JBLabel
     private lateinit var adbLocationField: TextFieldWithBrowseButton
@@ -91,6 +90,34 @@ class AdbWifiConfigurable : Configurable {
             }
         )
 
+        val adbPortTitle = JBLabel(PluginBundle.message("adbPortTitle"))
+        panel.add(
+            adbPortTitle,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 1
+                gridwidth = 1
+                anchor = GridBagConstraints.LINE_START
+                insets = Insets(COMPONENT_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 8)
+            }
+        )
+
+        adbPortField = JBTextField(7)
+        adbPortField.document = MaxLengthNumberDocument(5)
+        adbPortField.makeMonospaced()
+        adbPortField.text = properties.adbPort.toString()
+        panel.add(
+            adbPortField,
+            GridBagConstraints().apply {
+                gridx = 1
+                gridy = 1
+                gridwidth = 1
+                fill = GridBagConstraints.HORIZONTAL
+                weightx = 1.0
+                insets = Insets(COMPONENT_VERTICAL_INSET, 0, 0, 0)
+            }
+        )
+
         adbSystemPathCheckbox = JBCheckBox(PluginBundle.message("adbUseSystemPath"))
         adbSystemPathCheckbox.isSelected = properties.useAdbFromPath
         adbSystemPathCheckbox.addItemListener {
@@ -100,7 +127,7 @@ class AdbWifiConfigurable : Configurable {
             adbSystemPathCheckbox,
             GridBagConstraints().apply {
                 gridx = 0
-                gridy = 1
+                gridy = 2
                 gridwidth = 3
                 anchor = GridBagConstraints.LINE_START
                 insets = Insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
@@ -112,7 +139,7 @@ class AdbWifiConfigurable : Configurable {
             adbLocationTitle,
             GridBagConstraints().apply {
                 gridx = 0
-                gridy = 2
+                gridy = 3
                 gridwidth = 1
                 anchor = GridBagConstraints.LINE_START
                 insets = Insets(COMPONENT_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 8)
@@ -137,7 +164,7 @@ class AdbWifiConfigurable : Configurable {
             adbLocationField,
             GridBagConstraints().apply {
                 gridx = 1
-                gridy = 2
+                gridy = 3
                 gridwidth = 2
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
@@ -150,7 +177,7 @@ class AdbWifiConfigurable : Configurable {
             adbStatusLabel,
             GridBagConstraints().apply {
                 gridx = 1
-                gridy = 3
+                gridy = 4
                 gridwidth = 1
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
@@ -168,7 +195,7 @@ class AdbWifiConfigurable : Configurable {
             defaultAdbLocationButton,
             GridBagConstraints().apply {
                 gridx = 2
-                gridy = 3
+                gridy = 4
                 gridwidth = 1
                 insets = Insets(4, 0, 0, 0)
             }
@@ -423,6 +450,7 @@ class AdbWifiConfigurable : Configurable {
     override fun isModified(): Boolean {
         if (adbSystemPathCheckbox.isSelected != properties.useAdbFromPath) return true
         if (adbLocationField.text != properties.adbLocation) return true
+        if ((adbPortField.text.toIntOrNull() ?: ADB_DEFAULT_PORT) != properties.adbPort) return true
 
         if (scrcpyEnabledCheckbox.isSelected != properties.scrcpyEnabled) return true
         if (scrcpySystemPathCheckbox.isSelected != properties.useScrcpyFromPath) return true
@@ -437,6 +465,8 @@ class AdbWifiConfigurable : Configurable {
     override fun apply() {
         properties.adbLocation = adbLocationField.text
         properties.useAdbFromPath = adbSystemPathCheckbox.isSelected
+        properties.adbPort = adbPortField.text.toIntOrNull() ?: ADB_DEFAULT_PORT
+        adbPortField.text = properties.adbPort.toString()
 
         properties.scrcpyEnabled = scrcpyEnabledCheckbox.isSelected
         properties.scrcpyLocation = scrcpyLocationField.text
@@ -449,6 +479,7 @@ class AdbWifiConfigurable : Configurable {
     override fun reset() {
         adbSystemPathCheckbox.isSelected = properties.useAdbFromPath
         adbLocationField.text = properties.adbLocation
+        adbPortField.text = properties.adbPort.toString()
 
         scrcpyEnabledCheckbox.isSelected = properties.scrcpyEnabled
         scrcpySystemPathCheckbox.isSelected = properties.useScrcpyFromPath
