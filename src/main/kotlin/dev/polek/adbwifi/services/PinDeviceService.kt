@@ -53,6 +53,7 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
                 serialNumber = device.serialNumber,
                 name = device.name,
                 address = address,
+                port = device.port,
                 androidVersion = device.androidVersion,
                 apiLevel = device.apiLevel
             )

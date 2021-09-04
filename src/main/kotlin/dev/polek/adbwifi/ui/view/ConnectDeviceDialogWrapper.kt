@@ -9,6 +9,7 @@ import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.services.AdbService
+import dev.polek.adbwifi.utils.ADB_DEFAULT_PORT
 import dev.polek.adbwifi.utils.GridBagLayoutPanel
 import dev.polek.adbwifi.utils.MaxLengthNumberDocument
 import dev.polek.adbwifi.utils.makeMonospaced
@@ -75,7 +76,7 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
 
         portTextField = JBTextField(7)
         portTextField.document = MaxLengthNumberDocument(5)
-        portTextField.text = DEFAULT_PORT
+        portTextField.text = ADB_DEFAULT_PORT.toString()
         portTextField.makeMonospaced()
         portTextField.addActionListener {
             connectDevice()
@@ -134,7 +135,7 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
 
         val ip = ipTextField.text.trim()
         ipTextField.text = ip
-        val port = portTextField.text.ifEmpty { DEFAULT_PORT }.toInt()
+        val port = portTextField.text.toIntOrNull() ?: ADB_DEFAULT_PORT
 
         val adbService = service<AdbService>()
         connectJob = GlobalScope.launch(IO) {
@@ -168,6 +169,5 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
 
     private companion object {
         private val OUTPUT_TEXT_COLOR = JBColor(0x787878, 0xBBBBBB)
-        private const val DEFAULT_PORT = "5555"
     }
 }

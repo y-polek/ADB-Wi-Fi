@@ -7,6 +7,7 @@ data class Device(
     val serialNumber: String,
     val name: String,
     val address: Address?,
+    val port: Int,
     val androidVersion: String,
     val apiLevel: String,
     val connectionType: ConnectionType,

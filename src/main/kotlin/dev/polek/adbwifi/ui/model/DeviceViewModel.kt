@@ -65,6 +65,7 @@ data class DeviceViewModel(
                 serialNumber = this.serialNumber,
                 name = this.name,
                 address = Address("", this.address),
+                port = this.port,
                 androidVersion = this.androidVersion,
                 apiLevel = this.apiLevel,
                 connectionType = NONE,

@@ -5,6 +5,7 @@ data class PinnedDevice(
     val serialNumber: String,
     val name: String,
     val address: String,
+    val port: Int,
     val androidVersion: String,
     val apiLevel: String
 )

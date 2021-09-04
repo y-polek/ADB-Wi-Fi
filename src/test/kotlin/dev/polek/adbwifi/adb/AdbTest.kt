@@ -201,4 +201,34 @@ class AdbTest {
 
         assertThat(devices[0].address).isNull()
     }
+
+    @Test
+    fun `test port address of Wi-Fi device`() {
+        val commandExecutor = object : MockCommandExecutor(propertiesService.adbLocation) {
+            override fun mockOutput(command: String): String = when (command) {
+                "$adb devices" -> {
+                    """
+                    List of devices attached
+                    192.168.1.188:1234	device
+                    """.trimIndent()
+                }
+                "$adb -s 192.168.1.188:1234 shell getprop ro.serialno" -> "192.168.1.188:5555"
+                "$adb -s 192.168.1.188:1234 shell getprop ro.product.model" -> "SM-G9700"
+                "$adb -s 192.168.1.188:1234 shell getprop ro.product.manufacturer" -> "samsung"
+                "$adb -s 192.168.1.188:1234 shell getprop ro.build.version.release" -> "10"
+                "$adb -s 192.168.1.188:1234 shell getprop ro.build.version.sdk" -> "29"
+                "$adb -s 192.168.1.188:1234 shell ip route" -> {
+                    "192.168.1.0/24 dev wlan0 proto kernel scope link src 192.168.1.188"
+                }
+                else -> throw NotImplementedError("Unknown command: '$command'")
+            }
+        }
+
+        val devices = Adb(commandExecutor, propertiesService).devices()
+
+        assertThat(devices).hasSize(1)
+
+        assertThat(devices[0].address).isEqualTo(Address("wlan0", "192.168.1.188"))
+        assertThat(devices[0].port).isEqualTo(1234)
+    }
 }

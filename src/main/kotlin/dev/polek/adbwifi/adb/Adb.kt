@@ -7,6 +7,7 @@ import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.Device.ConnectionType.*
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.PropertiesService
+import dev.polek.adbwifi.utils.ADB_DEFAULT_PORT
 import dev.polek.adbwifi.utils.adbExec
 import dev.polek.adbwifi.utils.findAdbExecInSystemPath
 import kotlinx.coroutines.FlowPreview
@@ -38,7 +39,9 @@ class Adb(
                 }
             }
             .mapNotNull { (deviceId, address) ->
-                val addressFromId = IP_ADDRESS_REGEX.matchEntire(deviceId)?.groupValues?.getOrNull(1)
+                val groups = IP_ADDRESS_REGEX.matchEntire(deviceId)?.groupValues
+                val addressFromId = groups?.getOrNull(1)
+                val port = groups?.getOrNull(2)?.toIntOrNull() ?: ADB_DEFAULT_PORT
                 val connectionType = when {
                     addressFromId != null -> WIFI
                     else -> USB
@@ -52,6 +55,7 @@ class Adb(
                     serialNumber = serialNumber(deviceId),
                     name = "$manufacturer $model",
                     address = address,
+                    port = port,
                     androidVersion = androidVersion(deviceId),
                     apiLevel = apiLevel(deviceId),
                     connectionType = connectionType
@@ -77,19 +81,19 @@ class Adb(
 
     fun connect(device: Device): Flow<LogEntry> = flow {
         if (device.connectionType == USB) {
-            "-s ${device.id} tcpip 5555".execAndLogAsync(this)
+            "-s ${device.id} tcpip ${device.port}".execAndLogAsync(this)
             delay(1000)
         }
         try {
-            "connect ${device.address?.ip}:5555".execAndLogAsync(this@flow)
+            "connect ${device.address?.ip}:${device.port}".execAndLogAsync(this@flow)
         } catch (e: TimeoutCancellationException) {
             emit(LogEntry.Output("Timed out"))
         }
     }
 
-    fun connect(ip: String): String {
+    fun connect(ip: String, port: Int): String {
         return try {
-            commandExecutor.exec(adbCommand("connect $ip:5555")).joinToString("\n")
+            commandExecutor.exec(adbCommand("connect $ip:$port")).joinToString("\n")
         } catch (e: IOException) {
             e.message ?: "Connection failed"
         }
@@ -97,7 +101,7 @@ class Adb(
 
     fun disconnect(device: Device): Flow<LogEntry> = flow {
         try {
-            "disconnect ${device.address?.ip}:5555".execAndLogAsync(this@flow)
+            "disconnect ${device.address?.ip}:${device.port}".execAndLogAsync(this@flow)
         } catch (e: TimeoutCancellationException) {
             emit(LogEntry.Output("Timed out"))
         }
@@ -189,7 +193,7 @@ class Adb(
         private val DEVICE_ID_REGEX = "(.*?)\\s+device".toRegex()
         private val ADDRESS_LINE_REGEX =
             ".*dev\\s*(\\S+)\\s*.*\\b(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\b.*".toRegex()
-        private val IP_ADDRESS_REGEX = "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})(:\\d{1,5})".toRegex()
+        private val IP_ADDRESS_REGEX = "(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}):(\\d{1,5})".toRegex()
         private val ADDRESS_COMPARATOR = compareBy(Address::isWifiNetwork)
             .thenBy(Address::isHotspotNetwork)
             .thenBy(Address::isMobileNetwork)

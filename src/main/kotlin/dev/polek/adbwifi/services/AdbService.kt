@@ -6,6 +6,7 @@ import dev.polek.adbwifi.adb.ADB_DISPATCHER
 import dev.polek.adbwifi.adb.Adb
 import dev.polek.adbwifi.commandexecutor.RuntimeCommandExecutor
 import dev.polek.adbwifi.model.Device
+import dev.polek.adbwifi.utils.ADB_DEFAULT_PORT
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.Flow
@@ -44,8 +45,8 @@ class AdbService : Disposable {
         }
     }
 
-    fun connect(ip: String): String {
-        return adb.connect(ip)
+    fun connect(ip: String, port: Int = ADB_DEFAULT_PORT): String {
+        return adb.connect(ip, port)
     }
 
     suspend fun disconnect(device: Device) {
