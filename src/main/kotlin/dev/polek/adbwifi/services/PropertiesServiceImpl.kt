@@ -2,6 +2,7 @@ package dev.polek.adbwifi.services
 
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.util.SystemInfo
+import dev.polek.adbwifi.utils.ADB_DEFAULT_PORT
 import dev.polek.adbwifi.utils.findScrcpyExecInSystemPath
 import dev.polek.adbwifi.utils.hasAdbInSystemPath
 import dev.polek.adbwifi.utils.isValidAdbLocation
@@ -43,11 +44,17 @@ class PropertiesServiceImpl : PropertiesService {
             notifyAdbLocationListener()
         }
 
+    override var adbPort: Int
+        get() = properties.getInt(ADB_PORT, ADB_DEFAULT_PORT)
+        set(value) {
+            properties.setValue(ADB_PORT, value, ADB_DEFAULT_PORT)
+        }
+
     override var scrcpyEnabled: Boolean
         get() = properties.getBoolean(SCRCPY_ENABLED, defaultScrcpyEnabled)
         set(value) {
             properties.setValue(SCRCPY_ENABLED, value, defaultScrcpyEnabled)
-            notifyAdbLocationListener()
+            notifyScrcpyEnabledListener()
         }
 
     override val defaultScrcpyEnabled: Boolean
@@ -119,6 +126,7 @@ class PropertiesServiceImpl : PropertiesService {
 
         private const val ADB_FROM_SYSTEM_PATH = "dev.polek.adbwifi.ADB_FROM_SYSTEM_PATH"
         private const val ADB_LOCATION_PROPERTY = "dev.polek.adbwifi.ADB_LOCATION_PROPERTY"
+        private const val ADB_PORT = "dev.polek.adbwifi.ADB_PORT"
 
         private const val SCRCPY_ENABLED = "dev.polek.adbwifi.SCRCPY_ENABLED"
         private const val SCRCPY_FROM_SYSTEM_PATH = "dev.polek.adbwifi.SCRCPY_FROM_SYSTEM_PATH"
