@@ -33,6 +33,7 @@ class RuntimeCommandExecutor : CommandExecutor {
         val process = try {
             runtime.exec(command, envp)
         } catch (e: IOException) {
+            LOG.debug(e)
             return false
         }
         process.waitFor()

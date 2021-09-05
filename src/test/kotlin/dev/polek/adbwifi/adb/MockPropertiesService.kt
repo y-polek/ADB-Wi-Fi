@@ -3,6 +3,7 @@ package dev.polek.adbwifi.adb
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.utils.ADB_DEFAULT_PORT
 
+@SuppressWarnings("LongParameterList")
 class MockPropertiesService(
     override var isLogVisible: Boolean = false,
     override var isPreviouslyConnectedDevicesExpanded: Boolean = true,

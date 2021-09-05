@@ -81,7 +81,7 @@ class Scrcpy(
             this.write(System.lineSeparator().toByteArray())
             this.flush()
         } catch (e: IOException) {
-            /* no-op */
+            LOG.warn(e)
         }
     }
 }

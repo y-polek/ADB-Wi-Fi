@@ -87,6 +87,7 @@ class Adb(
         try {
             "connect ${device.address?.ip}:${device.port}".execAndLogAsync(this@flow)
         } catch (e: TimeoutCancellationException) {
+            LOG.debug(e)
             emit(LogEntry.Output("Timed out"))
         }
     }
@@ -103,6 +104,7 @@ class Adb(
         try {
             "disconnect ${device.address?.ip}:${device.port}".execAndLogAsync(this@flow)
         } catch (e: TimeoutCancellationException) {
+            LOG.debug(e)
             emit(LogEntry.Output("Timed out"))
         }
     }
