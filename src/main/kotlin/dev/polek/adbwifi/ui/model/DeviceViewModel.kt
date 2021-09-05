@@ -86,10 +86,12 @@ data class DeviceViewModel(
 
         private fun Device.subtitleText() = buildString {
             val device = this@subtitleText
+            append("<html>")
             append("Android ${device.androidVersion} (API ${device.apiLevel}) -")
             if (device.address != null) {
-                append(" ${device.address.ip}:${device.port}")
+                append(" <code>${device.address.ip}:${device.port}</code>")
             }
+            append("</html>")
         }
 
         private fun Device.icon(): Icon = when (connectionType) {
