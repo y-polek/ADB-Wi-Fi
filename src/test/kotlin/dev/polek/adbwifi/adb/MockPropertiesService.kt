@@ -1,6 +1,7 @@
 package dev.polek.adbwifi.adb
 
 import dev.polek.adbwifi.services.PropertiesService
+import dev.polek.adbwifi.utils.ADB_DEFAULT_PORT
 
 class MockPropertiesService(
     override var isLogVisible: Boolean = false,
@@ -9,6 +10,7 @@ class MockPropertiesService(
     override var useAdbFromPath: Boolean = false,
     override var adbLocation: String = "/bin",
     override var defaultAdbLocation: String = "/bin",
+    override var adbPort: Int = ADB_DEFAULT_PORT,
     override var adbLocationListener: ((isValid: Boolean) -> Unit)? = null,
     override var scrcpyEnabled: Boolean = true,
     override val defaultScrcpyEnabled: Boolean = true,
