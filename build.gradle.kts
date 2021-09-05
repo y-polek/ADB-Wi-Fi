@@ -42,7 +42,7 @@ repositories {
 }
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.5.1-native-mt")
-    implementation("io.sentry:sentry:3.1.0")
+    implementation("io.sentry:sentry:5.1.2")
 
     testImplementation("org.assertj:assertj-core:3.20.2")
 
