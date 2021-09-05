@@ -44,7 +44,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.5.1-native-mt")
     implementation("io.sentry:sentry:3.1.0")
 
-    testImplementation("org.assertj:assertj-core:3.16.1")
+    testImplementation("org.assertj:assertj-core:3.20.2")
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.14.2")
 }
