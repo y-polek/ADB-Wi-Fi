@@ -45,13 +45,13 @@ class LogPanel : BorderLayoutPanel() {
         private fun commandHtml(entry: LogEntry) = buildString {
             when (entry) {
                 is LogEntry.Command -> {
-                    appendLine("<b>> ${entry.text}</b>")
-                    appendLine("<br/>")
+                    appendln("<b>> ${entry.text}</b>")
+                    appendln("<br/>")
                 }
                 is LogEntry.Output -> {
                     if (entry.text.isNotBlank()) {
-                        appendLine(entry.text)
-                        appendLine("<br/>")
+                        appendln(entry.text)
+                        appendln("<br/>")
                     }
                 }
             }

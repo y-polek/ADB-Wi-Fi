@@ -8,7 +8,7 @@ plugins {
     // Java support
     id("java")
     // Kotlin support
-    id("org.jetbrains.kotlin.jvm") version "1.4.21"
+    id("org.jetbrains.kotlin.jvm") version "1.5.21"
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
     id("org.jetbrains.intellij") version "0.6.5"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
@@ -41,8 +41,7 @@ repositories {
     jcenter()
 }
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.4.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.5.1-native-mt")
     implementation("io.sentry:sentry:3.1.0")
 
     testImplementation("org.assertj:assertj-core:3.16.1")
