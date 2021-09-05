@@ -2,7 +2,7 @@ package dev.polek.adbwifi.report
 
 import com.intellij.diagnostic.AbstractMessage
 import com.intellij.ide.DataManager
-import com.intellij.ide.plugins.PluginManager
+import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.application.ApplicationManager
@@ -75,7 +75,7 @@ class ReportSubmitter : ErrorReportSubmitter() {
     }
 
     private fun pluginVersion(): String {
-        return PluginManager.getPlugin(pluginDescriptor.pluginId)?.version.orEmpty()
+        return PluginManagerCore.getPlugin(pluginDescriptor.pluginId)?.version.orEmpty()
     }
 
     private fun environment(): String {

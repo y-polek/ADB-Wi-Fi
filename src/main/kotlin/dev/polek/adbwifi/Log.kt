@@ -1,5 +1,5 @@
 package dev.polek.adbwifi
 
-import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.diagnostic.Logger
 
-val LOG = logger("dev.polek.adbwifi")
+val LOG = Logger.getInstance("dev.polek.adbwifi")
