@@ -75,6 +75,44 @@ class AdbWifiConfigurable : Configurable {
         return panel(top = panel)
     }
 
+    private fun createAdbPortField() = JBTextField(7).apply {
+        document = MaxLengthNumberDocument(5)
+        makeMonospaced()
+        text = properties.adbPort.toString()
+    }
+
+    private fun createAdbSystemPathCheckbox() = JBCheckBox(PluginBundle.message("adbUseSystemPath")).apply {
+        isSelected = properties.useAdbFromPath
+        addItemListener {
+            updateAdbLocationSettingsState()
+        }
+    }
+
+    private fun createAdbLocationField() = TextFieldWithBrowseButton().apply {
+        text = properties.adbLocation
+        textField.document.addDocumentListener(object : DocumentListener {
+            override fun insertUpdate(e: DocumentEvent) = verifyAdbLocation()
+            override fun removeUpdate(e: DocumentEvent) = verifyAdbLocation()
+            override fun changedUpdate(e: DocumentEvent) = verifyAdbLocation()
+        })
+        addBrowseFolderListener(
+            null,
+            null,
+            null,
+            executableChooserDescriptor(),
+            ExecutablePathTextComponentAccessor()
+        )
+    }
+
+    private fun createDefaultAdbLocationButton() =
+        HyperlinkLabel(PluginBundle.message("defaultAdbLocationButton")).apply {
+            addMouseListener(object : MouseAdapter() {
+                override fun mouseClicked(e: MouseEvent) {
+                    adbLocationField.text = properties.defaultAdbLocation
+                }
+            })
+        }
+
     private fun createAdbSettingsPanel(): JPanel {
         val panel = GridBagLayoutPanel()
 
@@ -102,10 +140,7 @@ class AdbWifiConfigurable : Configurable {
             }
         )
 
-        adbPortField = JBTextField(7)
-        adbPortField.document = MaxLengthNumberDocument(5)
-        adbPortField.makeMonospaced()
-        adbPortField.text = properties.adbPort.toString()
+        adbPortField = createAdbPortField()
         panel.add(
             adbPortField,
             GridBagConstraints().apply {
@@ -118,11 +153,7 @@ class AdbWifiConfigurable : Configurable {
             }
         )
 
-        adbSystemPathCheckbox = JBCheckBox(PluginBundle.message("adbUseSystemPath"))
-        adbSystemPathCheckbox.isSelected = properties.useAdbFromPath
-        adbSystemPathCheckbox.addItemListener {
-            updateAdbLocationSettingsState()
-        }
+        adbSystemPathCheckbox = createAdbSystemPathCheckbox()
         panel.add(
             adbSystemPathCheckbox,
             GridBagConstraints().apply {
@@ -146,20 +177,7 @@ class AdbWifiConfigurable : Configurable {
             }
         )
 
-        adbLocationField = TextFieldWithBrowseButton()
-        adbLocationField.text = properties.adbLocation
-        adbLocationField.textField.document.addDocumentListener(object : DocumentListener {
-            override fun insertUpdate(e: DocumentEvent) = verifyAdbLocation()
-            override fun removeUpdate(e: DocumentEvent) = verifyAdbLocation()
-            override fun changedUpdate(e: DocumentEvent) = verifyAdbLocation()
-        })
-        adbLocationField.addBrowseFolderListener(
-            null,
-            null,
-            null,
-            executableChooserDescriptor(),
-            ExecutablePathTextComponentAccessor()
-        )
+        adbLocationField = createAdbLocationField()
         panel.add(
             adbLocationField,
             GridBagConstraints().apply {
@@ -185,12 +203,7 @@ class AdbWifiConfigurable : Configurable {
             }
         )
 
-        defaultAdbLocationButton = HyperlinkLabel(PluginBundle.message("defaultAdbLocationButton"))
-        defaultAdbLocationButton.addMouseListener(object : MouseAdapter() {
-            override fun mouseClicked(e: MouseEvent) {
-                adbLocationField.text = properties.defaultAdbLocation
-            }
-        })
+        defaultAdbLocationButton = createDefaultAdbLocationButton()
         panel.add(
             defaultAdbLocationButton,
             GridBagConstraints().apply {
