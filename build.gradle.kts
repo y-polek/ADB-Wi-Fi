@@ -11,13 +11,13 @@ plugins {
     // Kotlin support
     id("org.jetbrains.kotlin.jvm") version "1.5.21"
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-    id("org.jetbrains.intellij") version "1.1.5"
+    id("org.jetbrains.intellij") version "1.3.0"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
-    id("org.jetbrains.changelog") version "0.6.2"
+    id("org.jetbrains.changelog") version "1.3.1"
     // detekt linter - read more: https://detekt.github.io/detekt/kotlindsl.html
     id("io.gitlab.arturbosch.detekt") version "1.18.1"
     // ktlint linter - read more: https://github.com/JLLeitschuh/ktlint-gradle
-    id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
+    id("org.jlleitschuh.gradle.ktlint") version "10.2.0"
 }
 
 group = properties("pluginGroup")
@@ -28,10 +28,10 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.5.1-native-mt")
-    implementation("io.sentry:sentry:5.1.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.5.2-native-mt")
+    implementation("io.sentry:sentry:5.4.0")
 
-    testImplementation("org.assertj:assertj-core:3.20.2")
+    testImplementation("org.assertj:assertj-core:3.21.0")
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.18.1")
 }
@@ -60,8 +60,7 @@ kotlin {
 // Configure gradle-changelog-plugin plugin.
 // Read more: https://github.com/JetBrains/gradle-changelog-plugin
 changelog {
-    version = properties("pluginVersion")
-    groups = emptyList()
+    version.set(properties("pluginVersion"))
 }
 
 // Configure detekt plugin.
