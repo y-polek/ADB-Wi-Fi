@@ -37,6 +37,8 @@
 
 ## [Unreleased]
 ### Added
+- Support non default port (5555). See "adb port" preference in plugin setting
+- Support of IntelliJ IDEA 2021.3 (213.*)
 
 ### Changed
 
