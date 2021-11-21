@@ -40,11 +40,13 @@ OR
 * `buildPlugin` packages installable zip file  
   Distribution zip file will be available under `./build/distributions/`
 
-You can choose which version of IDE `runIde` task launches by modifying `alternativeIdePath` variable in `./build.gradle.kts`:  
+You can choose which version of IDE `runIde` task launches by adding `runIde` configuration `./build.gradle.kts`:  
 ```
-intellij {
+tasks {
     ...
 
-    alternativeIdePath = "/Applications/Android Studio.app"
+    runIde {
+        ideDir.set(file("/Applications/Android Studio.app/Contents"))
+    }
 }
 ```
