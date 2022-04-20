@@ -9,15 +9,15 @@ plugins {
     // Java support
     id("java")
     // Kotlin support
-    id("org.jetbrains.kotlin.jvm") version "1.5.21"
+    id("org.jetbrains.kotlin.jvm") version "1.6.20"
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-    id("org.jetbrains.intellij") version "1.3.0"
+    id("org.jetbrains.intellij") version "1.5.3"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
     id("org.jetbrains.changelog") version "1.3.1"
     // detekt linter - read more: https://detekt.github.io/detekt/kotlindsl.html
-    id("io.gitlab.arturbosch.detekt") version "1.18.1"
+    id("io.gitlab.arturbosch.detekt") version "1.20.0"
     // ktlint linter - read more: https://github.com/JLLeitschuh/ktlint-gradle
-    id("org.jlleitschuh.gradle.ktlint") version "10.2.0"
+    id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
 }
 
 group = properties("pluginGroup")
@@ -28,12 +28,11 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.5.2-native-mt")
-    implementation("io.sentry:sentry:5.4.0")
+    implementation("io.sentry:sentry:5.7.2")
 
-    testImplementation("org.assertj:assertj-core:3.21.0")
+    testImplementation("org.assertj:assertj-core:3.22.0")
 
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.18.1")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.19.0")
 }
 
 // Configure gradle-intellij-plugin plugin.
@@ -43,7 +42,7 @@ intellij {
     version.set(properties("platformVersion"))
     type.set(properties("platformType"))
     downloadSources.set(properties("platformDownloadSources").toBoolean())
-    updateSinceUntilBuild.set(true)
+    updateSinceUntilBuild.set(false)
 
     // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
     plugins.set(properties("platformPlugins").split(',').map(String::trim).filter(String::isNotEmpty))
@@ -68,12 +67,6 @@ changelog {
 detekt {
     config = files("./detekt-config.yml")
     buildUponDefaultConfig = true
-
-    reports {
-        html.enabled = false
-        xml.enabled = false
-        txt.enabled = false
-    }
 }
 
 // Configure ktlint-gradle plugin.
@@ -118,7 +111,6 @@ tasks {
     patchPluginXml {
         version.set(properties("pluginVersion"))
         sinceBuild.set(properties("pluginSinceBuild"))
-        untilBuild.set(properties("pluginUntilBuild"))
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
         pluginDescription.set(
@@ -135,10 +127,6 @@ tasks {
 
         // Get the latest available change notes from the changelog file
         changeNotes.set(provider { changelog.getLatest().toHTML() })
-    }
-
-    runPluginVerifier {
-        ideVersions.set(properties("pluginVerifierIdeVersions").split(',').map(String::trim).filter(String::isNotEmpty))
     }
 
     publishPlugin {
