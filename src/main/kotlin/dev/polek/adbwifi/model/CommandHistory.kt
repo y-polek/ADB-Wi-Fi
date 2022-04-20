@@ -1,6 +1,6 @@
 package dev.polek.adbwifi.model
 
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.withContext
 import java.util.*
 
@@ -14,7 +14,7 @@ class CommandHistory {
             notifyListener()
         }
 
-    suspend fun add(entry: LogEntry) = withContext(Dispatchers.Main) {
+    suspend fun add(entry: LogEntry) = withContext(Main) {
         logEntries.add(entry)
         ensureCapacity()
         notifyListener()

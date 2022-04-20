@@ -13,12 +13,9 @@ import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.utils.GridBagLayoutPanel
 import dev.polek.adbwifi.utils.MaxLengthNumberDocument
 import dev.polek.adbwifi.utils.makeMonospaced
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.awt.GridBagConstraints
 import java.awt.Insets
 import javax.swing.Action
