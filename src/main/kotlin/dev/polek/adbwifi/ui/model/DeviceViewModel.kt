@@ -1,10 +1,10 @@
 package dev.polek.adbwifi.ui.model
 
-import com.intellij.openapi.util.IconLoader
 import dev.polek.adbwifi.model.Address
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.Device.ConnectionType.*
 import dev.polek.adbwifi.model.PinnedDevice
+import dev.polek.adbwifi.utils.Icons
 import javax.swing.Icon
 
 data class DeviceViewModel(
@@ -36,13 +36,6 @@ data class DeviceViewModel(
     }
 
     companion object {
-        private val ICON_USB = IconLoader.getIcon("/icons/usbIcon.svg")
-        private val ICON_NO_USB = IconLoader.getIcon("/icons/noUsbIcon.svg")
-        private val ICON_WIFI = IconLoader.getIcon("/icons/wifiIcon.svg")
-        private val ICON_NO_WIFI = IconLoader.getIcon("/icons/noWifi.svg")
-        private val ICON_WIFI_NETWORK = IconLoader.getIcon("/icons/wifiNetwork.svg")
-        private val ICON_MOBILE_NETWORK = IconLoader.getIcon("/icons/mobileNetwork.svg")
-        private val ICON_HOTSPOT_NETWORK = IconLoader.getIcon("/icons/hotspotNetwork.svg")
 
         fun Device.toViewModel(): DeviceViewModel {
             val device = this
@@ -95,18 +88,18 @@ data class DeviceViewModel(
         }
 
         private fun Device.icon(): Icon = when (connectionType) {
-            USB -> ICON_USB
-            WIFI -> ICON_WIFI
-            NONE -> ICON_NO_USB
+            USB -> Icons.USB
+            WIFI -> Icons.WIFI
+            NONE -> Icons.NO_USB
         }
 
         private fun Device.addressIcon(): Icon? {
-            address ?: return ICON_NO_WIFI
+            address ?: return Icons.NO_WIFI
             if (connectionType != USB) return null
             return when {
-                address.isWifiNetwork -> ICON_WIFI_NETWORK
-                address.isMobileNetwork -> ICON_MOBILE_NETWORK
-                address.isHotspotNetwork -> ICON_HOTSPOT_NETWORK
+                address.isWifiNetwork -> Icons.WIFI_NETWORK
+                address.isMobileNetwork -> Icons.MOBILE_NETWORK
+                address.isHotspotNetwork -> Icons.HOTSPOT_NETWORK
                 else -> null
             }
         }

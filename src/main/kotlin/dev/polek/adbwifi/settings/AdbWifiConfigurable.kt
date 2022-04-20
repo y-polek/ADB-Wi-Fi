@@ -7,7 +7,6 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.ui.TextComponentAccessor
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
-import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.ui.ContextHelpLabel
 import com.intellij.ui.HyperlinkLabel
@@ -128,6 +127,7 @@ class AdbWifiConfigurable : Configurable {
             }
         )
 
+        @Suppress("DialogTitleCapitalization")
         val adbPortTitle = JBLabel(PluginBundle.message("adbPortTitle"))
         panel.add(
             adbPortTitle,
@@ -220,6 +220,7 @@ class AdbWifiConfigurable : Configurable {
     private fun createScrcpySettingsPanel(): JPanel {
         val panel = GridBagLayoutPanel()
 
+        @Suppress("DialogTitleCapitalization")
         val helpButton = ContextHelpLabel.createWithLink(
             PluginBundle.message("scrcpyHelpTitle"),
             PluginBundle.message("scrcpyHelpDescription"),
@@ -230,6 +231,7 @@ class AdbWifiConfigurable : Configurable {
         val header = GridBagLayoutPanel().apply {
             withMinimumHeight(28)
 
+            @Suppress("DialogTitleCapitalization")
             add(JBLabel(PluginBundle.message("scrcpySettingsTitle")), GridBagConstraints())
             add(
                 helpButton,
@@ -403,6 +405,7 @@ class AdbWifiConfigurable : Configurable {
             }
         )
 
+        @Suppress("DialogTitleCapitalization")
         val subtitle = JBLabel(PluginBundle.message("scrcpyFlagsSubtitle"))
         subtitle.componentStyle = UIUtil.ComponentStyle.SMALL
         subtitle.fontColor = UIUtil.FontColor.BRIGHTER
@@ -509,7 +512,7 @@ class AdbWifiConfigurable : Configurable {
 
     private fun showAdbVerifiedMessage() {
         adbStatusLabel.apply {
-            icon = OK_ICON
+            icon = Icons.OK
             text = VERIFIED_MESSAGE
             foreground = JBColor.foreground()
         }
@@ -519,7 +522,7 @@ class AdbWifiConfigurable : Configurable {
 
     private fun showScrcpyVerifiedMessage() {
         scrcpyStatusLabel.apply {
-            icon = OK_ICON
+            icon = Icons.OK
             text = VERIFIED_MESSAGE
             foreground = JBColor.foreground()
         }
@@ -527,7 +530,7 @@ class AdbWifiConfigurable : Configurable {
 
     private fun showAdbVerificationErrorMessage() {
         adbStatusLabel.apply {
-            icon = ERROR_ICON
+            icon = Icons.ERROR
             text = ADB_VERIFICATION_ERROR_MESSAGE
             foreground = JBColor.RED
         }
@@ -537,7 +540,7 @@ class AdbWifiConfigurable : Configurable {
 
     private fun showScrcpyVerificationErrorMessage() {
         scrcpyStatusLabel.apply {
-            icon = ERROR_ICON
+            icon = Icons.ERROR
             text = SCRCPY_VERIFICATION_ERROR_MESSAGE
             foreground = JBColor.RED
         }
@@ -566,7 +569,7 @@ class AdbWifiConfigurable : Configurable {
         adbLocationTitle.isEnabled = enabled
         adbLocationField.isEnabled = enabled
         adbStatusLabel.isVisible = enabled
-        defaultAdbLocationButton.isVisible = enabled && adbStatusLabel.icon == ERROR_ICON
+        defaultAdbLocationButton.isVisible = enabled && adbStatusLabel.icon == Icons.ERROR
     }
 
     private fun updateScrcpySettingsState() {
@@ -600,8 +603,6 @@ class AdbWifiConfigurable : Configurable {
         private const val GROUP_VERTICAL_INSET = 10
         private const val GROUP_LEFT_INSET = 20
         private const val COMPONENT_VERTICAL_INSET = 4
-        private val OK_ICON = IconLoader.getIcon("AllIcons.General.InspectionsOK")
-        private val ERROR_ICON = IconLoader.getIcon("AllIcons.General.Error")
         private val VERIFIED_MESSAGE = PluginBundle.message("adbPathVerifiedMessage")
         private val ADB_VERIFICATION_ERROR_MESSAGE = PluginBundle.message("adbPathVerificationErrorMessage")
         private val SCRCPY_VERIFICATION_ERROR_MESSAGE = PluginBundle.message("scrcpyPathVerificationErrorMessage")

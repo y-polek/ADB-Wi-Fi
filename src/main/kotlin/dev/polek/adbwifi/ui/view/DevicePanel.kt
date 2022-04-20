@@ -3,7 +3,6 @@ package dev.polek.adbwifi.ui.view
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.ui.JBMenuItem
 import com.intellij.openapi.ui.JBPopupMenu
-import com.intellij.openapi.util.IconLoader
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
@@ -11,6 +10,7 @@ import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.ButtonType
+import dev.polek.adbwifi.utils.Icons
 import dev.polek.adbwifi.utils.flowPanel
 import dev.polek.adbwifi.utils.makeBold
 import dev.polek.adbwifi.utils.panel
@@ -120,7 +120,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         val actionButtons = arrayListOf<JComponent>()
 
         if (device.isShareScreenButtonVisible) {
-            val shareScreenButton = IconButton(ICON_SHARE_SCREEN, PluginBundle.message("shareScreenTooltip"))
+            val shareScreenButton = IconButton(Icons.SHARE_SCREEN, PluginBundle.message("shareScreenTooltip"))
             shareScreenButton.onClickedListener = {
                 listener?.onShareScreenClicked(device)
                 shareScreenButton.showProgressFor(2000)
@@ -130,7 +130,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         }
 
         if (device.isRemoveButtonVisible) {
-            val removeButton = IconButton(ICON_REMOVE, PluginBundle.message("removeDeviceTooltip"))
+            val removeButton = IconButton(Icons.DELETE, PluginBundle.message("removeDeviceTooltip"))
             removeButton.onClickedListener = {
                 listener?.onRemoveDeviceClicked(device)
             }
@@ -138,7 +138,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             actionButtons.add(removeButton)
         }
 
-        val menuButton = IconButton(ICON_MENU)
+        val menuButton = IconButton(Icons.MENU)
         menuButton.onClickedListener = { event ->
             openDeviceMenu(device, event)
         }
@@ -216,8 +216,5 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             "Plugins.lightSelectionBackground",
             JBColor(0xF5F9FF, 0x36393B)
         )
-        private val ICON_MENU = IconLoader.getIcon("/icons/menuIcon.svg")
-        private val ICON_SHARE_SCREEN = IconLoader.getIcon("/icons/shareScreen.svg")
-        private val ICON_REMOVE = IconLoader.getIcon("/icons/deleteIcon.svg")
     }
 }

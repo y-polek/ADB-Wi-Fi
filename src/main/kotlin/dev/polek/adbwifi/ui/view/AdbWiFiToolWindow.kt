@@ -1,7 +1,6 @@
 package dev.polek.adbwifi.ui.view
 
-import com.intellij.notification.NotificationDisplayType
-import com.intellij.notification.NotificationGroup
+import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionManager
@@ -12,8 +11,8 @@ import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.Messages
-import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.wm.ToolWindow
+import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.openapi.wm.ex.ToolWindowManagerListener
 import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.JBColor
@@ -28,6 +27,7 @@ import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.presenter.ToolWindowPresenter
 import dev.polek.adbwifi.utils.GridBagLayoutPanel
+import dev.polek.adbwifi.utils.Icons
 import dev.polek.adbwifi.utils.panel
 import dev.polek.adbwifi.utils.setFontSize
 import java.awt.GridBagConstraints
@@ -93,7 +93,7 @@ class AdbWiFiToolWindow(
     private val bottomPanel: JComponent
     private val emptyMessageLabel = JBLabel().apply {
         text = PluginBundle.message("deviceListEmptyMessage")
-        icon = IconLoader.getIcon("/icons/devices-lineup.png")
+        icon = Icons.DEVICE_LINEUP
         horizontalAlignment = SwingConstants.CENTER
         horizontalTextPosition = SwingConstants.CENTER
         verticalTextPosition = SwingConstants.BOTTOM
@@ -108,8 +108,9 @@ class AdbWiFiToolWindow(
         border = BorderFactory.createLineBorder(JBColor.border())
 
         val label = JBLabel().apply {
+            @Suppress("DialogTitleCapitalization")
             text = PluginBundle.message("adbPathVerificationErrorMessage", location)
-            icon = IconLoader.getIcon("/icons/deviceWarning.png")
+            icon = Icons.DEVICE_WARNING
             horizontalAlignment = SwingConstants.CENTER
             horizontalTextPosition = SwingConstants.CENTER
             verticalTextPosition = SwingConstants.BOTTOM
@@ -172,7 +173,7 @@ class AdbWiFiToolWindow(
             .subscribe(
                 ToolWindowManagerListener.TOPIC,
                 object : ToolWindowManagerListener {
-                    override fun stateChanged() {
+                    override fun stateChanged(toolWindowManager: ToolWindowManager) {
                         if (toolWindow.isVisible) {
                             presenter.onViewOpen()
                         } else {
@@ -220,6 +221,7 @@ class AdbWiFiToolWindow(
     }
 
     override fun showInvalidScrcpyLocationError() {
+        @Suppress("DialogTitleCapitalization")
         val notification = NOTIFICATION_GROUP.createNotification(
             PluginBundle.message("name"),
             null,
@@ -231,6 +233,7 @@ class AdbWiFiToolWindow(
     }
 
     override fun showScrcpyError(error: String) {
+        @Suppress("DialogTitleCapitalization")
         val notification = NOTIFICATION_GROUP.createNotification(
             PluginBundle.message("name"),
             null,
@@ -266,10 +269,7 @@ class AdbWiFiToolWindow(
 
     private companion object {
         private const val DEFAULT_PANEL_PROPORTION = 0.6f
-        private val NOTIFICATION_GROUP = NotificationGroup(
-            PluginBundle.message("name"),
-            NotificationDisplayType.BALLOON,
-            false
-        )
+        private val NOTIFICATION_GROUP = NotificationGroupManager.getInstance()
+            .getNotificationGroup("adb_wifi_notification_group")
     }
 }
