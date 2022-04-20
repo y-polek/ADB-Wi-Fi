@@ -45,7 +45,7 @@ private fun findExecInSystemPath(execName: String): String? {
             File("$dir$separator$execFileName").isFile
         }
 
-    return "$dir${File.separator}$execName"
+    return dir?.let { "$dir${File.separator}$execName" }
 }
 
 fun isValidAdbLocation(dirPath: String): Boolean = isValidExecPath(dirPath, "adb")
@@ -54,6 +54,5 @@ fun adbExec(dir: String): String = exec(dir, "adb")
 fun findAdbExecInSystemPath(): String? = findExecInSystemPath("adb")
 
 fun isValidScrcpyLocation(dirPath: String): Boolean = isValidExecPath(dirPath, "scrcpy")
-fun hasScrcpyInSystemPath(): Boolean = isValidExecPath(null, "scrcpy")
 fun scrcpyExec(dir: String): String = exec(dir, "scrcpy")
 fun findScrcpyExecInSystemPath(): String? = findExecInSystemPath("scrcpy")
