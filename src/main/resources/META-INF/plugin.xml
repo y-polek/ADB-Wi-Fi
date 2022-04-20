@@ -20,9 +20,14 @@
             anchor="right"
             secondary="true"
             icon="/icons/toolWindowIcon.svg"
-            factoryClass="dev.polek.adbwifi.ui.view.WindowFactory"/>
+            factoryClass="dev.polek.adbwifi.ui.view.WindowFactory" />
         <applicationConfigurable instance="dev.polek.adbwifi.settings.AdbWifiConfigurable" />
         <errorHandler implementation="dev.polek.adbwifi.report.ReportSubmitter" />
+        <notificationGroup
+                id="adb_wifi_notification_group"
+                displayType="BALLOON"
+                icon="/icons/toolWindowIcon.svg" />
+
     </extensions>
 
     <actions>
