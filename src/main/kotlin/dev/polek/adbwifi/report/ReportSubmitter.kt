@@ -37,7 +37,7 @@ class ReportSubmitter : ErrorReportSubmitter() {
         events: Array<out IdeaLoggingEvent>,
         additionalInfo: String?,
         parentComponent: Component,
-        consumer: Consumer<SubmittedReportInfo>
+        consumer: Consumer<in SubmittedReportInfo>
     ): Boolean {
         if (!SENTRY_ENABLED) return false
 
