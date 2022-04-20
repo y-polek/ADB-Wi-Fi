@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 
-@OptIn(FlowPreview::class)
 class AdbService : Disposable {
 
     var deviceListListener: ((List<Device>) -> Unit)? = null

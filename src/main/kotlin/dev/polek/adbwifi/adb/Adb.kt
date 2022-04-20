@@ -10,7 +10,6 @@ import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.utils.adbExec
 import dev.polek.adbwifi.utils.findAdbExecInSystemPath
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -19,7 +18,6 @@ import kotlinx.coroutines.flow.flow
 import org.jetbrains.annotations.TestOnly
 import java.io.IOException
 
-@OptIn(FlowPreview::class)
 class Adb(
     private val commandExecutor: CommandExecutor,
     private val properties: PropertiesService
