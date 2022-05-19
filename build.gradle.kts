@@ -28,11 +28,11 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    implementation("io.sentry:sentry:5.7.2")
+    implementation("io.sentry:sentry:5.7.4")
 
     testImplementation("org.assertj:assertj-core:3.22.0")
 
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.19.0")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.20.0")
 }
 
 // Configure gradle-intellij-plugin plugin.
@@ -77,20 +77,18 @@ ktlint {
 }
 
 tasks {
-    // Set the compatibility versions to 1.8
-    withType<JavaCompile> {
-        sourceCompatibility = "1.8"
-        targetCompatibility = "1.8"
-    }
-    listOf("compileKotlin", "compileTestKotlin").forEach {
-        getByName<KotlinCompile>(it) {
-            kotlinOptions.jvmTarget = "1.8"
-            kotlinOptions.freeCompilerArgs += listOf("-Xopt-in=kotlin.RequiresOptIn", "-Xopt-in=kotlin.OptIn")
+    // Set the JVM compatibility versions
+    properties("javaVersion").let { javaVersion ->
+        withType<JavaCompile> {
+            sourceCompatibility = javaVersion
+            targetCompatibility = javaVersion
         }
-    }
-
-    withType<Detekt> {
-        jvmTarget = "1.8"
+        withType<KotlinCompile> {
+            kotlinOptions.jvmTarget = javaVersion
+        }
+        withType<Detekt> {
+            jvmTarget = javaVersion
+        }
     }
 
     register("loadSentryProperties") {
