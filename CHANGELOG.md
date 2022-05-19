@@ -2,6 +2,15 @@
 
 # ADB Wi-Fi Changelog
 
+## [1.2.5]
+### Added
+- Support of IntelliJ IDEA 2022.1 (221.*)
+
+## [1.2.4]
+### Added
+- Support non default port (5555). See "adb port" preference in plugin setting
+- Support of IntelliJ IDEA 2021.3 (213.*)
+
 ## [1.2.3]
 ### Added
 - Added support of IntelliJ IDEA 2021.2 (212.*)
@@ -37,8 +46,6 @@
 
 ## [Unreleased]
 ### Added
-- Support non default port (5555). See "adb port" preference in plugin setting
-- Support of IntelliJ IDEA 2021.3 (213.*)
 
 ### Changed
 
