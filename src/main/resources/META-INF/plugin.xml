@@ -25,8 +25,7 @@
         <errorHandler implementation="dev.polek.adbwifi.report.ReportSubmitter" />
         <notificationGroup
                 id="adb_wifi_notification_group"
-                displayType="BALLOON"
-                icon="/icons/toolWindowIcon.svg" />
+                displayType="BALLOON" />
 
     </extensions>
 

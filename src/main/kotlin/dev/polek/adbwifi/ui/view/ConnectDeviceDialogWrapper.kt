@@ -12,6 +12,7 @@ import dev.polek.adbwifi.services.AdbService
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.utils.GridBagLayoutPanel
 import dev.polek.adbwifi.utils.MaxLengthNumberDocument
+import dev.polek.adbwifi.utils.appCoroutineScope
 import dev.polek.adbwifi.utils.makeMonospaced
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
@@ -38,7 +39,7 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
 
     init {
         init()
-        setResizable(false)
+        isResizable = false
         title = PluginBundle.message("name")
     }
 
@@ -137,7 +138,7 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
         val port = portTextField.text.toIntOrNull() ?: properties.adbPort
 
         val adbService = service<AdbService>()
-        connectJob = GlobalScope.launch(IO) {
+        connectJob = appCoroutineScope.launch(IO) {
             val output = adbService.connect(ip, port)
             withContext(Main) {
                 hideConnectionProgress()

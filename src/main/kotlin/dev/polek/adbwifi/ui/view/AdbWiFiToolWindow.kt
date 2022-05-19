@@ -9,7 +9,8 @@ import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.DialogWrapper
+import com.intellij.openapi.ui.DoNotAskOption
+import com.intellij.openapi.ui.MessageDialogBuilder
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowManager
@@ -154,7 +155,7 @@ class AdbWiFiToolWindow(
             toolbarActionGroup,
             true
         )
-        toolbar.setTargetComponent(this)
+        toolbar.targetComponent = this
         addToTop(toolbar.component)
         addToCenter(splitter)
 
@@ -224,7 +225,6 @@ class AdbWiFiToolWindow(
         @Suppress("DialogTitleCapitalization")
         val notification = NOTIFICATION_GROUP.createNotification(
             PluginBundle.message("name"),
-            null,
             PluginBundle.message("scrcpyPathVerificationErrorMessage"),
             NotificationType.ERROR
         )
@@ -236,7 +236,6 @@ class AdbWiFiToolWindow(
         @Suppress("DialogTitleCapitalization")
         val notification = NOTIFICATION_GROUP.createNotification(
             PluginBundle.message("name"),
-            null,
             error,
             NotificationType.ERROR
         )
@@ -245,7 +244,7 @@ class AdbWiFiToolWindow(
     }
 
     override fun showRemoveDeviceConfirmation(device: DeviceViewModel) {
-        val doNotAskAgain = object : DialogWrapper.DoNotAskOption.Adapter() {
+        val doNotAskAgain = object : DoNotAskOption.Adapter() {
             override fun rememberChoice(isSelected: Boolean, exitCode: Int) {
                 if (exitCode == Messages.OK) {
                     presenter.onRemoveDeviceConfirmed(device, doNotAskAgain = isSelected)
@@ -256,15 +255,11 @@ class AdbWiFiToolWindow(
                 return PluginBundle.message("doNotAskAgain")
             }
         }
-        Messages.showOkCancelDialog(
-            project,
-            PluginBundle.message("removeDeviceConfirmation"),
-            device.titleText,
-            PluginBundle.message("removeButton"),
-            PluginBundle.message("cancelButton"),
-            null,
-            doNotAskAgain
-        )
+        MessageDialogBuilder.yesNo(title = device.titleText, message = PluginBundle.message("removeDeviceConfirmation"))
+            .yesText(PluginBundle.message("removeButton"))
+            .noText(PluginBundle.message("cancelButton"))
+            .doNotAsk(doNotAskAgain)
+            .ask(project)
     }
 
     private companion object {
