@@ -41,10 +41,10 @@ class RenameDeviceDialogWrapper(private val deviceViewModel: DeviceViewModel) : 
 
         customNameLabel = JBLabel(PluginBundle.message("renameDeviceLabel"))
         panel.add(
-                customNameLabel,
-                GridBagConstraints().apply {
-                    gridx = 0
-                }
+            customNameLabel,
+            GridBagConstraints().apply {
+                gridx = 0
+            }
         )
 
         customNameField = JBTextField(25)
@@ -55,23 +55,23 @@ class RenameDeviceDialogWrapper(private val deviceViewModel: DeviceViewModel) : 
             override fun changedUpdate(e: DocumentEvent) = updateRenameButton()
         })
         panel.add(
-                customNameField,
-                GridBagConstraints().apply {
-                    gridx = 1
-                    fill = GridBagConstraints.HORIZONTAL
-                    weightx = 1.0
-                    insets = JBUI.insets(0, 5)
-                }
+            customNameField,
+            GridBagConstraints().apply {
+                gridx = 1
+                fill = GridBagConstraints.HORIZONTAL
+                weightx = 1.0
+                insets = JBUI.insets(0, 5)
+            }
         )
         renameButton = JButton(PluginBundle.message("renameButton"))
         renameButton.addActionListener {
             renameDevice()
         }
         panel.add(
-                renameButton,
-                GridBagConstraints().apply {
-                    gridx = 3
-                }
+            renameButton,
+            GridBagConstraints().apply {
+                gridx = 3
+            }
         )
 
         updateRenameButton()
