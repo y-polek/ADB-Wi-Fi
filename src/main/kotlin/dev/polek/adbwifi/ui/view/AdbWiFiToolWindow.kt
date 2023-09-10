@@ -70,6 +70,10 @@ class AdbWiFiToolWindow(
         override fun onCopyDeviceAddressClicked(device: DeviceViewModel) {
             presenter.onCopyDeviceAddressClicked(device)
         }
+
+        override fun onRenameDeviceClicked(device: DeviceViewModel) {
+            RenameDeviceDialogWrapper(device).show()
+        }
     }
 
     private val splitter = JBSplitter(true, "AdbWifi.ShellPaneProportion", DEFAULT_PANEL_PROPORTION)
