@@ -235,7 +235,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
                     device.serialNumber == pinnedDevice.serialNumber && device.address == pinnedDevice.address
                 } == null
             }
-            .sortedBy { it.name }
+            .sortedBy { it.customName ?: it.name }
             .map { it.toViewModel() }
             .toList()
     }
