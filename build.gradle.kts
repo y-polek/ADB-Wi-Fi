@@ -11,13 +11,15 @@ plugins {
     // Kotlin support
     id("org.jetbrains.kotlin.jvm") version "1.6.20"
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-    id("org.jetbrains.intellij") version "1.5.3"
+    id("org.jetbrains.intellij") version "1.13.3"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
     id("org.jetbrains.changelog") version "1.3.1"
     // detekt linter - read more: https://detekt.github.io/detekt/kotlindsl.html
-    id("io.gitlab.arturbosch.detekt") version "1.20.0"
+    id("io.gitlab.arturbosch.detekt") version "1.22.0"
     // ktlint linter - read more: https://github.com/JLLeitschuh/ktlint-gradle
     id("org.jlleitschuh.gradle.ktlint") version "10.2.1"
+    // Sentry - read more: https://docs.sentry.io/platforms/java/
+    id("io.sentry.jvm.gradle") version "3.12.0"
 }
 
 group = properties("pluginGroup")
@@ -28,11 +30,9 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    implementation("io.sentry:sentry:5.7.4")
+    testImplementation("org.assertj:assertj-core:3.24.2")
 
-    testImplementation("org.assertj:assertj-core:3.22.0")
-
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.20.0")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.22.0")
 }
 
 // Configure gradle-intellij-plugin plugin.
