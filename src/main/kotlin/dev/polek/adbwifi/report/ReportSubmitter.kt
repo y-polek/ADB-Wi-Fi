@@ -27,6 +27,7 @@ class ReportSubmitter : ErrorReportSubmitter() {
         if (SENTRY_ENABLED) {
             Sentry.init { options: SentryOptions ->
                 options.dsn = SENTRY_DNS
+                options.isEnableUncaughtExceptionHandler = false
             }
         }
     }
