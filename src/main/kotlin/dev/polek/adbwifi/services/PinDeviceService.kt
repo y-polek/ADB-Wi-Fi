@@ -20,18 +20,14 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
     var pinnedDevices: List<PinnedDevice> = listOf()
 
     fun addPreviouslyConnectedDevice(device: Device) {
-        if (device.connectionType == WIFI && device.address?.ip!!.isNotEmpty() && !pinnedDevices.contains(device)) {
-            pinnedDevices = pinnedDevices.add(device)
-        }
+        if (device.connectionType != WIFI) return
+        if (device.address?.ip.isNullOrBlank()) return
+        if (pinnedDevices.contains(device)) return
+        pinnedDevices = pinnedDevices.add(device)
     }
 
     fun addPreviouslyConnectedDevices(devices: List<Device>) {
-        for (device in devices) {
-            if (device.connectionType != WIFI) continue
-            if (device.address?.ip.isNullOrBlank()) continue
-            if (pinnedDevices.contains(device)) continue
-            pinnedDevices = pinnedDevices.add(device)
-        }
+        devices.forEach { addPreviouslyConnectedDevice(it) }
     }
 
     fun removePreviouslyConnectedDevice(device: Device) {
