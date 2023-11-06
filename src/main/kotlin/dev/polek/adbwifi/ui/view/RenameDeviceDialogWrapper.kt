@@ -9,12 +9,7 @@ import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.services.PinDeviceService
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.utils.GridBagLayoutPanel
-import dev.polek.adbwifi.utils.appCoroutineScope
 import dev.polek.adbwifi.utils.makeMonospaced
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.awt.GridBagConstraints
 import javax.swing.Action
 import javax.swing.JButton
@@ -27,8 +22,6 @@ class RenameDeviceDialogWrapper(private val deviceViewModel: DeviceViewModel) : 
     private lateinit var customNameLabel: JBLabel
     private lateinit var customNameField: JBTextField
     private lateinit var renameButton: JButton
-
-    private var renameDeviceJob: Job? = null
 
     init {
         init()
@@ -83,15 +76,11 @@ class RenameDeviceDialogWrapper(private val deviceViewModel: DeviceViewModel) : 
 
     private fun renameDevice() {
         val pinService = service<PinDeviceService>()
-        renameDeviceJob = appCoroutineScope.launch(Dispatchers.IO) {
-            val customName = customNameField.text.trim()
-            withContext(Dispatchers.Main) {
-                customNameField.text = customName
-                customNameField.requestFocusInWindow()
-                deviceViewModel.device.customName = customName
-                pinService.updatePreviouslyConnectedDevice(deviceViewModel.device)
-            }
-        }
+        val customName = customNameField.text.trim()
+        customNameField.text = customName
+        customNameField.requestFocusInWindow()
+        deviceViewModel.device.customName = customName
+        pinService.updatePreviouslyConnectedDevice(deviceViewModel.device)
         dispose()
     }
 
