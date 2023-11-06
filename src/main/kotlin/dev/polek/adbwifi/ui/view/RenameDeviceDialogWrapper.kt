@@ -84,13 +84,12 @@ class RenameDeviceDialogWrapper(private val deviceViewModel: DeviceViewModel) : 
     private fun renameDevice() {
         val pinService = service<PinDeviceService>()
         renameDeviceJob = appCoroutineScope.launch(Dispatchers.IO) {
-            pinService.removePreviouslyConnectedDevice(deviceViewModel.device)
             val customName = customNameField.text.trim()
             withContext(Dispatchers.Main) {
                 customNameField.text = customName
                 customNameField.requestFocusInWindow()
                 deviceViewModel.device.customName = customName
-                pinService.addPreviouslyConnectedDevice(deviceViewModel.device)
+                pinService.updatePreviouslyConnectedDevice(deviceViewModel.device)
             }
         }
         dispose()
