@@ -21,7 +21,7 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
 
     fun addPreviouslyConnectedDevice(device: Device) {
         if (device.connectionType == WIFI && device.address?.ip!!.isNotEmpty() && !pinnedDevices.contains(device)) {
-            pinnedDevices.add(device)
+            pinnedDevices = pinnedDevices.add(device)
         }
     }
 
