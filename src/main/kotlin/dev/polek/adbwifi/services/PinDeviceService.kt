@@ -24,7 +24,7 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
         addPreviouslyConnectedDevice(device)
     }
 
-    fun addPreviouslyConnectedDevice(device: Device) {
+    private fun addPreviouslyConnectedDevice(device: Device) {
         pinnedDevices = pinnedDevices.add(device)
     }
 
