@@ -19,6 +19,15 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
     @OptionTag(converter = PinnedDeviceListConverter::class)
     var pinnedDevices: List<PinnedDevice> = listOf()
 
+    fun updatePreviouslyConnectedDevice(device: Device){
+        removePreviouslyConnectedDevice(device)
+        addPreviouslyConnectedDevice(device)
+    }
+
+    private fun addPreviouslyConnectedDevice(device: Device) {
+        pinnedDevices = pinnedDevices.add(device)
+    }
+
     fun addPreviouslyConnectedDevices(devices: List<Device>) {
         for (device in devices) {
             if (device.connectionType != WIFI) continue
@@ -52,6 +61,7 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
                 id = device.id,
                 serialNumber = device.serialNumber,
                 name = device.name,
+                customName = device.customName,
                 address = address,
                 port = device.port,
                 androidVersion = device.androidVersion,

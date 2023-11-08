@@ -184,6 +184,12 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
     private fun openDeviceMenu(device: DeviceViewModel, event: MouseEvent) {
         val menu = JBPopupMenu()
 
+        val renameDeviceItem = JBMenuItem(PluginBundle.message("renameDevice"))
+        renameDeviceItem.addActionListener {
+            listener?.onRenameDeviceClicked(device)
+        }
+        menu.add(renameDeviceItem)
+
         val copyIdItem = JBMenuItem(PluginBundle.message("copyDeviceIdMenuItem"), AllIcons.Actions.Copy)
         copyIdItem.addActionListener {
             listener?.onCopyDeviceIdClicked(device)
@@ -207,6 +213,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         fun onRemoveDeviceClicked(device: DeviceViewModel)
         fun onCopyDeviceIdClicked(device: DeviceViewModel)
         fun onCopyDeviceAddressClicked(device: DeviceViewModel)
+        fun onRenameDeviceClicked(device: DeviceViewModel)
     }
 
     private companion object {
