@@ -26,8 +26,9 @@ class Scrcpy(
     private val adbExe: String
         get() {
             return if (properties.useAdbFromPath) {
-                findAdbExecInSystemPath()
-                    ?: throw IllegalStateException("Cannot find 'adb' executable in system PATH")
+                checkNotNull(findAdbExecInSystemPath()) {
+                    "Cannot find 'adb' executable in system PATH"
+                }
             } else {
                 adbExec(properties.adbLocation)
             }
@@ -46,7 +47,7 @@ class Scrcpy(
         }
 
     suspend fun share(device: Device): CmdResult {
-        val scrcpyExe = scrcpyExe ?: throw IllegalStateException("'scrcpy' executable not found")
+        val scrcpyExe = checkNotNull(scrcpyExe) { "'scrcpy' executable not found" }
         val processBuilder = ProcessBuilder(listOf(scrcpyExe, "-s", device.id) + cmdFlags())
             .redirectErrorStream(true)
         processBuilder.environment()["ADB"] = adbExe
