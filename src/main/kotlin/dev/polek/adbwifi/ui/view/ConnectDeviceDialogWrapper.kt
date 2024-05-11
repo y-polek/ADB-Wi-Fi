@@ -6,6 +6,7 @@ import com.intellij.ui.AnimatedIcon
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextField
+import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.services.AdbService
@@ -14,11 +15,12 @@ import dev.polek.adbwifi.utils.GridBagLayoutPanel
 import dev.polek.adbwifi.utils.MaxLengthNumberDocument
 import dev.polek.adbwifi.utils.appCoroutineScope
 import dev.polek.adbwifi.utils.makeMonospaced
-import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.awt.GridBagConstraints
-import java.awt.Insets
 import javax.swing.Action
 import javax.swing.JButton
 import javax.swing.JComponent
@@ -70,7 +72,7 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
                 gridx = 1
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
-                insets = Insets(0, 5, 0, 5)
+                insets = JBUI.insets(0, 5)
             }
         )
 
@@ -85,7 +87,7 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
             portTextField,
             GridBagConstraints().apply {
                 gridx = 2
-                insets = Insets(0, 0, 0, 5)
+                insets = JBUI.insetsRight(5)
             }
         )
 
@@ -112,7 +114,7 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
                 gridwidth = 3
                 fill = GridBagConstraints.BOTH
                 weighty = 1.0
-                insets = Insets(10, 0, 0, 0)
+                insets = JBUI.insetsTop(10)
             }
         )
 

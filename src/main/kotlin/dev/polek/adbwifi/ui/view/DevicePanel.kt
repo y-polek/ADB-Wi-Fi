@@ -6,6 +6,7 @@ import com.intellij.openapi.ui.JBPopupMenu
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
+import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.ui.model.DeviceViewModel
@@ -17,7 +18,6 @@ import dev.polek.adbwifi.utils.panel
 import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
-import java.awt.Insets
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.JComponent
@@ -55,13 +55,20 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
                 gridheight = 2
                 fill = GridBagConstraints.VERTICAL
                 weighty = 1.0
-                insets = Insets(0, 10, 0, 10)
+                insets = JBUI.insets(0, 10)
             }
         )
 
         val titleLabel = JBLabel(device.titleText)
         titleLabel.componentStyle = UIUtil.ComponentStyle.LARGE
         titleLabel.makeBold()
+        titleLabel.addMouseListener(object : MouseAdapter() {
+            override fun mouseClicked(e: MouseEvent) {
+                if (e.clickCount == 2) {
+                    listener?.onRenameDeviceClicked(device)
+                }
+            }
+        })
         add(
             titleLabel,
             GridBagConstraints().apply {
@@ -71,7 +78,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
                 fill = GridBagConstraints.BOTH
                 anchor = GridBagConstraints.PAGE_START
                 weightx = 1.0
-                insets = Insets(5, 0, 0, 0)
+                insets = JBUI.insetsTop(5)
             }
         )
 
@@ -88,7 +95,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
                     gridy = 0
                     gridwidth = 2
                     weighty = 1.0
-                    insets = Insets(vInset, 10, vInset, 10)
+                    insets = JBUI.insets(vInset, 10, vInset, 10)
                 }
             )
         } else {
@@ -112,7 +119,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
                     gridy = 0
                     gridwidth = 2
                     weighty = 1.0
-                    insets = Insets(vInset, 10, vInset, 10)
+                    insets = JBUI.insets(vInset, 10, vInset, 10)
                 }
             )
         }
@@ -173,7 +180,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
                 anchor = GridBagConstraints.PAGE_END
                 weightx = 1.0
                 weighty = 1.0
-                insets = Insets(0, 0, 0, actionsPanel.preferredSize.width)
+                insets = JBUI.insetsRight(actionsPanel.preferredSize.width)
             }
         )
 
@@ -183,6 +190,12 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
 
     private fun openDeviceMenu(device: DeviceViewModel, event: MouseEvent) {
         val menu = JBPopupMenu()
+
+        val renameDeviceItem = JBMenuItem(PluginBundle.message("renameDeviceMenuItem"), AllIcons.Actions.Edit)
+        renameDeviceItem.addActionListener {
+            listener?.onRenameDeviceClicked(device)
+        }
+        menu.add(renameDeviceItem)
 
         val copyIdItem = JBMenuItem(PluginBundle.message("copyDeviceIdMenuItem"), AllIcons.Actions.Copy)
         copyIdItem.addActionListener {
@@ -205,6 +218,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         fun onDisconnectButtonClicked(device: DeviceViewModel)
         fun onShareScreenClicked(device: DeviceViewModel)
         fun onRemoveDeviceClicked(device: DeviceViewModel)
+        fun onRenameDeviceClicked(device: DeviceViewModel)
         fun onCopyDeviceIdClicked(device: DeviceViewModel)
         fun onCopyDeviceAddressClicked(device: DeviceViewModel)
     }

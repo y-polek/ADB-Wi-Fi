@@ -1,9 +1,9 @@
 package dev.polek.adbwifi.ui.model
 
-import dev.polek.adbwifi.model.Address
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.Device.ConnectionType.*
 import dev.polek.adbwifi.model.PinnedDevice
+import dev.polek.adbwifi.model.PinnedDevice.Companion.toDevice
 import dev.polek.adbwifi.utils.Icons
 import javax.swing.Icon
 
@@ -37,44 +37,26 @@ data class DeviceViewModel(
 
     companion object {
 
-        fun Device.toViewModel(): DeviceViewModel {
+        fun Device.toViewModel(
+            customName: String?,
+            isRemoveButtonVisible: Boolean = false
+        ): DeviceViewModel {
             val device = this
             return DeviceViewModel(
                 device = device,
-                titleText = device.name,
+                titleText = customName ?: device.name,
                 subtitleText = device.subtitleText(),
                 subtitleIcon = device.addressIcon(),
                 icon = device.icon(),
                 hasAddress = device.hasAddress(),
                 buttonType = device.buttonType(),
                 isShareScreenButtonVisible = false,
-                isRemoveButtonVisible = false
+                isRemoveButtonVisible = isRemoveButtonVisible
             )
         }
 
-        fun PinnedDevice.toViewModel(): DeviceViewModel {
-            val device = Device(
-                id = this.id,
-                serialNumber = this.serialNumber,
-                name = this.name,
-                address = Address("", this.address),
-                port = this.port,
-                androidVersion = this.androidVersion,
-                apiLevel = this.apiLevel,
-                connectionType = NONE,
-                isPinnedDevice = true
-            )
-            return DeviceViewModel(
-                device = device,
-                titleText = device.name,
-                subtitleText = device.subtitleText(),
-                subtitleIcon = device.addressIcon(),
-                icon = device.icon(),
-                hasAddress = device.hasAddress(),
-                buttonType = device.buttonType(),
-                isShareScreenButtonVisible = false,
-                isRemoveButtonVisible = true
-            )
+        fun PinnedDevice.toViewModel(customName: String?): DeviceViewModel {
+            return toDevice().toViewModel(customName, isRemoveButtonVisible = true)
         }
 
         private fun Device.subtitleText() = buildString {

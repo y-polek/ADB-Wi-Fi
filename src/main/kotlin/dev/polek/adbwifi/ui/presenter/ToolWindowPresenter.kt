@@ -23,6 +23,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     private val logService by lazy { service<LogService>() }
     private val propertiesService by lazy { service<PropertiesService>() }
     private val pinDeviceService by lazy { service<PinDeviceService>() }
+    private val deviceNamesService by lazy { service<DeviceNamesService>() }
 
     private var isViewOpen: Boolean = false
     private var isAdbValid: Boolean = true
@@ -123,6 +124,19 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
         updateDeviceLists()
     }
 
+    fun onRenameDeviceClicked(device: DeviceViewModel) {
+        view?.showRenameDeviceDialog(device)
+        updateDeviceNames()
+    }
+
+    private fun updateDeviceNames() {
+        devices = devices.map {
+            it.device.toViewModel(customName = deviceNamesService.findName(it.serialNumber))
+        }
+        pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
+        updateDeviceLists()
+    }
+
     fun onCopyDeviceIdClicked(device: DeviceViewModel) {
         copyToClipboard(device.device.id)
     }
@@ -133,7 +147,9 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     }
 
     private fun onDevicesUpdated(model: List<Device>) {
-        devices = model.map { it.toViewModel() }
+        devices = model.map {
+            it.toViewModel(customName = deviceNamesService.findName(it.serialNumber))
+        }
         pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
 
         updateDeviceLists()
@@ -236,7 +252,9 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
                 } == null
             }
             .sortedBy { it.name }
-            .map { it.toViewModel() }
+            .map {
+                it.toViewModel(customName = deviceNamesService.findName(it.serialNumber))
+            }
             .toList()
     }
 

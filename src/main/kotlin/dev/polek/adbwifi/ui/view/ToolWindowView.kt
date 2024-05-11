@@ -24,4 +24,6 @@ interface ToolWindowView {
     fun setLogEntries(entries: List<LogEntry>)
 
     fun showRemoveDeviceConfirmation(device: DeviceViewModel)
+
+    fun showRenameDeviceDialog(device: DeviceViewModel)
 }

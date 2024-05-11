@@ -63,6 +63,10 @@ class AdbWiFiToolWindow(
             presenter.onRemoveDeviceButtonClicked(device)
         }
 
+        override fun onRenameDeviceClicked(device: DeviceViewModel) {
+            presenter.onRenameDeviceClicked(device)
+        }
+
         override fun onCopyDeviceIdClicked(device: DeviceViewModel) {
             presenter.onCopyDeviceIdClicked(device)
         }
@@ -260,6 +264,10 @@ class AdbWiFiToolWindow(
             .noText(PluginBundle.message("cancelButton"))
             .doNotAsk(doNotAskAgain)
             .ask(project)
+    }
+
+    override fun showRenameDeviceDialog(device: DeviceViewModel) {
+        RenameDeviceDialogWrapper(device).show()
     }
 
     private companion object {
