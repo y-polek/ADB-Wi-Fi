@@ -9,8 +9,7 @@ import com.intellij.ui.content.ContentFactory
 class WindowFactory : ToolWindowFactory, DumbAware {
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val contentFactory = ContentFactory.SERVICE.getInstance()
-        val content = contentFactory.createContent(AdbWiFiToolWindow(project, toolWindow), "", false)
+        val content = ContentFactory.getInstance().createContent(AdbWiFiToolWindow(project, toolWindow), "", false)
         toolWindow.contentManager.addContent(content)
     }
 }
