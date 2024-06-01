@@ -1,5 +1,6 @@
 package dev.polek.adbwifi.actions
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.ToggleAction
 import com.intellij.openapi.application.ApplicationManager
@@ -15,4 +16,6 @@ class ToggleLogAction : ToggleAction(), DumbAware {
     override fun setSelected(e: AnActionEvent, state: Boolean) {
         service.isLogVisible = state
     }
+
+    override fun getActionUpdateThread() = ActionUpdateThread.EDT
 }
