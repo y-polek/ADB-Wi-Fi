@@ -15,12 +15,12 @@ class DeviceNamesService : PersistentStateComponent<DeviceNamesService> {
     @OptionTag
     private val deviceNames = mutableMapOf<String/*Serial number*/, String/*Name*/>()
 
-    fun setName(serialNumber: String, name: String?) {
-        if (name == null) {
-            deviceNames.remove(serialNumber)
-        } else {
-            deviceNames[serialNumber] = name
-        }
+    fun setName(serialNumber: String, name: String) {
+        deviceNames[serialNumber] = name
+    }
+
+    fun removeName(serialNumber: String) {
+        deviceNames.remove(serialNumber)
     }
 
     fun findName(serialNumber: String): String? {

@@ -2,6 +2,7 @@ package dev.polek.adbwifi.ui.view
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.DialogWrapper
+import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBUI
 import dev.polek.adbwifi.PluginBundle
@@ -24,6 +25,7 @@ class RenameDeviceDialogWrapper(
 
     private lateinit var textField: JBTextField
     private lateinit var renameButton: JButton
+    private lateinit var resetNameCheckbox: JBCheckBox
 
     init {
         init()
@@ -39,9 +41,9 @@ class RenameDeviceDialogWrapper(
         textField.selectionEnd = textField.text.length
         textField.makeMonospaced()
         textField.document.addDocumentListener(object : DocumentListener {
-            override fun insertUpdate(e: DocumentEvent) = updateRenameButton()
-            override fun removeUpdate(e: DocumentEvent) = updateRenameButton()
-            override fun changedUpdate(e: DocumentEvent) = updateRenameButton()
+            override fun insertUpdate(e: DocumentEvent) = updateUi()
+            override fun removeUpdate(e: DocumentEvent) = updateUi()
+            override fun changedUpdate(e: DocumentEvent) = updateUi()
         })
         textField.addActionListener {
             renameDeviceAndDismiss()
@@ -49,10 +51,9 @@ class RenameDeviceDialogWrapper(
         panel.add(
             textField,
             GridBagConstraints().apply {
-                gridx = 1
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
-                insets = JBUI.insets(0, 5)
+                insets = JBUI.insetsRight(10)
             }
         )
 
@@ -67,7 +68,20 @@ class RenameDeviceDialogWrapper(
             }
         )
 
-        updateRenameButton()
+        resetNameCheckbox = JBCheckBox(PluginBundle.message("resetToOriginalName", device.device.name))
+        resetNameCheckbox.addActionListener {
+            updateUi()
+        }
+        panel.add(
+            resetNameCheckbox,
+            GridBagConstraints().apply {
+                gridy = 1
+                gridwidth = 4
+                insets = JBUI.insetsTop(5)
+            }
+        )
+
+        updateUi()
 
         return panel
     }
@@ -75,12 +89,22 @@ class RenameDeviceDialogWrapper(
     override fun createActions(): Array<Action> = emptyArray()
 
     private fun renameDeviceAndDismiss() {
-        val newName = textField.text.trim()
-        deviceNamesService.setName(device.serialNumber, newName)
+        if (resetNameCheckbox.isSelected) {
+            deviceNamesService.removeName(device.serialNumber)
+        } else {
+            val newName = textField.text.trim()
+            deviceNamesService.setName(device.serialNumber, newName)
+        }
         dispose()
     }
 
-    private fun updateRenameButton() {
-        renameButton.isEnabled = textField.text.isNotBlank()
+    private fun updateUi() {
+        renameButton.isEnabled = textField.text.isNotBlank() || resetNameCheckbox.isSelected
+        renameButton.text = if (resetNameCheckbox.isSelected) {
+            PluginBundle.message("saveButton")
+        } else {
+            PluginBundle.message("renameButton")
+        }
+        textField.isEnabled = !resetNameCheckbox.isSelected
     }
 }
