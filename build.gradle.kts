@@ -137,6 +137,6 @@ tasks {
     }
 
     runIde {
-        //ideDir.set(file("/Applications/Android Studio.app/Contents"))
+        // ideDir.set(file("/Applications/Android Studio.app/Contents"))
     }
 }

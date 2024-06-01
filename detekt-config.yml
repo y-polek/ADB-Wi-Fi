@@ -9,6 +9,7 @@ formatting:
 complexity:
   TooManyFunctions:
     thresholdInClasses: 20
+    thresholdInInterfaces: 20
     ignoreDeprecated: true
     ignorePrivate: true
     ignoreOverridden: true

@@ -3,7 +3,7 @@ package dev.polek.adbwifi.ui.view
 import com.intellij.ui.AnimatedIcon
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
-import kotlinx.coroutines.GlobalScope
+import dev.polek.adbwifi.utils.appCoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.awt.event.MouseAdapter
@@ -48,7 +48,7 @@ class IconButton(icon: Icon, tooltip: String? = null) : JBLabel() {
         onClickedListener = null
         this.icon = AnimatedIcon.Default()
 
-        GlobalScope.launch {
+        appCoroutineScope.launch {
             delay(timeMillis)
             onClickedListener = listener
             this@IconButton.icon = icon
