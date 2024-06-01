@@ -16,13 +16,13 @@ import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.components.JBTextField
+import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.utils.*
 import java.awt.Dimension
 import java.awt.GridBagConstraints
-import java.awt.Insets
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.io.File
@@ -136,7 +136,7 @@ class AdbWifiConfigurable : Configurable {
                 gridy = 1
                 gridwidth = 1
                 anchor = GridBagConstraints.LINE_START
-                insets = Insets(COMPONENT_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 8)
+                insets = JBUI.insets(COMPONENT_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 8)
             }
         )
 
@@ -149,7 +149,7 @@ class AdbWifiConfigurable : Configurable {
                 gridwidth = 1
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
-                insets = Insets(COMPONENT_VERTICAL_INSET, 0, 0, 0)
+                insets = JBUI.insetsTop(COMPONENT_VERTICAL_INSET)
             }
         )
 
@@ -161,7 +161,7 @@ class AdbWifiConfigurable : Configurable {
                 gridy = 2
                 gridwidth = 3
                 anchor = GridBagConstraints.LINE_START
-                insets = Insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
+                insets = JBUI.insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
             }
         )
 
@@ -173,7 +173,7 @@ class AdbWifiConfigurable : Configurable {
                 gridy = 3
                 gridwidth = 1
                 anchor = GridBagConstraints.LINE_START
-                insets = Insets(COMPONENT_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 8)
+                insets = JBUI.insets(COMPONENT_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 8)
             }
         )
 
@@ -186,7 +186,7 @@ class AdbWifiConfigurable : Configurable {
                 gridwidth = 2
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
-                insets = Insets(COMPONENT_VERTICAL_INSET, 0, 0, 0)
+                insets = JBUI.insetsTop(COMPONENT_VERTICAL_INSET)
             }
         )
 
@@ -199,7 +199,7 @@ class AdbWifiConfigurable : Configurable {
                 gridwidth = 1
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
-                insets = Insets(COMPONENT_VERTICAL_INSET, 0, 0, 0)
+                insets = JBUI.insetsTop(COMPONENT_VERTICAL_INSET)
             }
         )
 
@@ -210,7 +210,7 @@ class AdbWifiConfigurable : Configurable {
                 gridx = 2
                 gridy = 4
                 gridwidth = 1
-                insets = Insets(4, 0, 0, 0)
+                insets = JBUI.insetsTop(4)
             }
         )
 
@@ -226,7 +226,13 @@ class AdbWifiConfigurable : Configurable {
             PluginBundle.message("scrcpyHelpDescription"),
             PluginBundle.message("scrcpyHelpLinkText")
         ) {
-            BrowserUtil.browse(installScrcpyUrl)
+            val url = when {
+                SystemInfo.isLinux -> "https://github.com/Genymobile/scrcpy#linux"
+                SystemInfo.isWindows -> "https://github.com/Genymobile/scrcpy#windows"
+                SystemInfo.isMac -> "https://github.com/Genymobile/scrcpy#macos"
+                else -> "https://github.com/Genymobile/scrcpy"
+            }
+            BrowserUtil.browse(url)
         }
         val header = GridBagLayoutPanel().apply {
             withMinimumHeight(28)
@@ -236,7 +242,7 @@ class AdbWifiConfigurable : Configurable {
             add(
                 helpButton,
                 GridBagConstraints().apply {
-                    insets = Insets(0, 5, 0, 0)
+                    insets = JBUI.insetsLeft(5)
                 }
             )
             add(
@@ -271,7 +277,7 @@ class AdbWifiConfigurable : Configurable {
                 gridy = 1
                 gridwidth = 3
                 anchor = GridBagConstraints.LINE_START
-                insets = Insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
+                insets = JBUI.insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
             }
         )
 
@@ -283,7 +289,7 @@ class AdbWifiConfigurable : Configurable {
                 gridwidth = 3
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
-                insets = Insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
+                insets = JBUI.insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
             }
         )
 
@@ -295,7 +301,7 @@ class AdbWifiConfigurable : Configurable {
                 gridwidth = 3
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
-                insets = Insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
+                insets = JBUI.insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
             }
         )
 
@@ -328,7 +334,7 @@ class AdbWifiConfigurable : Configurable {
                 gridy = 1
                 gridwidth = 1
                 anchor = GridBagConstraints.LINE_START
-                insets = Insets(COMPONENT_VERTICAL_INSET, 0, 0, 8)
+                insets = JBUI.insets(COMPONENT_VERTICAL_INSET, 0, 0, 8)
             }
         )
 
@@ -354,7 +360,7 @@ class AdbWifiConfigurable : Configurable {
                 gridwidth = 2
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
-                insets = Insets(COMPONENT_VERTICAL_INSET, 0, 0, 0)
+                insets = JBUI.insetsTop(COMPONENT_VERTICAL_INSET)
             }
         )
 
@@ -367,7 +373,7 @@ class AdbWifiConfigurable : Configurable {
                 gridwidth = 1
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
-                insets = Insets(COMPONENT_VERTICAL_INSET, 0, 0, 0)
+                insets = JBUI.insetsTop(COMPONENT_VERTICAL_INSET)
             }
         )
 
@@ -390,7 +396,7 @@ class AdbWifiConfigurable : Configurable {
 
         scrcpyCmdFlagsTextArea = JBTextArea(3, 1).apply {
             lineWrap = true
-            margin = Insets(8, 8, 8, 8)
+            margin = JBUI.insets(8)
         }
         panel.add(
             scrcpyCmdFlagsTextArea,
@@ -401,7 +407,7 @@ class AdbWifiConfigurable : Configurable {
                 fill = GridBagConstraints.HORIZONTAL
                 weightx = 1.0
                 weighty = 1.0
-                insets = Insets(4, 0, 0, 0)
+                insets = JBUI.insetsTop(4)
             }
         )
 
@@ -415,7 +421,7 @@ class AdbWifiConfigurable : Configurable {
                 gridx = 0
                 gridy = 2
                 anchor = GridBagConstraints.LINE_START
-                insets = Insets(4, 0, 0, 0)
+                insets = JBUI.insetsTop(4)
             }
         )
 
@@ -427,7 +433,7 @@ class AdbWifiConfigurable : Configurable {
                 gridx = 1
                 gridy = 2
                 anchor = GridBagConstraints.LINE_END
-                insets = Insets(4, 0, 0, 0)
+                insets = JBUI.insetsTop(4)
             }
         )
 
@@ -456,7 +462,7 @@ class AdbWifiConfigurable : Configurable {
                 gridx = 0
                 gridy = 1
                 anchor = GridBagConstraints.LINE_START
-                insets = Insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
+                insets = JBUI.insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
             }
         )
 
@@ -513,7 +519,7 @@ class AdbWifiConfigurable : Configurable {
     private fun showAdbVerifiedMessage() {
         adbStatusLabel.apply {
             icon = Icons.OK
-            text = VERIFIED_MESSAGE
+            text = PluginBundle.message("adbPathVerifiedMessage")
             foreground = JBColor.foreground()
         }
 
@@ -523,7 +529,7 @@ class AdbWifiConfigurable : Configurable {
     private fun showScrcpyVerifiedMessage() {
         scrcpyStatusLabel.apply {
             icon = Icons.OK
-            text = VERIFIED_MESSAGE
+            text = PluginBundle.message("adbPathVerifiedMessage")
             foreground = JBColor.foreground()
         }
     }
@@ -531,7 +537,7 @@ class AdbWifiConfigurable : Configurable {
     private fun showAdbVerificationErrorMessage() {
         adbStatusLabel.apply {
             icon = Icons.ERROR
-            text = ADB_VERIFICATION_ERROR_MESSAGE
+            text = PluginBundle.message("adbPathVerificationErrorMessage")
             foreground = JBColor.RED
         }
 
@@ -541,7 +547,7 @@ class AdbWifiConfigurable : Configurable {
     private fun showScrcpyVerificationErrorMessage() {
         scrcpyStatusLabel.apply {
             icon = Icons.ERROR
-            text = SCRCPY_VERIFICATION_ERROR_MESSAGE
+            text = PluginBundle.message("scrcpyPathVerificationErrorMessage")
             foreground = JBColor.RED
         }
     }
@@ -603,17 +609,5 @@ class AdbWifiConfigurable : Configurable {
         private const val GROUP_VERTICAL_INSET = 10
         private const val GROUP_LEFT_INSET = 20
         private const val COMPONENT_VERTICAL_INSET = 4
-        private val VERIFIED_MESSAGE = PluginBundle.message("adbPathVerifiedMessage")
-        private val ADB_VERIFICATION_ERROR_MESSAGE = PluginBundle.message("adbPathVerificationErrorMessage")
-        private val SCRCPY_VERIFICATION_ERROR_MESSAGE = PluginBundle.message("scrcpyPathVerificationErrorMessage")
-
-        private val installScrcpyUrl: String by lazy {
-            when {
-                SystemInfo.isLinux -> "https://github.com/Genymobile/scrcpy#linux"
-                SystemInfo.isWindows -> "https://github.com/Genymobile/scrcpy#windows"
-                SystemInfo.isMac -> "https://github.com/Genymobile/scrcpy#macos"
-                else -> "https://github.com/Genymobile/scrcpy"
-            }
-        }
     }
 }
