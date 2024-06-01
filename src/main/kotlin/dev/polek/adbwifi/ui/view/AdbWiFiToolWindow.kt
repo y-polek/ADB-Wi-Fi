@@ -20,6 +20,7 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.components.BorderLayoutPanel
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.actions.OpenSettingsNotificationAction
@@ -32,7 +33,6 @@ import dev.polek.adbwifi.utils.Icons
 import dev.polek.adbwifi.utils.panel
 import dev.polek.adbwifi.utils.setFontSize
 import java.awt.GridBagConstraints
-import java.awt.Insets
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.*
@@ -146,7 +146,7 @@ class AdbWiFiToolWindow(
             GridBagConstraints().apply {
                 gridx = 0
                 gridy = 1
-                insets = Insets(20, 0, 20, 0)
+                insets = JBUI.insets(20, 0)
             }
         )
     }
@@ -169,6 +169,7 @@ class AdbWiFiToolWindow(
             logToolbarActionGroup,
             false
         )
+        logToolbar.targetComponent = this
         bottomPanel = panel(center = JBScrollPane(logPanel), left = logToolbar.component)
 
         splitter.firstComponent = topPanel
