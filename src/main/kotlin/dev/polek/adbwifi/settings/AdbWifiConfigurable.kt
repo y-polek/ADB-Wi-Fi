@@ -226,13 +226,7 @@ class AdbWifiConfigurable : Configurable {
             PluginBundle.message("scrcpyHelpDescription"),
             PluginBundle.message("scrcpyHelpLinkText")
         ) {
-            val url = when {
-                SystemInfo.isLinux -> "https://github.com/Genymobile/scrcpy#linux"
-                SystemInfo.isWindows -> "https://github.com/Genymobile/scrcpy#windows"
-                SystemInfo.isMac -> "https://github.com/Genymobile/scrcpy#macos"
-                else -> "https://github.com/Genymobile/scrcpy"
-            }
-            BrowserUtil.browse(url)
+            BrowserUtil.browse("https://github.com/Genymobile/scrcpy#get-the-app")
         }
         val header = GridBagLayoutPanel().apply {
             withMinimumHeight(28)
@@ -426,7 +420,7 @@ class AdbWifiConfigurable : Configurable {
         )
 
         val docLink = HyperlinkLabel(PluginBundle.message("scrcpyDocLabel"))
-        docLink.setHyperlinkTarget("https://github.com/Genymobile/scrcpy#features")
+        docLink.setHyperlinkTarget("https://github.com/Genymobile/scrcpy#user-documentation")
         panel.add(
             docLink,
             GridBagConstraints().apply {
