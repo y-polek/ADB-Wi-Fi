@@ -100,9 +100,9 @@ tasks {
             writer.println("package dev.polek.adbwifi")
             writer.println()
 
-            val sentryDns = System.getenv("SENTRY_DNS")
-            val sentryDnsStr = if (sentryDns != null) "\"$sentryDns\"" else "null"
-            writer.println("val SENTRY_DNS: String? = $sentryDnsStr")
+            val sentryDsn = System.getenv("SENTRY_DSN")
+            val sentryDsnStr = if (sentryDsn != null) "\"$sentryDsn\"" else "null"
+            writer.println("val SENTRY_DSN: String? = $sentryDsnStr")
         }
     }
 

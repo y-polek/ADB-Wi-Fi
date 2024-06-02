@@ -14,7 +14,7 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.util.Consumer
 import dev.polek.adbwifi.PluginBundle
-import dev.polek.adbwifi.SENTRY_DNS
+import dev.polek.adbwifi.SENTRY_DSN
 import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryOptions
@@ -23,10 +23,12 @@ import java.awt.Component
 
 class ReportSubmitter : ErrorReportSubmitter() {
 
+    private val isSentryEnabled = SENTRY_DSN != null
+
     init {
-        if (SENTRY_ENABLED) {
+        if (isSentryEnabled) {
             Sentry.init { options: SentryOptions ->
-                options.dsn = SENTRY_DNS
+                options.dsn = SENTRY_DSN
                 options.isEnableUncaughtExceptionHandler = false
             }
         }
@@ -40,7 +42,7 @@ class ReportSubmitter : ErrorReportSubmitter() {
         parentComponent: Component,
         consumer: Consumer<in SubmittedReportInfo>
     ): Boolean {
-        if (!SENTRY_ENABLED) return false
+        if (!isSentryEnabled) return false
 
         val context = DataManager.getInstance().getDataContext(parentComponent)
         val project = CommonDataKeys.PROJECT.getData(context)
@@ -83,9 +85,5 @@ class ReportSubmitter : ErrorReportSubmitter() {
         val os = SystemInfo.getOsNameAndVersion()
         val ideaName = ApplicationInfo.getInstance().fullApplicationName
         return "$os, $ideaName"
-    }
-
-    private companion object {
-        private val SENTRY_ENABLED = SENTRY_DNS != null
     }
 }

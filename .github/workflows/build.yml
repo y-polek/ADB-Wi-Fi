@@ -10,8 +10,6 @@
 # Docs:
 # - GitHub Actions: https://help.github.com/en/actions
 # - IntelliJ Plugin Verifier GitHub Action: https://github.com/ChrisCarini/intellij-platform-plugin-verifier-action
-#
-## JBIJPPTPL
 
 name: Build
 on: [push, pull_request]
@@ -37,7 +35,7 @@ jobs:
     name: Test
     needs: gradleValidation
     env:
-      SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
     runs-on: ubuntu-latest
     steps:
 
@@ -79,7 +77,7 @@ jobs:
     name: Build
     needs: test
     env:
-      SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
     runs-on: ubuntu-latest
     outputs:
       name: ${{ steps.properties.outputs.name }}
@@ -153,8 +151,8 @@ jobs:
         with:
           plugin-location: plugin-artifact/${{ needs.build.outputs.artifact }}
           ide-versions: |
-            ideaIC:2019.3
-            ideaIC:2020.1
+            ideaIC:2022.3
+            ideaIC:LATEST-EAP-SNAPSHOT
 
       # Print the output of the verify step
       - name: Print Logs
