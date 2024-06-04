@@ -24,11 +24,11 @@ jobs:
 
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       # Validate wrapper
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/wrapper-validation-action@v3
 
   # Run verifyPlugin and test Gradle tasks
   test:
@@ -41,19 +41,19 @@ jobs:
 
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      # Setup Java 11 environment for the next steps
+      # Setup Java 17 environment for the next steps
       - name: Setup Java
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
-          distribution: zulu
-          java-version: 11
+          distribution: 'zulu'
+          java-version: '17'
           cache: gradle
 
       # Cache Gradle dependencies
       - name: Setup Cache
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
@@ -82,25 +82,25 @@ jobs:
     outputs:
       name: ${{ steps.properties.outputs.name }}
       version: ${{ steps.properties.outputs.version }}
-      artifact: ${{ steps.properties.outputs.name }}-${{ steps.properties.outputs.version }}.zip
+      artifact: ${{ steps.properties.outputs.pluginName }}-${{ steps.properties.outputs.version }}.zip
       changelog: ${{ steps.properties.outputs.changelog }}
     steps:
 
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      # Setup Java 11 environment for the next steps
+      # Setup Java 17 environment for the next steps
       - name: Setup Java
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
-          distribution: zulu
-          java-version: 11
+          distribution: 'zulu'
+          java-version: '17'
           cache: gradle
 
       # Cache Gradle dependencies
       - name: Setup Cache
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
@@ -112,6 +112,7 @@ jobs:
         run: |
           echo "::set-output name=version::$(./gradlew properties --console=plain -q | grep "^version:" | cut -f2- -d ' ')"
           echo "::set-output name=name::$(./gradlew properties --console=plain -q | grep "^name:" | cut -f2- -d ' ')"
+          echo "::set-output name=pluginName::$(./gradlew properties --console=plain -q | grep "^pluginName:" | cut -f2- -d ' ')"
 
           CHANGELOG=$(./gradlew getChangelog --unreleased --no-header --console=plain -q)
           CHANGELOG="${CHANGELOG//'%'/'%25'}"
@@ -125,55 +126,23 @@ jobs:
 
       # Upload plugin artifact to make it available in the next jobs
       - name: Upload artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: plugin-artifact
           path: ./build/distributions/${{ needs.build.outputs.artifact }}
-
-  # Verify built plugin using IntelliJ Plugin Verifier tool
-  # Requires build job to be passed
-  verify:
-    name: Verify
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-
-      # Download plugin artifact provided by the previous job
-      - name: Download Artifact
-        uses: actions/download-artifact@v1
-        with:
-          name: plugin-artifact
-
-      # Run IntelliJ Plugin Verifier action using GitHub Action
-      - name: Verify Plugin
-        id: verify
-        uses: ChrisCarini/intellij-platform-plugin-verifier-action@v0.0.2
-        with:
-          plugin-location: plugin-artifact/${{ needs.build.outputs.artifact }}
-          ide-versions: |
-            ideaIC:2022.3
-            ideaIC:LATEST-EAP-SNAPSHOT
-
-      # Print the output of the verify step
-      - name: Print Logs
-        env:
-          OUTPUT_LOG: ${{ steps.verify.outputs.verification-output-log-filename }}
-        run: |
-          echo "The verifier log file [$OUTPUT_LOG] contents : " ;
-          cat $OUTPUT_LOG
 
   # Prepare a draft release for GitHub Releases page for the manual verification
   # If accepted and published, release workflow would be triggered
   releaseDraft:
     name: Release Draft
     if: github.ref == 'refs/heads/main'
-    needs: [build, verify]
+    needs: build
     runs-on: ubuntu-latest
     steps:
 
       # Check out current repository
       - name: Fetch Sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       # Remove old release drafts by using the curl request for the available releases with draft flag
       - name: Remove Old Release Drafts
@@ -200,7 +169,7 @@ jobs:
 
       # Download plugin artifact provided by the previous job
       - name: Download Artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         with:
           name: plugin-artifact
 

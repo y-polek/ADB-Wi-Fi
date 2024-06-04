@@ -91,7 +91,7 @@ tasks {
         }
     }
 
-    register("loadSentryProperties") {
+    create("loadSentryProperties") {
         val secretsFile = file("build/generated/src/SentryProperties.kt").apply {
             ensureParentDirsCreated()
             createNewFile()
