@@ -28,7 +28,7 @@ jobs:
 
       # Validate wrapper
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v3
+        uses: gradle/actions/wrapper-validation@v3
 
   # Run verifyPlugin and test Gradle tasks
   test:
@@ -110,15 +110,15 @@ jobs:
       - name: Export Properties
         id: properties
         run: |
-          echo "::set-output name=version::$(./gradlew properties --console=plain -q | grep "^version:" | cut -f2- -d ' ')"
-          echo "::set-output name=name::$(./gradlew properties --console=plain -q | grep "^name:" | cut -f2- -d ' ')"
-          echo "::set-output name=pluginName::$(./gradlew properties --console=plain -q | grep "^pluginName:" | cut -f2- -d ' ')"
+          echo "version=$(./gradlew properties --console=plain -q | grep "^version:" | cut -f2- -d ' ')" >> $GITHUB_OUTPUT
+          echo "name=$(./gradlew properties --console=plain -q | grep "^name:" | cut -f2- -d ' ')" >> $GITHUB_OUTPUT
+          echo "pluginName=$(./gradlew properties --console=plain -q | grep "^pluginName:" | cut -f2- -d ' ')" >> $GITHUB_OUTPUT
 
           CHANGELOG=$(./gradlew getChangelog --unreleased --no-header --console=plain -q)
           CHANGELOG="${CHANGELOG//'%'/'%25'}"
           CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
           CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
-          echo "::set-output name=changelog::$CHANGELOG"
+          echo "changelog=$CHANGELOG" >> $GITHUB_OUTPUT
 
       # Build artifact using buildPlugin Gradle task
       - name: Build Plugin
@@ -128,5 +128,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ needs.build.outputs.artifact }}
-          path: ./build/distributions/${{ needs.build.outputs.artifact }}
+          name: ${{ steps.properties.outputs.pluginName }}-${{ steps.properties.outputs.version }}.zip
+          path: ./build/distributions/
+          if-no-files-found: error
