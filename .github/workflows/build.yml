@@ -79,11 +79,6 @@ jobs:
     env:
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
     runs-on: ubuntu-latest
-    outputs:
-      name: ${{ steps.properties.outputs.name }}
-      version: ${{ steps.properties.outputs.version }}
-      artifact: ${{ steps.properties.outputs.pluginName }}-${{ steps.properties.outputs.version }}.zip
-      changelog: ${{ steps.properties.outputs.changelog }}
     steps:
 
       # Check out current repository
@@ -114,20 +109,16 @@ jobs:
           echo "name=$(./gradlew properties --console=plain -q | grep "^name:" | cut -f2- -d ' ')" >> $GITHUB_OUTPUT
           echo "pluginName=$(./gradlew properties --console=plain -q | grep "^pluginName:" | cut -f2- -d ' ')" >> $GITHUB_OUTPUT
 
-          CHANGELOG=$(./gradlew getChangelog --unreleased --no-header --console=plain -q)
-          CHANGELOG="${CHANGELOG//'%'/'%25'}"
-          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
-          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
-          echo "changelog=$CHANGELOG" >> $GITHUB_OUTPUT
-
       # Build artifact using buildPlugin Gradle task
       - name: Build Plugin
         run: ./gradlew buildPlugin
 
-      # Upload plugin artifact to make it available in the next jobs
+      - name: Changelog
+        run: ./gradlew getChangelog --console=plain -q > ./build/distributions/CHANGELOG.md
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.properties.outputs.pluginName }}-${{ steps.properties.outputs.version }}.zip
+          name: bundle
           path: ./build/distributions/
           if-no-files-found: error
