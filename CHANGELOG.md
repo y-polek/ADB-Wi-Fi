@@ -2,6 +2,10 @@
 
 # ADB Wi-Fi Changelog
 
+## [1.2.6]
+### Added
+- Added the ability to rename devices in the device list
+
 ## [1.2.5]
 ### Added
 - Support of IntelliJ IDEA 2022.1 (221.*)
