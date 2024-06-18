@@ -1,4 +1,4 @@
-<idea-plugin>
+<idea-plugin require-restart="false">
     <id>dev.polek.adbwifi</id>
     <name>ADB Wi-Fi</name>
     <vendor>Yury Polek</vendor>
@@ -19,7 +19,7 @@
             secondary="true"
             icon="/icons/toolWindowIcon.svg"
             factoryClass="dev.polek.adbwifi.ui.view.WindowFactory" />
-        <applicationConfigurable instance="dev.polek.adbwifi.settings.AdbWifiConfigurable" />
+        <applicationConfigurable instance="dev.polek.adbwifi.settings.AdbWifiConfigurable" displayName="ADB Wi-Fi"/>
         <errorHandler implementation="dev.polek.adbwifi.report.ReportSubmitter" />
         <notificationGroup
                 id="adb_wifi_notification_group"
