@@ -1,8 +1,10 @@
 package dev.polek.adbwifi.services
 
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import dev.polek.adbwifi.model.CommandHistory
 
+@Service
 class LogService {
 
     private val properties = service<PropertiesService>()

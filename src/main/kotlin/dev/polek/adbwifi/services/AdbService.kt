@@ -1,6 +1,7 @@
 package dev.polek.adbwifi.services
 
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import dev.polek.adbwifi.adb.ADB_DISPATCHER
 import dev.polek.adbwifi.adb.Adb
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 
+@Service
 class AdbService : Disposable {
 
     var deviceListListener: ((List<Device>) -> Unit)? = null

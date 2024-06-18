@@ -8,9 +8,6 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="dev.polek.adbwifi.services.AdbService" />
-        <applicationService serviceImplementation="dev.polek.adbwifi.services.ScrcpyService" />
-        <applicationService serviceImplementation="dev.polek.adbwifi.services.LogService" />
         <applicationService
             serviceInterface="dev.polek.adbwifi.services.PropertiesService"
             serviceImplementation="dev.polek.adbwifi.services.PropertiesServiceImpl" />
