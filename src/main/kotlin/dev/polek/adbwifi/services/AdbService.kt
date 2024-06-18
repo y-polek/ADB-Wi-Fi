@@ -14,6 +14,7 @@ import dev.polek.adbwifi.utils.appCoroutineScope
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.toList
 
 @Service
 class AdbService : Disposable {
@@ -48,8 +49,10 @@ class AdbService : Disposable {
         }
     }
 
-    fun connect(ip: String, port: Int = properties.adbPort): String {
-        return adb.connect(ip, port)
+    suspend fun connect(ip: String, port: Int = properties.adbPort): String {
+        val logEntries = adb.connect(ip, port).toList()
+        logEntries.forEach { logService.commandHistory.add(it) }
+        return logEntries.lastOrNull()?.text.orEmpty()
     }
 
     suspend fun disconnect(device: Device) {
