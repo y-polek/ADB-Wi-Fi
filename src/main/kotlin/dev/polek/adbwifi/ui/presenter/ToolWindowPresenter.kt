@@ -1,5 +1,6 @@
 package dev.polek.adbwifi.ui.presenter
 
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.components.service
 import dev.polek.adbwifi.model.CommandHistory
 import dev.polek.adbwifi.model.Device
@@ -11,8 +12,8 @@ import dev.polek.adbwifi.ui.model.DeviceViewModel.Companion.toViewModel
 import dev.polek.adbwifi.ui.view.ToolWindowView
 import dev.polek.adbwifi.utils.BasePresenter
 import dev.polek.adbwifi.utils.copyToClipboard
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -65,7 +66,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
         connectingDevices.add(device)
         updateDeviceLists()
 
-        launch(Main) {
+        launch(Dispatchers.EDT) {
             withContext(IO) {
                 adbService.connect(device.device)
             }
@@ -80,7 +81,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
         connectingDevices.add(device)
         updateDeviceLists()
 
-        launch(Main) {
+        launch {
             withContext(IO) {
                 adbService.disconnect(device.device)
             }

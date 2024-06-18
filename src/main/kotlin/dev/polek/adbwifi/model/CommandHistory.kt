@@ -1,6 +1,7 @@
 package dev.polek.adbwifi.model
 
-import kotlinx.coroutines.Dispatchers.Main
+import com.intellij.openapi.application.EDT
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.*
 
@@ -14,7 +15,7 @@ class CommandHistory {
             notifyListener()
         }
 
-    suspend fun add(entry: LogEntry) = withContext(Main) {
+    suspend fun add(entry: LogEntry) = withContext(Dispatchers.EDT) {
         logEntries.add(entry)
         ensureCapacity()
         notifyListener()

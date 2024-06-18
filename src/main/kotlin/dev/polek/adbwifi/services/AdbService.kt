@@ -1,6 +1,7 @@
 package dev.polek.adbwifi.services
 
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import dev.polek.adbwifi.adb.ADB_DISPATCHER
@@ -9,9 +10,7 @@ import dev.polek.adbwifi.commandexecutor.RuntimeCommandExecutor
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.utils.appCoroutineScope
 import kotlinx.coroutines.*
-import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 
 @Service
@@ -74,7 +73,7 @@ class AdbService : Disposable {
 
     private fun startPollingDevices() {
         devicePollingJob?.cancel()
-        devicePollingJob = appCoroutineScope.launch(Main) {
+        devicePollingJob = appCoroutineScope.launch(Dispatchers.EDT) {
             devicesFlow()
                 .collect { devices ->
                     deviceListListener?.invoke(devices)

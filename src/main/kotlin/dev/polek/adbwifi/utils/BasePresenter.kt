@@ -1,5 +1,6 @@
 package dev.polek.adbwifi.utils
 
+import com.intellij.openapi.application.EDT
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -17,7 +18,7 @@ abstract class BasePresenter<V> : CoroutineScope {
             if (job == null) {
                 job = Job()
             }
-            return Dispatchers.Main + job!!
+            return Dispatchers.EDT + job!!
         }
 
     @OverridingMethodsMustInvokeSuper
