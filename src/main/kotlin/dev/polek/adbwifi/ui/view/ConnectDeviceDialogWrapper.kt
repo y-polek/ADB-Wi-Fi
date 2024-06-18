@@ -1,5 +1,8 @@
 package dev.polek.adbwifi.ui.view
 
+import com.intellij.openapi.application.EDT
+import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.application.asContextElement
 import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.ui.AnimatedIcon
@@ -15,11 +18,7 @@ import dev.polek.adbwifi.utils.GridBagLayoutPanel
 import dev.polek.adbwifi.utils.MaxLengthNumberDocument
 import dev.polek.adbwifi.utils.appCoroutineScope
 import dev.polek.adbwifi.utils.makeMonospaced
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.awt.GridBagConstraints
 import javax.swing.Action
 import javax.swing.JButton
@@ -36,6 +35,7 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
     private lateinit var portTextField: JBTextField
     private lateinit var connectButton: JButton
     private lateinit var outputLabel: JBLabel
+    private lateinit var progressBar: JBLabel
 
     private var connectJob: Job? = null
 
@@ -118,6 +118,20 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
             }
         )
 
+        progressBar = JBLabel(AnimatedIcon.Default())
+        progressBar.isVisible = false
+        panel.add(
+            progressBar,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 1
+                gridwidth = 1
+                weighty = 1.0
+                anchor = GridBagConstraints.LINE_START
+                insets = JBUI.insetsTop(10)
+            }
+        )
+
         updateConnectButton()
 
         return panel
@@ -140,29 +154,31 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
         val port = portTextField.text.toIntOrNull() ?: properties.adbPort
 
         val adbService = service<AdbService>()
-        connectJob = appCoroutineScope.launch(IO) {
-            val output = adbService.connect(ip, port)
-            withContext(Main) {
-                hideConnectionProgress()
-                outputLabel.text = output
-                outputLabel.isVisible = true
-                ipTextField.requestFocusInWindow()
+        connectJob = appCoroutineScope.launch(Dispatchers.EDT + ModalityState.current().asContextElement()) {
+            val output = withContext(Dispatchers.IO) {
+                adbService.connect(ip, port)
             }
+            hideConnectionProgress()
+            outputLabel.text = output
+            outputLabel.isVisible = true
+            ipTextField.requestFocusInWindow()
         }
     }
 
     private fun showConnectionProgress() {
         ipLabel.isEnabled = false
         ipTextField.isEnabled = false
+        portTextField.isEnabled = false
         connectButton.isEnabled = false
-        connectButton.icon = AnimatedIcon.Default()
+        progressBar.isVisible = true
     }
 
     private fun hideConnectionProgress() {
         ipLabel.isEnabled = true
         ipTextField.isEnabled = true
+        portTextField.isEnabled = true
         connectButton.isEnabled = true
-        connectButton.icon = null
+        progressBar.isVisible = false
     }
 
     private fun updateConnectButton() {
