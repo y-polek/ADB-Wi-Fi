@@ -50,12 +50,12 @@
             text="Connect Device"
         />
         <group id="AdbWifi.ToolbarActions">
-            <reference id="AdbWifi.ConnectDevice" />
+            <reference ref="AdbWifi.ConnectDevice" />
             <separator />
-            <reference id="AdbWifi.ToggleLog" />
-            <reference id="AdbWifi.OpenSettings" />
+            <reference ref="AdbWifi.ToggleLog" />
+            <reference ref="AdbWifi.OpenSettings" />
             <separator />
-            <reference id="AdbWifi.Refresh" />
+            <reference ref="AdbWifi.Refresh" />
         </group>
 
         <action
@@ -64,7 +64,7 @@
             icon="/icons/deleteIcon.svg"
             text="Clear Log" />
         <group id="AdbWifi.LogToolbarActions">
-            <reference id="AdbWifi.ClearLog" />
+            <reference ref="AdbWifi.ClearLog" />
         </group>
     </actions>
 </idea-plugin>
