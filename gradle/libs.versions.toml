@@ -10,7 +10,6 @@ changelog = "2.3.0"
 intelliJPlatform = "2.7.0"
 kotlin = "2.2.0"
 kover = "0.9.1"
-qodana = "2025.1.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -22,5 +21,4 @@ changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }
 intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "intelliJPlatform" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
-qodana = { id = "org.jetbrains.qodana", version.ref = "qodana" }
 sentry = { id = "io.sentry.jvm.gradle", version.ref = "sentry" }

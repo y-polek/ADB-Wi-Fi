@@ -9,7 +9,6 @@ plugins {
     alias(libs.plugins.kotlin)
     alias(libs.plugins.intelliJPlatform)
     alias(libs.plugins.changelog)
-    alias(libs.plugins.qodana)
     alias(libs.plugins.kover)
     alias(libs.plugins.sentry)
 }

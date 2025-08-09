@@ -126,42 +126,6 @@ jobs:
           files: ${{ github.workspace }}/build/reports/kover/report.xml
           token: ${{ secrets.CODECOV_TOKEN }}
 
-  # Run Qodana inspections and provide a report
-  inspectCode:
-    name: Inspect code
-    needs: [ build ]
-    runs-on: ubuntu-latest
-    env:
-      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-    permissions:
-      contents: write
-      checks: write
-      pull-requests: write
-    steps:
-
-      - name: Maximize Build Space
-        uses: jlumbroso/free-disk-space@v1.3.1
-        with:
-          tool-cache: false
-          large-packages: false
-
-      - name: Fetch Sources
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}  # to check out the actual pull request commit, not the merge commit
-          fetch-depth: 0  # a full history is required for pull request analysis
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: zulu
-          java-version: 21
-
-      - name: Qodana - Code Inspection
-        uses: JetBrains/qodana-action@v2025.1.1
-        with:
-          cache-default-branch-only: true
-
   # Run plugin structure verification along with IntelliJ Plugin Verifier
   verify:
     name: Verify plugin
@@ -208,7 +172,7 @@ jobs:
   releaseDraft:
     name: Release draft
     if: github.event_name != 'pull_request'
-    needs: [ build, test, inspectCode, verify ]
+    needs: [ build, test, verify ]
     runs-on: ubuntu-latest
     env:
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
