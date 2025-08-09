@@ -83,7 +83,6 @@ jobs:
 
   detekt:
     name: Detekt
-    needs: [ build ]
     runs-on: ubuntu-latest
     env:
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
@@ -210,7 +209,7 @@ jobs:
   releaseDraft:
     name: Release draft
     if: github.event_name != 'pull_request'
-    needs: [ build, test, verify ]
+    needs: [ build, detekt, test, verify ]
     runs-on: ubuntu-latest
     env:
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
