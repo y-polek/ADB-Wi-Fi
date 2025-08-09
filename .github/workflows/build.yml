@@ -81,6 +81,44 @@ jobs:
           name: ${{ steps.artifact.outputs.filename }}
           path: ./build/distributions/content/*/*
 
+  detekt:
+    name: Detekt
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    env:
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+    steps:
+
+      - name: Maximize Build Space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          large-packages: false
+
+      - name: Fetch Sources
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: true
+
+      - name: Run Detekt
+        run: ./gradlew detekt
+
+      - name: Collect Detekt Report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: detekt-report
+          path: ${{ github.workspace }}/build/reports/detekt
+
   test:
     name: Test
     needs: [ build ]
@@ -110,7 +148,7 @@ jobs:
           cache-read-only: true
 
       - name: Run Tests
-        run: ./gradlew check
+        run: ./gradlew test
 
       - name: Collect Tests Result
         if: ${{ failure() }}
