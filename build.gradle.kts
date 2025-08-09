@@ -1,3 +1,4 @@
+import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
@@ -11,6 +12,7 @@ plugins {
     alias(libs.plugins.changelog)
     alias(libs.plugins.kover)
     alias(libs.plugins.sentry)
+    alias(libs.plugins.detekt)
 }
 
 group = providers.gradleProperty("pluginGroup").get()
@@ -37,6 +39,8 @@ repositories {
 
 // Dependencies are managed with Gradle version catalog - read more: https://docs.gradle.org/current/userguide/platforms.html#sub:version-catalog
 dependencies {
+    detektPlugins(libs.detekt)
+
     testImplementation(libs.junit)
     testImplementation(libs.opentest4j)
     testImplementation(libs.assertj)
@@ -130,6 +134,13 @@ kover {
     }
 }
 
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    config.setFrom("$projectDir/detekt/config.yml")
+    baseline = file("$projectDir/detekt/baseline.xml")
+}
+
 tasks {
     wrapper {
         gradleVersion = providers.gradleProperty("gradleVersion").get()
@@ -139,7 +150,7 @@ tasks {
         dependsOn(patchChangelog)
     }
 
-    register("loadSentryProperties") {
+    register<Task>("loadSentryProperties") {
         val secretsFile = file("build/generated/src/SentryProperties.kt").apply {
             ensureParentDirsCreated()
             createNewFile()
@@ -156,25 +167,13 @@ tasks {
     withType<KotlinCompile>().configureEach {
         dependsOn("loadSentryProperties")
     }
-}
 
-intellijPlatformTesting {
-    runIde {
-        register("runIdeForUiTests") {
-            task {
-                jvmArgumentProviders += CommandLineArgumentProvider {
-                    listOf(
-                        "-Drobot-server.port=8082",
-                        "-Dide.mac.message.dialogs.as.sheets=false",
-                        "-Djb.privacy.policy.text=<!--999.999-->",
-                        "-Djb.consents.confirmation.enabled=false",
-                    )
-                }
-            }
-
-            plugins {
-                robotServerPlugin()
-            }
+    withType<Detekt>().configureEach {
+        reports {
+            html.required.set(true) // observe findings in your browser with structure and code snippets
+            xml.required.set(true) // checkstyle like format mainly for integrations like Jenkins
+            sarif.required.set(true) // standardized SARIF format (https://sarifweb.azurewebsites.net/) to support integrations with GitHub Code Scanning
+            md.required.set(true) // simple Markdown format
         }
     }
 }

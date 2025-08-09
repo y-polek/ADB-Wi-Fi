@@ -10,11 +10,13 @@ changelog = "2.3.0"
 intelliJPlatform = "2.7.0"
 kotlin = "2.2.0"
 kover = "0.9.1"
+detekt = "1.23.8"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 opentest4j = { group = "org.opentest4j", name = "opentest4j", version.ref = "opentest4j" }
 assertj = { group = "org.assertj", name = "assertj-core", version.ref = "assertj" }
+detekt = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }
 
 [plugins]
 changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }
@@ -22,3 +24,4 @@ intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "inte
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 sentry = { id = "io.sentry.jvm.gradle", version.ref = "sentry" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt"}
