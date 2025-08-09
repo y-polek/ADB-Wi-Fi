@@ -2,5 +2,11 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>CommentWrapping:DeviceNamesService.kt$DeviceNamesService$/*Name*/</ID>
+    <ID>CommentWrapping:DeviceNamesService.kt$DeviceNamesService$/*Serial number*/</ID>
+    <ID>CommentWrapping:ToolWindowPresenter.kt$ToolWindowPresenter$/*Device's unique ID*/</ID>
+    <ID>CommentWrapping:ToolWindowPresenter.kt$ToolWindowPresenter$/*IP address*/</ID>
+    <ID>CommentWrapping:ToolWindowPresenter.kt$ToolWindowPresenter.Companion$/*IP address*/</ID>
+    <ID>CommentWrapping:ToolWindowPresenter.kt$ToolWindowPresenter.Companion$/*Unique ID*/</ID>
   </CurrentIssues>
 </SmellBaseline>
