@@ -33,20 +33,22 @@ Open project in Intellij IDEA.
 
 Available gradle tasks:
 * `runIde` - launches a new instance of IDE with the plugin installed:
-  * Execute `./gradlew runIde` command in terminal  
+  * Execute `./gradlew runIde` or `./gradlew runAndroidStudio` command in terminal  
 OR
-  * Press `Ctrl` twice to open the Run Anything window and execute `gradle runIde` command
+  * Press `Ctrl` twice to open the Run Anything window and execute `gradle runIde` or `gradle runAndroidStudio` command
 * `check` - runs linters and tests
 * `buildPlugin` packages installable zip file  
   Distribution zip file will be available under `./build/distributions/`
 
-You can choose which version of IDE `runIde` task launches by adding `runIde` configuration `./build.gradle.kts`:  
+You can choose which version of Android Studio `runAndroidStudio` task launches by modifying `version` property in `./build.gradle.kts`:  
 ```
 tasks {
     ...
 
-    runIde {
-        ideDir.set(file("/Applications/Android Studio.app/Contents"))
+    // AndroidStudio releases list: https://plugins.jetbrains.com/docs/intellij/android-studio-releases-list.html
+    val runAndroidStudio by intellijPlatformTesting.runIde.registering {
+        type = IntelliJPlatformType.AndroidStudio
+        version = "2025.1.2.11"
     }
 }
 ```

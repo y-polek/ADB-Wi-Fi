@@ -1,6 +1,7 @@
 import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.kotlin.gradle.internal.ensureParentDirsCreated
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -176,5 +177,11 @@ tasks {
             xml.required.set(false)
             txt.required.set(false)
         }
+    }
+
+    // AndroidStudio releases list: https://plugins.jetbrains.com/docs/intellij/android-studio-releases-list.html
+    val runAndroidStudio by intellijPlatformTesting.runIde.registering {
+        type = IntelliJPlatformType.AndroidStudio
+        version = "2025.1.2.11"
     }
 }
