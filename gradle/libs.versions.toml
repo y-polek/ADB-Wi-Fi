@@ -7,8 +7,8 @@ assertj = "3.27.3"
 
 # plugins
 changelog = "2.3.0"
-intelliJPlatform = "2.7.0"
-kotlin = "2.2.0"
+intelliJPlatform = "2.10.5"
+kotlin = "2.1.20"
 kover = "0.9.1"
 detekt = "1.23.8"
 
