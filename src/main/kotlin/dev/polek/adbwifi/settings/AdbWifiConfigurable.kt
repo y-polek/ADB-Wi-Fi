@@ -27,8 +27,6 @@ import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.io.File
 import javax.swing.*
-import javax.swing.event.DocumentEvent
-import javax.swing.event.DocumentListener
 
 class AdbWifiConfigurable : Configurable {
 
@@ -89,11 +87,7 @@ class AdbWifiConfigurable : Configurable {
 
     private fun createAdbLocationField() = TextFieldWithBrowseButton().apply {
         text = properties.adbLocation
-        textField.document.addDocumentListener(object : DocumentListener {
-            override fun insertUpdate(e: DocumentEvent) = verifyAdbLocation()
-            override fun removeUpdate(e: DocumentEvent) = verifyAdbLocation()
-            override fun changedUpdate(e: DocumentEvent) = verifyAdbLocation()
-        })
+        textField.onTextChanged(::verifyAdbLocation)
         addBrowseFolderListener(
             null,
             null,
@@ -334,11 +328,7 @@ class AdbWifiConfigurable : Configurable {
 
         scrcpyLocationField = TextFieldWithBrowseButton()
         scrcpyLocationField.text = properties.scrcpyLocation
-        scrcpyLocationField.textField.document.addDocumentListener(object : DocumentListener {
-            override fun insertUpdate(e: DocumentEvent) = verifyScrcpyLocation()
-            override fun removeUpdate(e: DocumentEvent) = verifyScrcpyLocation()
-            override fun changedUpdate(e: DocumentEvent) = verifyScrcpyLocation()
-        })
+        scrcpyLocationField.textField.onTextChanged(::verifyScrcpyLocation)
         scrcpyLocationField.addBrowseFolderListener(
             null,
             null,

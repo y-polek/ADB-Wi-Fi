@@ -10,12 +10,11 @@ import dev.polek.adbwifi.services.DeviceNamesService
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.utils.GridBagLayoutPanel
 import dev.polek.adbwifi.utils.makeMonospaced
+import dev.polek.adbwifi.utils.onTextChanged
 import java.awt.GridBagConstraints
 import javax.swing.Action
 import javax.swing.JButton
 import javax.swing.JComponent
-import javax.swing.event.DocumentEvent
-import javax.swing.event.DocumentListener
 
 class RenameDeviceDialogWrapper(
     private val device: DeviceViewModel
@@ -40,11 +39,7 @@ class RenameDeviceDialogWrapper(
         textField.selectionStart = 0
         textField.selectionEnd = textField.text.length
         textField.makeMonospaced()
-        textField.document.addDocumentListener(object : DocumentListener {
-            override fun insertUpdate(e: DocumentEvent) = updateUi()
-            override fun removeUpdate(e: DocumentEvent) = updateUi()
-            override fun changedUpdate(e: DocumentEvent) = updateUi()
-        })
+        textField.onTextChanged(::updateUi)
         textField.addActionListener {
             renameDeviceAndDismiss()
         }
