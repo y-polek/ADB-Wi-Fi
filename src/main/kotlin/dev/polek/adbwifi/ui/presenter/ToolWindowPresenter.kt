@@ -32,6 +32,8 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     private var deviceCollectionJob: Job? = null
     private var logVisibilityJob: Job? = null
     private var logEntriesJob: Job? = null
+    private var adbLocationJob: Job? = null
+    private var scrcpyEnabledJob: Job? = null
 
     override fun attach(view: ToolWindowView) {
         super.attach(view)
@@ -150,7 +152,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     }
 
     private fun updateDeviceLists() {
-        val isScrcpyEnabled = propertiesService.scrcpyEnabled
+        val isScrcpyEnabled = propertiesService.isScrcpyEnabled.value
 
         devices.forEach {
             it.isInProgress = connectingDevices.contains(it)
@@ -201,13 +203,16 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     }
 
     private fun subscribeToScrcpyEnabledState() {
-        propertiesService.scrcpyEnabledListener = {
-            updateDeviceLists()
+        scrcpyEnabledJob = launch {
+            propertiesService.isScrcpyEnabled.collect {
+                updateDeviceLists()
+            }
         }
     }
 
     private fun unsubscribeFromScrcpyEnabledState() {
-        propertiesService.scrcpyEnabledListener = null
+        scrcpyEnabledJob?.cancel()
+        scrcpyEnabledJob = null
     }
 
     private fun updateLogVisibility(isLogVisible: Boolean) {
@@ -226,23 +231,26 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     }
 
     private fun subscribeToAdbLocationChanges() {
-        propertiesService.adbLocationListener = { isValid ->
-            isAdbValid = isValid
-            if (!isValid) {
-                unsubscribeFromDeviceList()
-                devices = emptyList()
-                view?.showInvalidAdbLocationError()
-            } else {
-                updateDeviceLists()
-                if (isViewOpen) {
-                    subscribeToDeviceList()
+        adbLocationJob = launch {
+            propertiesService.isAdbLocationValid.collect { isValid ->
+                isAdbValid = isValid
+                if (!isValid) {
+                    unsubscribeFromDeviceList()
+                    devices = emptyList()
+                    view?.showInvalidAdbLocationError()
+                } else {
+                    updateDeviceLists()
+                    if (isViewOpen) {
+                        subscribeToDeviceList()
+                    }
                 }
             }
         }
     }
 
     private fun unsubscribeFromAdbLocationChanges() {
-        propertiesService.adbLocationListener = null
+        adbLocationJob?.cancel()
+        adbLocationJob = null
     }
 
     private fun List<PinnedDevice>.toViewModel(): List<DeviceViewModel> {

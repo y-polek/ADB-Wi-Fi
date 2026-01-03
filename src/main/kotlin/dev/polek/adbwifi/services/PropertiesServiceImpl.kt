@@ -6,6 +6,9 @@ import dev.polek.adbwifi.utils.ADB_DEFAULT_PORT
 import dev.polek.adbwifi.utils.findScrcpyExecInSystemPath
 import dev.polek.adbwifi.utils.hasAdbInSystemPath
 import dev.polek.adbwifi.utils.isValidAdbLocation
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.io.File
 
 class PropertiesServiceImpl : PropertiesService {
@@ -34,14 +37,24 @@ class PropertiesServiceImpl : PropertiesService {
         get() = properties.getBoolean(ADB_FROM_SYSTEM_PATH, false)
         set(value) {
             properties.setValue(ADB_FROM_SYSTEM_PATH, value)
-            notifyAdbLocationListener()
+            _isAdbLocationValid.value = isAdbLocationValid()
         }
+
+    override val defaultAdbLocation: String by lazy {
+        val home = System.getProperty("user.home")
+        val path = when {
+            SystemInfo.isMac -> "$home/Library/Android/sdk/platform-tools"
+            SystemInfo.isWindows -> "$home/AppData/Local/Android/Sdk/platform-tools"
+            else -> "$home/Android/Sdk/platform-tools"
+        }
+        return@lazy File(path).absolutePath
+    }
 
     override var adbLocation: String
         get() = properties.getValue(ADB_LOCATION_PROPERTY, defaultAdbLocation)
         set(value) {
             properties.setValue(ADB_LOCATION_PROPERTY, value)
-            notifyAdbLocationListener()
+            _isAdbLocationValid.value = isAdbLocationValid()
         }
 
     override var adbPort: Int
@@ -50,23 +63,24 @@ class PropertiesServiceImpl : PropertiesService {
             properties.setValue(ADB_PORT, value, ADB_DEFAULT_PORT)
         }
 
-    override var scrcpyEnabled: Boolean
-        get() = properties.getBoolean(SCRCPY_ENABLED, defaultScrcpyEnabled)
-        set(value) {
-            properties.setValue(SCRCPY_ENABLED, value, defaultScrcpyEnabled)
-            notifyScrcpyEnabledListener()
-        }
-
     override val defaultScrcpyEnabled: Boolean
-        get() {
-            return findScrcpyExecInSystemPath() != null
-        }
+        get() = findScrcpyExecInSystemPath() != null
+
+    private val _isScrcpyEnabled = MutableStateFlow(properties.getBoolean(SCRCPY_ENABLED, defaultScrcpyEnabled))
+    override val isScrcpyEnabled: StateFlow<Boolean> = _isScrcpyEnabled.asStateFlow()
+
+    override fun setScrcpyEnabled(enabled: Boolean) {
+        properties.setValue(SCRCPY_ENABLED, enabled, defaultScrcpyEnabled)
+        _isScrcpyEnabled.value = enabled
+    }
 
     override var useScrcpyFromPath: Boolean
         get() = properties.getBoolean(SCRCPY_FROM_SYSTEM_PATH, true)
         set(value) {
             properties.setValue(SCRCPY_FROM_SYSTEM_PATH, value, true)
         }
+
+    override val defaultScrcpyLocation: String = ""
 
     override var scrcpyLocation: String
         get() = properties.getValue(SCRCPY_LOCATION_PROPERTY, defaultScrcpyLocation)
@@ -80,40 +94,12 @@ class PropertiesServiceImpl : PropertiesService {
             properties.setValue(SCRCPY_CMD_FLAGS, value)
         }
 
-    override val defaultAdbLocation: String by lazy {
-        val home = System.getProperty("user.home")
-        val path = when {
-            SystemInfo.isMac -> "$home/Library/Android/sdk/platform-tools"
-            SystemInfo.isWindows -> "$home/AppData/Local/Android/Sdk/platform-tools"
-            else -> "$home/Android/Sdk/platform-tools"
-        }
-        return@lazy File(path).absolutePath
-    }
+    private val _isAdbLocationValid = MutableStateFlow(isAdbLocationValid())
+    override val isAdbLocationValid: StateFlow<Boolean> = _isAdbLocationValid.asStateFlow()
 
-    override val defaultScrcpyLocation: String = ""
-
-    override var adbLocationListener: ((isValid: Boolean) -> Unit)? = null
-        set(value) {
-            field = value
-            notifyAdbLocationListener()
-        }
-
-    private fun notifyAdbLocationListener() {
-        val isValid = when {
-            useAdbFromPath -> hasAdbInSystemPath()
-            else -> isValidAdbLocation(adbLocation)
-        }
-        adbLocationListener?.invoke(isValid)
-    }
-
-    override var scrcpyEnabledListener: ((isEnabled: Boolean) -> Unit)? = null
-        set(value) {
-            field = value
-            notifyScrcpyEnabledListener()
-        }
-
-    private fun notifyScrcpyEnabledListener() {
-        scrcpyEnabledListener?.invoke(scrcpyEnabled)
+    private fun isAdbLocationValid(): Boolean = when {
+        useAdbFromPath -> hasAdbInSystemPath()
+        else -> isValidAdbLocation(adbLocation)
     }
 
     private companion object {

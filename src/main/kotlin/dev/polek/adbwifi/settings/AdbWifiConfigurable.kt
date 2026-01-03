@@ -254,7 +254,7 @@ class AdbWifiConfigurable : Configurable {
         )
 
         scrcpyEnabledCheckbox = JBCheckBox(PluginBundle.message("scrcpyEnabled"))
-        scrcpyEnabledCheckbox.isSelected = properties.scrcpyEnabled
+        scrcpyEnabledCheckbox.isSelected = properties.isScrcpyEnabled.value
         scrcpyEnabledCheckbox.addItemListener {
             updateScrcpySettingsState()
         }
@@ -458,7 +458,7 @@ class AdbWifiConfigurable : Configurable {
         if (adbLocationField.text != properties.adbLocation) return true
         if ((adbPortField.text.toIntOrNull() ?: ADB_DEFAULT_PORT) != properties.adbPort) return true
 
-        if (scrcpyEnabledCheckbox.isSelected != properties.scrcpyEnabled) return true
+        if (scrcpyEnabledCheckbox.isSelected != properties.isScrcpyEnabled.value) return true
         if (scrcpySystemPathCheckbox.isSelected != properties.useScrcpyFromPath) return true
         if (scrcpyLocationField.text != properties.scrcpyLocation) return true
         if (scrcpyCmdFlagsTextArea.text.trim() != properties.scrcpyCmdFlags) return true
@@ -474,7 +474,7 @@ class AdbWifiConfigurable : Configurable {
         properties.adbPort = adbPortField.text.toIntOrNull() ?: ADB_DEFAULT_PORT
         adbPortField.text = properties.adbPort.toString()
 
-        properties.scrcpyEnabled = scrcpyEnabledCheckbox.isSelected
+        properties.setScrcpyEnabled(scrcpyEnabledCheckbox.isSelected)
         properties.scrcpyLocation = scrcpyLocationField.text
         properties.useScrcpyFromPath = scrcpySystemPathCheckbox.isSelected
         properties.scrcpyCmdFlags = scrcpyCmdFlagsTextArea.text.trim()
@@ -487,7 +487,7 @@ class AdbWifiConfigurable : Configurable {
         adbLocationField.text = properties.adbLocation
         adbPortField.text = properties.adbPort.toString()
 
-        scrcpyEnabledCheckbox.isSelected = properties.scrcpyEnabled
+        scrcpyEnabledCheckbox.isSelected = properties.isScrcpyEnabled.value
         scrcpySystemPathCheckbox.isSelected = properties.useScrcpyFromPath
         scrcpyLocationField.text = properties.scrcpyLocation
         scrcpyCmdFlagsTextArea.text = properties.scrcpyCmdFlags
