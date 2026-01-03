@@ -55,10 +55,22 @@ ADB Wi-Fi is an IntelliJ IDEA/Android Studio plugin that simplifies connecting t
 
 ### Data Flow
 
-1. `AdbService` polls `Adb.devices()` every 3 seconds when tool window is open
+1. `AdbService.devices` is a `StateFlow<List<Device>>` that polls `Adb.devices()` every 3 seconds while subscribed
 2. `Adb` executes `adb devices` and queries each device for properties
-3. Device list is emitted to `ToolWindowPresenter` via callback
+3. `ToolWindowPresenter` collects from the StateFlow and updates the view
 4. Presenter converts `Device` models to `DeviceViewModel` and updates view
+
+### Reactive Patterns
+
+The codebase uses Kotlin Coroutines `StateFlow` for reactive state management:
+
+- `AdbService.devices: StateFlow<List<Device>>` - Device list with automatic polling (WhileSubscribed)
+- `LogService.isLogVisible: StateFlow<Boolean>` - Log panel visibility state
+- `CommandHistory.entries: StateFlow<List<LogEntry>>` - Command log entries
+- `PropertiesService.isAdbLocationValid: StateFlow<Boolean>` - ADB location validation state
+- `PropertiesService.isScrcpyEnabled: StateFlow<Boolean>` - Scrcpy feature toggle
+
+Presenters subscribe to these flows using `launch { flow.collect { ... } }` and cancel the jobs when detaching.
 
 ### Model Classes
 
