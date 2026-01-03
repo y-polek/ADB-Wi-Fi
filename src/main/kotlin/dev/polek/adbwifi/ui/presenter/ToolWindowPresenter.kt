@@ -1,9 +1,7 @@
 package dev.polek.adbwifi.ui.presenter
 
 import com.intellij.openapi.components.service
-import dev.polek.adbwifi.model.CommandHistory
 import dev.polek.adbwifi.model.Device
-import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.model.PinnedDevice
 import dev.polek.adbwifi.services.*
 import dev.polek.adbwifi.ui.model.DeviceViewModel
@@ -33,6 +31,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     private var connectingDevices = mutableSetOf<Pair<String/*Device's unique ID*/, String/*IP address*/>>()
     private var deviceCollectionJob: Job? = null
     private var logVisibilityJob: Job? = null
+    private var logEntriesJob: Job? = null
 
     override fun attach(view: ToolWindowView) {
         super.attach(view)
@@ -214,14 +213,15 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     private fun updateLogVisibility(isLogVisible: Boolean) {
         if (isLogVisible) {
             view?.openLog()
-            logService.commandHistory.listener = object : CommandHistory.Listener {
-                override fun onLogEntriesModified(entries: List<LogEntry>) {
+            logEntriesJob = launch {
+                logService.commandHistory.entries.collect { entries ->
                     view?.setLogEntries(entries)
                 }
             }
         } else {
             view?.closeLog()
-            logService.commandHistory.listener = null
+            logEntriesJob?.cancel()
+            logEntriesJob = null
         }
     }
 
