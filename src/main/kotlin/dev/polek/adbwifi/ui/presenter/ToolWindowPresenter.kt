@@ -32,6 +32,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
 
     private var connectingDevices = mutableSetOf<Pair<String/*Device's unique ID*/, String/*IP address*/>>()
     private var deviceCollectionJob: Job? = null
+    private var logVisibilityJob: Job? = null
 
     override fun attach(view: ToolWindowView) {
         super.attach(view)
@@ -188,11 +189,16 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     }
 
     private fun subscribeToLogEvents() {
-        logService.logVisibilityListener = ::updateLogVisibility
+        logVisibilityJob = launch {
+            logService.isLogVisible.collect { isVisible ->
+                updateLogVisibility(isVisible)
+            }
+        }
     }
 
     private fun unsubscribeFromLogEvents() {
-        logService.logVisibilityListener = null
+        logVisibilityJob?.cancel()
+        logVisibilityJob = null
     }
 
     private fun subscribeToScrcpyEnabledState() {

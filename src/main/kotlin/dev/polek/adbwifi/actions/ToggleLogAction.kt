@@ -11,10 +11,10 @@ class ToggleLogAction : ToggleAction(), DumbAware {
 
     private val service by lazy { ApplicationManager.getApplication().getService(LogService::class.java) }
 
-    override fun isSelected(e: AnActionEvent) = service.isLogVisible
+    override fun isSelected(e: AnActionEvent) = service.isLogVisible.value
 
     override fun setSelected(e: AnActionEvent, state: Boolean) {
-        service.isLogVisible = state
+        service.setLogVisible(state)
     }
 
     override fun getActionUpdateThread() = ActionUpdateThread.EDT
