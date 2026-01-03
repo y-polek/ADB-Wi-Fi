@@ -12,6 +12,7 @@ import dev.polek.adbwifi.ui.view.ToolWindowView
 import dev.polek.adbwifi.utils.BasePresenter
 import dev.polek.adbwifi.utils.copyToClipboard
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -30,6 +31,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     private var pinnedDevices: List<DeviceViewModel> = pinDeviceService.pinnedDevices.toViewModel()
 
     private var connectingDevices = mutableSetOf<Pair<String/*Device's unique ID*/, String/*IP address*/>>()
+    private var deviceCollectionJob: Job? = null
 
     override fun attach(view: ToolWindowView) {
         super.attach(view)
@@ -76,7 +78,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
             withContext(IO) {
                 action(device.device)
             }
-            onDevicesUpdated(adbService.devices())
+            onDevicesUpdated(adbService.devices.value)
         }.invokeOnCompletion {
             connectingDevices.remove(device)
             updateDeviceLists()
@@ -169,19 +171,20 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     }
 
     private fun subscribeToDeviceList() {
-        if (adbService.deviceListListener != null) {
+        if (deviceCollectionJob != null) {
             // Already subscribed
             return
         }
-        adbService.deviceListListener = ::onDevicesUpdated
+        deviceCollectionJob = launch {
+            adbService.devices.collect { devices ->
+                onDevicesUpdated(devices)
+            }
+        }
     }
 
     private fun unsubscribeFromDeviceList() {
-        if (adbService.deviceListListener == null) {
-            // Already unsubscribed
-            return
-        }
-        adbService.deviceListListener = null
+        deviceCollectionJob?.cancel()
+        deviceCollectionJob = null
     }
 
     private fun subscribeToLogEvents() {

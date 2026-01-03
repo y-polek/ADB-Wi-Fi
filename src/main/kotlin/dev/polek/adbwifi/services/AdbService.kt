@@ -1,9 +1,5 @@
 package dev.polek.adbwifi.services
 
-import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.EDT
-import com.intellij.openapi.application.ModalityState
-import com.intellij.openapi.application.asContextElement
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import dev.polek.adbwifi.adb.ADB_DISPATCHER
@@ -11,31 +7,32 @@ import dev.polek.adbwifi.adb.Adb
 import dev.polek.adbwifi.commandexecutor.RuntimeCommandExecutor
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.utils.appCoroutineScope
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Service
-class AdbService : Disposable {
-
-    var deviceListListener: ((List<Device>) -> Unit)? = null
-        set(value) {
-            field = value
-            if (value != null) {
-                startPollingDevices()
-            } else {
-                stopPollingDevices()
-            }
-        }
+class AdbService {
 
     private val adb = Adb(RuntimeCommandExecutor(), service())
-    private var devicePollingJob: Job? = null
     private val logService by lazy { service<LogService>() }
     private val pinDeviceService by lazy { service<PinDeviceService>() }
     private val properties by lazy { service<PropertiesService>() }
 
-    suspend fun devices(): List<Device> {
+    val devices: StateFlow<List<Device>> = flow {
+        while (true) {
+            emit(fetchDevices())
+            delay(POLLING_INTERVAL_MILLIS)
+        }
+    }.stateIn(
+        scope = appCoroutineScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = emptyList()
+    )
+
+    private suspend fun fetchDevices(): List<Device> {
         val devices = withContext(ADB_DISPATCHER) {
             adb.devices()
         }
@@ -69,32 +66,6 @@ class AdbService : Disposable {
             adb.killServer().collect { logEntry ->
                 logService.commandHistory.add(logEntry)
             }
-        }
-    }
-
-    override fun dispose() {
-        stopPollingDevices()
-    }
-
-    private fun startPollingDevices() {
-        devicePollingJob?.cancel()
-        devicePollingJob = appCoroutineScope.launch(Dispatchers.EDT + ModalityState.any().asContextElement()) {
-            devicesFlow()
-                .collect { devices ->
-                    deviceListListener?.invoke(devices)
-                }
-        }
-    }
-
-    private fun stopPollingDevices() {
-        devicePollingJob?.cancel()
-        devicePollingJob = null
-    }
-
-    private fun devicesFlow(): Flow<List<Device>> = flow {
-        while (true) {
-            emit(devices())
-            delay(POLLING_INTERVAL_MILLIS)
         }
     }
 
