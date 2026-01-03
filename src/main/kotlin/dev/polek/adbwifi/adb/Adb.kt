@@ -82,30 +82,15 @@ class Adb(
             "-s ${device.id} tcpip ${device.port}".execAndLogAsync(this)
             delay(1000)
         }
-        try {
-            "connect ${device.address?.ip}:${device.port}".execAndLogAsync(this@flow)
-        } catch (e: TimeoutCancellationException) {
-            LOG.debug(e)
-            emit(LogEntry.Output("Timed out"))
-        }
+        "connect ${device.address?.ip}:${device.port}".execAndLogAsyncWithTimeout(this)
     }
 
     fun connect(ip: String, port: Int): Flow<LogEntry> = flow {
-        try {
-            "connect $ip:$port".execAndLogAsync(this@flow)
-        } catch (e: TimeoutCancellationException) {
-            LOG.debug(e)
-            emit(LogEntry.Output("Timed out"))
-        }
+        "connect $ip:$port".execAndLogAsyncWithTimeout(this)
     }
 
     fun disconnect(device: Device): Flow<LogEntry> = flow {
-        try {
-            "disconnect ${device.address?.ip}:${device.port}".execAndLogAsync(this@flow)
-        } catch (e: TimeoutCancellationException) {
-            LOG.debug(e)
-            emit(LogEntry.Output("Timed out"))
-        }
+        "disconnect ${device.address?.ip}:${device.port}".execAndLogAsyncWithTimeout(this)
     }
 
     fun disconnectAllDevices(): Flow<LogEntry> = flow {
@@ -187,6 +172,15 @@ class Adb(
             e.message ?: "Failed to execute command"
         }
         logCollector.emit(LogEntry.Output(output))
+    }
+
+    private suspend fun String.execAndLogAsyncWithTimeout(logCollector: FlowCollector<LogEntry>) {
+        try {
+            execAndLogAsync(logCollector)
+        } catch (e: TimeoutCancellationException) {
+            LOG.debug(e)
+            logCollector.emit(LogEntry.Output("Timed out"))
+        }
     }
 
     companion object {
