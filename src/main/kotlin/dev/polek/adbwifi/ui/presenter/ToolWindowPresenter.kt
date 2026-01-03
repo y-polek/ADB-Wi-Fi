@@ -1,6 +1,5 @@
 package dev.polek.adbwifi.ui.presenter
 
-import com.intellij.openapi.application.EDT
 import com.intellij.openapi.components.service
 import dev.polek.adbwifi.model.CommandHistory
 import dev.polek.adbwifi.model.Device
@@ -12,7 +11,6 @@ import dev.polek.adbwifi.ui.model.DeviceViewModel.Companion.toViewModel
 import dev.polek.adbwifi.ui.view.ToolWindowView
 import dev.polek.adbwifi.utils.BasePresenter
 import dev.polek.adbwifi.utils.copyToClipboard
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -63,27 +61,20 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     }
 
     fun onConnectButtonClicked(device: DeviceViewModel) {
-        connectingDevices.add(device)
-        updateDeviceLists()
-
-        launch(Dispatchers.EDT) {
-            withContext(IO) {
-                adbService.connect(device.device)
-            }
-            onDevicesUpdated(adbService.devices())
-        }.invokeOnCompletion {
-            connectingDevices.remove(device)
-            updateDeviceLists()
-        }
+        executeDeviceAction(device) { adbService.connect(it) }
     }
 
     fun onDisconnectButtonClicked(device: DeviceViewModel) {
+        executeDeviceAction(device) { adbService.disconnect(it) }
+    }
+
+    private fun executeDeviceAction(device: DeviceViewModel, action: suspend (Device) -> Unit) {
         connectingDevices.add(device)
         updateDeviceLists()
 
         launch {
             withContext(IO) {
-                adbService.disconnect(device.device)
+                action(device.device)
             }
             onDevicesUpdated(adbService.devices())
         }.invokeOnCompletion {
