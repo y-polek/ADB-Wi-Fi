@@ -5,6 +5,10 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.ui.JBMenuItem
 import com.intellij.openapi.ui.JBPopupMenu
+import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.intellij.openapi.ui.popup.ListSeparator
+import com.intellij.openapi.ui.popup.PopupStep
+import com.intellij.openapi.ui.popup.util.BaseListPopupStep
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
@@ -25,6 +29,7 @@ import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import javax.swing.Icon
 import javax.swing.JComponent
 import javax.swing.JProgressBar
 import javax.swing.SwingConstants
@@ -228,41 +233,93 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
     }
 
     private fun openAdbCommandsMenu(device: DeviceViewModel, event: MouseEvent) {
-        val menu = JBPopupMenu()
         val commandsService = service<AdbCommandsService>()
-
         val packageName = device.packageName
-        if (packageName != null) {
-            val header = JBMenuItem("Package: $packageName")
-            header.isEnabled = false
-            menu.add(header)
-            menu.addSeparator()
-        } else {
-            val header = JBMenuItem(PluginBundle.message("adbCommandNoPackage"))
-            header.isEnabled = false
-            menu.add(header)
-            menu.addSeparator()
+        val commands = commandsService.getEnabledCommands()
+
+        // Build list of menu items
+        val items = mutableListOf<AdbCommandMenuItem>()
+
+        // Add header
+        val headerText = packageName ?: PluginBundle.message("adbCommandNoPackage")
+        items.add(AdbCommandMenuItem.Header(headerText))
+
+        // Add command items
+        commands.forEach { config ->
+            items.add(AdbCommandMenuItem.Command(config, packageName != null))
         }
 
-        commandsService.getEnabledCommands().forEach { config ->
-            val icon = ActionIconsProvider.getIconById(config.iconId)?.icon
-            val item = JBMenuItem(config.name, icon)
-            item.isEnabled = packageName != null
-            item.addActionListener { listener?.onAdbCommandClicked(device, config) }
-            menu.add(item)
+        // Add customize item
+        items.add(AdbCommandMenuItem.Customize)
+
+        val step = object : BaseListPopupStep<AdbCommandMenuItem>(null, items) {
+            override fun getTextFor(value: AdbCommandMenuItem): String = when (value) {
+                is AdbCommandMenuItem.Header -> value.text
+                is AdbCommandMenuItem.Command -> value.config.name
+                is AdbCommandMenuItem.Customize -> PluginBundle.message("adbCommandsCustomize")
+            }
+
+            override fun getIconFor(value: AdbCommandMenuItem): Icon? = when (value) {
+                is AdbCommandMenuItem.Header -> null
+                is AdbCommandMenuItem.Command ->
+                    if (value.config.iconId.isNotEmpty()) {
+                        ActionIconsProvider.getIconById(value.config.iconId)?.icon
+                    } else {
+                        null
+                    }
+                is AdbCommandMenuItem.Customize -> AllIcons.General.Settings
+            }
+
+            override fun isSelectable(value: AdbCommandMenuItem): Boolean = when (value) {
+                is AdbCommandMenuItem.Header -> false
+                is AdbCommandMenuItem.Command -> value.isEnabled
+                is AdbCommandMenuItem.Customize -> true
+            }
+
+            override fun getSeparatorAbove(value: AdbCommandMenuItem): ListSeparator? = when (value) {
+                is AdbCommandMenuItem.Customize -> ListSeparator()
+                is AdbCommandMenuItem.Command ->
+                    if (items.indexOf(value) == 1) ListSeparator() else null
+                else -> null
+            }
+
+            override fun onChosen(selectedValue: AdbCommandMenuItem, finalChoice: Boolean): PopupStep<*>? {
+                return doFinalStep {
+                    when (selectedValue) {
+                        is AdbCommandMenuItem.Command -> {
+                            listener?.onAdbCommandClicked(device, selectedValue.config)
+                        }
+                        is AdbCommandMenuItem.Customize -> {
+                            ShowSettingsUtil.getInstance().showSettingsDialog(
+                                null,
+                                PluginBundle.message("settingsPageName")
+                            )
+                        }
+                        else -> {}
+                    }
+                }
+            }
         }
 
-        menu.addSeparator()
-        val customizeItem = JBMenuItem(
-            PluginBundle.message("adbCommandsCustomize"),
-            AllIcons.General.Settings
-        )
-        customizeItem.addActionListener {
-            ShowSettingsUtil.getInstance().showSettingsDialog(null, PluginBundle.message("settingsPageName"))
-        }
-        menu.add(customizeItem)
+        // Calculate width based on longest text
+        val fontMetrics = event.component.getFontMetrics(UIUtil.getLabelFont())
+        val maxTextWidth = items.maxOfOrNull { item ->
+            val text = step.getTextFor(item)
+            val hasIcon = step.getIconFor(item) != null
+            val iconWidth = if (hasIcon) JBUI.scale(16 + 8) else 0  // icon + gap
+            fontMetrics.stringWidth(text) + iconWidth
+        } ?: 0
+        val popupWidth = maxTextWidth + JBUI.scale(40)  // padding for margins and selection insets
 
-        menu.show(event.component, event.x, event.y)
+        val popup = JBPopupFactory.getInstance().createListPopup(step)
+        popup.setMinimumSize(Dimension(popupWidth, 0))
+        popup.showUnderneathOf(event.component)
+    }
+
+    private sealed class AdbCommandMenuItem {
+        data class Header(val text: String) : AdbCommandMenuItem()
+        data class Command(val config: AdbCommandConfig, val isEnabled: Boolean) : AdbCommandMenuItem()
+        data object Customize : AdbCommandMenuItem()
     }
 
     interface Listener {
