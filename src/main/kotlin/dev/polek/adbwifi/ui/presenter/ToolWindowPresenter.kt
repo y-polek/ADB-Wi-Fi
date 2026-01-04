@@ -1,6 +1,8 @@
 package dev.polek.adbwifi.ui.presenter
 
 import com.intellij.openapi.components.service
+import com.intellij.openapi.project.Project
+import dev.polek.adbwifi.adb.AdbCommand
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.PinnedDevice
 import dev.polek.adbwifi.services.*
@@ -14,7 +16,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
+class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWindowView>() {
 
     private val adbService by lazy { service<AdbService>() }
     private val scrcpyService by lazy { service<ScrcpyService>() }
@@ -22,6 +24,7 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     private val propertiesService by lazy { service<PropertiesService>() }
     private val pinDeviceService by lazy { service<PinDeviceService>() }
     private val deviceNamesService by lazy { service<DeviceNamesService>() }
+    private val packageService by lazy { project.service<PackageService>() }
 
     private var isViewOpen: Boolean = false
     private var isAdbValid: Boolean = true
@@ -142,6 +145,15 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
         copyToClipboard(address.ip)
     }
 
+    fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommand) {
+        val packageName = packageService.getPackageName() ?: return
+        launch {
+            withContext(IO) {
+                adbService.executeAppCommand(command, device.id, packageName)
+            }
+        }
+    }
+
     private fun onDevicesUpdated(model: List<Device>) {
         devices = model.map {
             it.toViewModel(customName = deviceNamesService.findName(it.serialNumber))
@@ -153,10 +165,13 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
 
     private fun updateDeviceLists() {
         val isScrcpyEnabled = propertiesService.isScrcpyEnabled.value
+        val packageName = packageService.getPackageName()
 
         devices.forEach {
             it.isInProgress = connectingDevices.contains(it)
             it.isShareScreenButtonVisible = isScrcpyEnabled
+            it.isAdbCommandsButtonVisible = true
+            it.packageName = packageName
         }
         pinnedDevices.forEach {
             it.isInProgress = connectingDevices.contains(it)

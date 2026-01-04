@@ -9,6 +9,7 @@ import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
+import dev.polek.adbwifi.adb.AdbCommand
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.ButtonType
 import dev.polek.adbwifi.utils.Icons
@@ -136,6 +137,15 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             actionButtons.add(shareScreenButton)
         }
 
+        if (device.isAdbCommandsButtonVisible) {
+            val adbCommandsButton = IconButton(AllIcons.Actions.Execute, PluginBundle.message("adbCommandsTooltip"))
+            adbCommandsButton.onClickedListener = { event ->
+                openAdbCommandsMenu(device, event)
+            }
+            adbCommandsButton.addMouseListener(hoverListener)
+            actionButtons.add(adbCommandsButton)
+        }
+
         if (device.isRemoveButtonVisible) {
             val removeButton = IconButton(Icons.DELETE, PluginBundle.message("removeDeviceTooltip"))
             removeButton.onClickedListener = {
@@ -213,6 +223,40 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         menu.show(event.component, event.x, event.y)
     }
 
+    private fun openAdbCommandsMenu(device: DeviceViewModel, event: MouseEvent) {
+        val menu = JBPopupMenu()
+
+        val packageName = device.packageName
+        if (packageName != null) {
+            val header = JBMenuItem("Package: $packageName")
+            header.isEnabled = false
+            menu.add(header)
+            menu.addSeparator()
+        } else {
+            val header = JBMenuItem(PluginBundle.message("adbCommandNoPackage"))
+            header.isEnabled = false
+            menu.add(header)
+            menu.addSeparator()
+        }
+
+        AdbCommand.entries.forEach { command ->
+            val item = JBMenuItem(PluginBundle.message(command.messageKey), getIconForCommand(command))
+            item.isEnabled = packageName != null
+            item.addActionListener { listener?.onAdbCommandClicked(device, command) }
+            menu.add(item)
+        }
+
+        menu.show(event.component, event.x, event.y)
+    }
+
+    private fun getIconForCommand(command: AdbCommand) = when (command) {
+        AdbCommand.KILL_APP -> AllIcons.Actions.Suspend
+        AdbCommand.START_APP -> AllIcons.Actions.Execute
+        AdbCommand.RESTART_APP -> AllIcons.Actions.Restart
+        AdbCommand.CLEAR_DATA -> AllIcons.Actions.ClearCash
+        AdbCommand.CLEAR_DATA_AND_RESTART -> AllIcons.Actions.ForceRefresh
+    }
+
     interface Listener {
         fun onConnectButtonClicked(device: DeviceViewModel)
         fun onDisconnectButtonClicked(device: DeviceViewModel)
@@ -221,6 +265,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         fun onRenameDeviceClicked(device: DeviceViewModel)
         fun onCopyDeviceIdClicked(device: DeviceViewModel)
         fun onCopyDeviceAddressClicked(device: DeviceViewModel)
+        fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommand)
     }
 
     private companion object {

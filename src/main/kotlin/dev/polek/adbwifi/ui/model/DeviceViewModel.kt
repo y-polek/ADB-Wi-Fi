@@ -17,7 +17,9 @@ data class DeviceViewModel(
     val buttonType: ButtonType,
     var isShareScreenButtonVisible: Boolean,
     val isRemoveButtonVisible: Boolean,
-    var isInProgress: Boolean = false
+    var isInProgress: Boolean = false,
+    var packageName: String? = null,
+    var isAdbCommandsButtonVisible: Boolean = false
 ) {
     val id: String
         get() = device.id
