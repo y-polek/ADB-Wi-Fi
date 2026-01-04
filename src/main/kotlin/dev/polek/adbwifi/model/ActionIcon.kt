@@ -21,7 +21,9 @@ object ActionIconsProvider {
         // Data & Storage
         ActionIcon("clear", "Clear 1", AllIcons.Actions.GC),
         ActionIcon("clear-2", "Clear 2", AllIcons.Actions.ClearCash),
-        ActionIcon("delete", "Delete", AllIcons.Actions.DeleteTag),
+        ActionIcon("delete", "Delete 1", AllIcons.General.Delete),
+        ActionIcon("delete-2", "Delete 2", AllIcons.Actions.DeleteTag),
+        ActionIcon("delete-3", "Delete 3", AllIcons.Actions.DeleteTagHover),
         ActionIcon("trash", "Trash", AllIcons.Actions.Cancel),
 
         // Refresh & Sync

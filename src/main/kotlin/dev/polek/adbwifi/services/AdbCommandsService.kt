@@ -32,6 +32,8 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
         private const val RESTART_APP_ID = "RESTART_APP"
         private const val CLEAR_DATA_ID = "CLEAR_DATA"
         private const val CLEAR_DATA_AND_RESTART_ID = "CLEAR_DATA_AND_RESTART"
+        private const val UNINSTALL_APP_ID = "UNINSTALL_APP"
+        private const val UNINSTALL_APP_KEEP_DATA_ID = "UNINSTALL_APP_KEEP_DATA"
 
         fun defaultCommands(): List<AdbCommandConfig> = listOf(
             AdbCommandConfig(
@@ -73,6 +75,22 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 iconId = "force-refresh",
                 isEnabled = true,
                 order = 4
+            ),
+            AdbCommandConfig(
+                id = UNINSTALL_APP_ID,
+                name = "Uninstall app",
+                command = "pm uninstall {package}",
+                iconId = "trash",
+                isEnabled = false,
+                order = 5
+            ),
+            AdbCommandConfig(
+                id = UNINSTALL_APP_KEEP_DATA_ID,
+                name = "Uninstall app (keep data)",
+                command = "pm uninstall -k {package}",
+                iconId = "delete",
+                isEnabled = false,
+                order = 6
             )
         )
     }
