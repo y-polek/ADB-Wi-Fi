@@ -306,10 +306,10 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         val maxTextWidth = items.maxOfOrNull { item ->
             val text = step.getTextFor(item)
             val hasIcon = step.getIconFor(item) != null
-            val iconWidth = if (hasIcon) JBUI.scale(16 + 8) else 0  // icon + gap
+            val iconWidth = if (hasIcon) JBUI.scale(16 + 8) else 0 // icon + gap
             fontMetrics.stringWidth(text) + iconWidth
         } ?: 0
-        val popupWidth = maxTextWidth + JBUI.scale(40)  // padding for margins and selection insets
+        val popupWidth = maxTextWidth + JBUI.scale(40) // padding for margins and selection insets
 
         val popup = JBPopupFactory.getInstance().createListPopup(step)
         popup.setMinimumSize(Dimension(popupWidth, 0))
