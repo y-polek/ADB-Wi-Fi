@@ -121,15 +121,24 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
         return false
     }
 
+    private fun syncCheckboxStatesToCommands() {
+        commands.forEachIndexed { index, config ->
+            val isChecked = checkBoxList.isItemSelected(index)
+            if (config.isEnabled != isChecked) {
+                commands[index] = config.copy(isEnabled = isChecked)
+            }
+        }
+    }
+
     private fun refreshList() {
         checkBoxList.clear()
         commands.forEach { config ->
-            val icon = CommandIcon.fromId(config.iconId)?.icon
             checkBoxList.addItem(config, config.name, config.isEnabled)
         }
     }
 
     private fun addCommand() {
+        syncCheckboxStatesToCommands()
         val dialog = AdbCommandEditorDialog()
         if (dialog.showAndGet()) {
             val maxOrder = commands.maxOfOrNull { it.order } ?: -1
@@ -151,6 +160,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
         val selectedIndex = checkBoxList.selectedIndex
         if (selectedIndex < 0) return
 
+        syncCheckboxStatesToCommands()
         val config = commands[selectedIndex]
         val dialog = AdbCommandEditorDialog(config)
         if (dialog.showAndGet()) {
@@ -168,6 +178,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
         val selectedIndex = checkBoxList.selectedIndex
         if (selectedIndex < 0) return
 
+        syncCheckboxStatesToCommands()
         val config = commands[selectedIndex]
         if (config.isBuiltIn) return
 
@@ -192,6 +203,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
         val selectedIndex = checkBoxList.selectedIndex
         if (selectedIndex <= 0) return
 
+        syncCheckboxStatesToCommands()
         val temp = commands[selectedIndex]
         commands[selectedIndex] = commands[selectedIndex - 1]
         commands[selectedIndex - 1] = temp
@@ -203,6 +215,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
         val selectedIndex = checkBoxList.selectedIndex
         if (selectedIndex < 0 || selectedIndex >= commands.lastIndex) return
 
+        syncCheckboxStatesToCommands()
         val temp = commands[selectedIndex]
         commands[selectedIndex] = commands[selectedIndex + 1]
         commands[selectedIndex + 1] = temp
