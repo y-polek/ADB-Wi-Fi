@@ -52,6 +52,7 @@ ADB Wi-Fi is an IntelliJ IDEA/Android Studio plugin that simplifies connecting t
 - `PinDeviceService`: Persists previously connected devices for quick reconnection
 - `DeviceNamesService`: Custom device name storage
 - `ScrcpyService`: Optional screen sharing via scrcpy
+- `AdbCommandsService`: Manages custom ADB shell commands (kill app, clear data, etc.)
 
 ### Data Flow
 
@@ -78,6 +79,14 @@ Presenters subscribe to these flows using `launch { flow.collect { ... } }` and 
 - `Address`: Network interface name + IP address
 - `PinnedDevice`: Serialized device for persistence
 - `DeviceViewModel`: UI-specific wrapper with display state
+- `AdbCommandConfig`: Custom ADB command with name, shell command, icon, and confirmation flag
+
+### UI Patterns
+
+- **Popup menus**: Use `JBPopupFactory.createListPopup()` with `BaseListPopupStep` for context menus
+- **Dialogs**: Extend `DialogWrapper` for modal dialogs
+- **Settings panels**: Extend `Configurable` and use `ToolbarDecorator` for list editing
+- **Clickable links**: Use `HyperlinkLabel` for inline clickable text
 
 ## Testing
 
