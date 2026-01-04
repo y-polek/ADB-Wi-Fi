@@ -3,8 +3,6 @@ package dev.polek.adbwifi.ui.view
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.ShowSettingsUtil
-import com.intellij.openapi.ui.JBMenuItem
-import com.intellij.openapi.ui.JBPopupMenu
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.ListSeparator
 import com.intellij.openapi.ui.popup.PopupStep
@@ -208,28 +206,50 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
     }
 
     private fun openDeviceMenu(device: DeviceViewModel, event: MouseEvent) {
-        val menu = JBPopupMenu()
+        val items = listOf(
+            DeviceMenuItem.Rename,
+            DeviceMenuItem.CopyId,
+            DeviceMenuItem.CopyAddress(device.hasAddress)
+        )
 
-        val renameDeviceItem = JBMenuItem(PluginBundle.message("renameDeviceMenuItem"), AllIcons.Actions.Edit)
-        renameDeviceItem.addActionListener {
-            listener?.onRenameDeviceClicked(device)
+        val step = object : BaseListPopupStep<DeviceMenuItem>(null, items) {
+            override fun getTextFor(value: DeviceMenuItem): String = when (value) {
+                is DeviceMenuItem.Rename -> PluginBundle.message("renameDeviceMenuItem")
+                is DeviceMenuItem.CopyId -> PluginBundle.message("copyDeviceIdMenuItem")
+                is DeviceMenuItem.CopyAddress -> PluginBundle.message("copyIpAddressMenuItem")
+            }
+
+            override fun getIconFor(value: DeviceMenuItem): Icon? = when (value) {
+                is DeviceMenuItem.Rename -> AllIcons.Actions.Edit
+                is DeviceMenuItem.CopyId -> AllIcons.Actions.Copy
+                is DeviceMenuItem.CopyAddress -> AllIcons.Actions.Copy
+            }
+
+            override fun isSelectable(value: DeviceMenuItem): Boolean = when (value) {
+                is DeviceMenuItem.CopyAddress -> value.isEnabled
+                else -> true
+            }
+
+            override fun onChosen(selectedValue: DeviceMenuItem, finalChoice: Boolean): PopupStep<*>? {
+                return doFinalStep {
+                    when (selectedValue) {
+                        is DeviceMenuItem.Rename -> listener?.onRenameDeviceClicked(device)
+                        is DeviceMenuItem.CopyId -> listener?.onCopyDeviceIdClicked(device)
+                        is DeviceMenuItem.CopyAddress -> listener?.onCopyDeviceAddressClicked(device)
+                    }
+                }
+            }
         }
-        menu.add(renameDeviceItem)
 
-        val copyIdItem = JBMenuItem(PluginBundle.message("copyDeviceIdMenuItem"), AllIcons.Actions.Copy)
-        copyIdItem.addActionListener {
-            listener?.onCopyDeviceIdClicked(device)
-        }
-        menu.add(copyIdItem)
+        val fontMetrics = event.component.getFontMetrics(UIUtil.getLabelFont())
+        val maxTextWidth = items.maxOfOrNull { item ->
+            fontMetrics.stringWidth(step.getTextFor(item)) + JBUI.scale(16 + 8)
+        } ?: 0
+        val popupWidth = maxTextWidth + JBUI.scale(40)
 
-        val copyAddressItem = JBMenuItem(PluginBundle.message("copyIpAddressMenuItem"), AllIcons.Actions.Copy)
-        copyAddressItem.addActionListener {
-            listener?.onCopyDeviceAddressClicked(device)
-        }
-        copyAddressItem.isEnabled = device.hasAddress
-        menu.add(copyAddressItem)
-
-        menu.show(event.component, event.x, event.y)
+        val popup = JBPopupFactory.getInstance().createListPopup(step)
+        popup.setMinimumSize(Dimension(popupWidth, 0))
+        popup.showUnderneathOf(event.component)
     }
 
     private fun openAdbCommandsMenu(device: DeviceViewModel, event: MouseEvent) {
@@ -314,6 +334,12 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         val popup = JBPopupFactory.getInstance().createListPopup(step)
         popup.setMinimumSize(Dimension(popupWidth, 0))
         popup.showUnderneathOf(event.component)
+    }
+
+    private sealed class DeviceMenuItem {
+        data object Rename : DeviceMenuItem()
+        data object CopyId : DeviceMenuItem()
+        data class CopyAddress(val isEnabled: Boolean) : DeviceMenuItem()
     }
 
     private sealed class AdbCommandMenuItem {
