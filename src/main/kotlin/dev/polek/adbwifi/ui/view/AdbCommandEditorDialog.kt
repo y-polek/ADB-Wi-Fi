@@ -1,5 +1,6 @@
 package dev.polek.adbwifi.ui.view
 
+import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.ui.components.JBLabel
@@ -12,7 +13,10 @@ import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.model.AdbCommandConfig
 import dev.polek.adbwifi.model.CommandIcon
 import java.awt.Dimension
-import javax.swing.*
+import javax.swing.DefaultComboBoxModel
+import javax.swing.JComponent
+import javax.swing.JList
+import javax.swing.ListCellRenderer
 
 class AdbCommandEditorDialog(
     existingCommand: AdbCommandConfig? = null
@@ -20,7 +24,7 @@ class AdbCommandEditorDialog(
 
     private val nameField = JBTextField()
     private val commandArea = JBTextArea(4, 40)
-    private val iconComboBox = JComboBox(DefaultComboBoxModel(CommandIcon.entries.toTypedArray()))
+    private val iconComboBox = ComboBox(DefaultComboBoxModel(CommandIcon.entries.toTypedArray()))
 
     val commandName: String get() = nameField.text.trim()
     val command: String get() = commandArea.text.trim()
