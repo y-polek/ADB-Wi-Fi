@@ -2,12 +2,13 @@ package dev.polek.adbwifi.settings
 
 import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.components.service
+import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.Configurable
-import com.intellij.openapi.ui.TextComponentAccessor
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.SystemInfo
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.ContextHelpLabel
 import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.JBColor
@@ -27,7 +28,6 @@ import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.io.File
 import javax.swing.*
 
 class AdbWifiConfigurable : Configurable {
@@ -95,13 +95,24 @@ class AdbWifiConfigurable : Configurable {
     private fun createAdbLocationField() = TextFieldWithBrowseButton().apply {
         text = properties.adbLocation
         textField.onTextChanged(::verifyAdbLocation)
-        addBrowseFolderListener(
-            null,
-            null,
-            null,
-            executableChooserDescriptor(),
-            ExecutablePathTextComponentAccessor()
-        )
+        addActionListener {
+            val currentPath = textField.text.takeIf { it.isNotBlank() }?.let {
+                LocalFileSystem.getInstance().findFileByPath(it)
+            }
+            FileChooser.chooseFile(
+                executableChooserDescriptor(),
+                null,
+                this,
+                currentPath
+            ) { selectedFile ->
+                val path = if (selectedFile.isDirectory) {
+                    selectedFile.path
+                } else {
+                    selectedFile.parent?.path.orEmpty()
+                }
+                textField.text = path
+            }
+        }
     }
 
     private fun createDefaultAdbLocationButton() =
@@ -336,13 +347,24 @@ class AdbWifiConfigurable : Configurable {
         scrcpyLocationField = TextFieldWithBrowseButton()
         scrcpyLocationField.text = properties.scrcpyLocation
         scrcpyLocationField.textField.onTextChanged(::verifyScrcpyLocation)
-        scrcpyLocationField.addBrowseFolderListener(
-            null,
-            null,
-            null,
-            executableChooserDescriptor(),
-            ExecutablePathTextComponentAccessor()
-        )
+        scrcpyLocationField.addActionListener {
+            val currentPath = scrcpyLocationField.text.takeIf { it.isNotBlank() }?.let {
+                LocalFileSystem.getInstance().findFileByPath(it)
+            }
+            FileChooser.chooseFile(
+                executableChooserDescriptor(),
+                null,
+                scrcpyLocationField,
+                currentPath
+            ) { selectedFile ->
+                val path = if (selectedFile.isDirectory) {
+                    selectedFile.path
+                } else {
+                    selectedFile.parent?.path.orEmpty()
+                }
+                scrcpyLocationField.text = path
+            }
+        }
         panel.add(
             scrcpyLocationField,
             GridBagConstraints().apply {
@@ -617,21 +639,6 @@ class AdbWifiConfigurable : Configurable {
         scrcpyLocationTitle.isEnabled = locationEnabled
         scrcpyLocationField.isEnabled = locationEnabled
         scrcpyStatusLabel.isVisible = locationEnabled
-    }
-
-    private class ExecutablePathTextComponentAccessor(
-        val onTextChanged: (() -> Unit)? = null
-    ) : TextComponentAccessor<JTextField> {
-
-        override fun getText(component: JTextField): String = component.text
-
-        override fun setText(component: JTextField, text: String) {
-            val file = File(text)
-            val dirName = if (file.isFile) file.parent.orEmpty() else text
-            component.text = dirName
-
-            onTextChanged?.invoke()
-        }
     }
 
     private companion object {
