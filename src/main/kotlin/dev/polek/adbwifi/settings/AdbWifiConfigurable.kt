@@ -429,6 +429,7 @@ class AdbWifiConfigurable : Configurable {
         val subtitle = JBLabel(PluginBundle.message("scrcpyFlagsSubtitle"))
         subtitle.componentStyle = UIUtil.ComponentStyle.SMALL
         subtitle.fontColor = UIUtil.FontColor.BRIGHTER
+        subtitle.setCopyable(true)
         panel.add(
             subtitle,
             GridBagConstraints().apply {
