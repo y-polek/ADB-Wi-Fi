@@ -19,14 +19,14 @@ object ActionIconsProvider {
         ActionIcon("pause", "Pause", AllIcons.Actions.Pause),
 
         // Data & Storage
-        ActionIcon("clear", "Clear", AllIcons.Actions.GC),
+        ActionIcon("clear", "Clear 1", AllIcons.Actions.GC),
+        ActionIcon("clear-2", "Clear 2", AllIcons.Actions.ClearCash),
         ActionIcon("delete", "Delete", AllIcons.Actions.DeleteTag),
         ActionIcon("trash", "Trash", AllIcons.Actions.Cancel),
 
         // Refresh & Sync
-        ActionIcon("refresh", "Refresh", AllIcons.Actions.Refresh),
-        ActionIcon("force-refresh", "Force Refresh", AllIcons.Actions.ForceRefresh),
-        ActionIcon("sync", "Sync", AllIcons.Actions.Refresh),
+        ActionIcon("refresh", "Refresh 1", AllIcons.Actions.Refresh),
+        ActionIcon("force-refresh", "Refresh 2", AllIcons.Actions.ForceRefresh),
 
         // Transfer
         ActionIcon("download", "Download", AllIcons.Actions.Download),
@@ -41,14 +41,13 @@ object ActionIconsProvider {
         ActionIcon("copy", "Copy", AllIcons.Actions.Copy),
 
         // Status & Info
-        ActionIcon("info", "Info", AllIcons.Actions.Help),
+        ActionIcon("help", "Help", AllIcons.Actions.Help),
         ActionIcon("warning", "Warning", AllIcons.General.Warning),
         ActionIcon("error", "Error", AllIcons.General.Error),
 
         // Actions
         ActionIcon("lightning", "Lightning", AllIcons.Actions.Lightning),
         ActionIcon("console", "Console", AllIcons.Debugger.Console),
-        ActionIcon("terminal", "Terminal", AllIcons.Debugger.Console),
 
         // Navigation
         ActionIcon("back", "Back", AllIcons.Actions.Back),
@@ -59,15 +58,13 @@ object ActionIconsProvider {
 
         // Settings & Config
         ActionIcon("settings", "Settings", AllIcons.General.Settings),
-        ActionIcon("configure", "Configure", AllIcons.General.GearPlain),
 
         // Misc
         ActionIcon("pin", "Pin", AllIcons.General.Pin_tab),
-        ActionIcon("favorite", "Favorite", AllIcons.Nodes.Favorite),
         ActionIcon("star", "Star", AllIcons.Nodes.Favorite),
         ActionIcon("flag", "Flag", AllIcons.Nodes.NotFavoriteOnHover),
-        ActionIcon("link", "Link", AllIcons.Ide.Link),
-        ActionIcon("external", "External Link", AllIcons.Ide.External_link_arrow),
+        ActionIcon("link", "Link 1", AllIcons.Ide.Link),
+        ActionIcon("external", "Link 2", AllIcons.Ide.External_link_arrow),
         ActionIcon("eye", "Show", AllIcons.Actions.Show),
         ActionIcon("hide", "Hide", AllIcons.Actions.ToggleVisibility),
         ActionIcon("lock", "Lock", AllIcons.Diff.Lock),
