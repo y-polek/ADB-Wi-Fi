@@ -2,6 +2,7 @@ package dev.polek.adbwifi.ui.view
 
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.ValidationInfo
+import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
@@ -29,10 +30,12 @@ class AdbCommandEditorDialog(
     private val commandArea = JBTextArea(4, 40)
     private var selectedIcon: ActionIcon? = null
     private val iconButton = createIconButton()
+    private val confirmationCheckbox = JBCheckBox(PluginBundle.message("adbCommandEditorConfirmationLabel"))
 
     val commandName: String get() = nameField.text.trim()
     val command: String get() = commandArea.text.trim()
     val iconId: String get() = selectedIcon?.id ?: ""
+    val requiresConfirmation: Boolean get() = confirmationCheckbox.isSelected
 
     init {
         title = if (existingCommand != null) {
@@ -45,6 +48,7 @@ class AdbCommandEditorDialog(
         existingCommand?.let { config ->
             nameField.text = config.name
             commandArea.text = config.command
+            confirmationCheckbox.isSelected = config.requiresConfirmation
             if (config.iconId.isNotEmpty()) {
                 selectedIcon = ActionIconsProvider.getIconById(config.iconId)
                 updateIconButton()
@@ -67,6 +71,7 @@ class AdbCommandEditorDialog(
             .addLabeledComponent(PluginBundle.message("adbCommandEditorCommandLabel"), commandScrollPane)
             .addComponentToRightColumn(hintLabel)
             .addLabeledComponent(PluginBundle.message("adbCommandEditorIconLabel"), iconButton)
+            .addComponent(confirmationCheckbox)
             .panel
     }
 

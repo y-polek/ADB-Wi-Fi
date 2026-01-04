@@ -129,6 +129,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
             if (config.name != original.name) return true
             if (config.command != original.command) return true
             if (config.iconId != original.iconId) return true
+            if (config.requiresConfirmation != original.requiresConfirmation) return true
         }
         return false
     }
@@ -160,7 +161,8 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
                 command = dialog.command,
                 iconId = dialog.iconId,
                 isEnabled = true,
-                order = maxOrder + 1
+                order = maxOrder + 1,
+                requiresConfirmation = dialog.requiresConfirmation
             )
             commands.add(newCommand)
             refreshList()
@@ -178,7 +180,8 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
             commands[selectedIndex] = config.copy(
                 name = dialog.commandName,
                 command = dialog.command,
-                iconId = dialog.iconId
+                iconId = dialog.iconId,
+                requiresConfirmation = dialog.requiresConfirmation
             )
             refreshList()
             checkBoxList.selectedIndex = selectedIndex
@@ -204,7 +207,8 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
                 command = dialog.command,
                 iconId = dialog.iconId,
                 isEnabled = true,
-                order = maxOrder + 1
+                order = maxOrder + 1,
+                requiresConfirmation = dialog.requiresConfirmation
             )
             commands.add(newCommand)
             refreshList()

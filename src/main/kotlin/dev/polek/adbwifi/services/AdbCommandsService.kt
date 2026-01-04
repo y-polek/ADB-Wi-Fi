@@ -64,9 +64,10 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 id = CLEAR_DATA_ID,
                 name = "Clear app data",
                 command = "pm clear {package}",
-                iconId = "clear",
+                iconId = "clear-2",
                 isEnabled = true,
-                order = 3
+                order = 3,
+                requiresConfirmation = true
             ),
             AdbCommandConfig(
                 id = CLEAR_DATA_AND_RESTART_ID,
@@ -74,23 +75,26 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 command = "pm clear {package}\nmonkey -p {package} -c android.intent.category.LAUNCHER 1",
                 iconId = "force-refresh",
                 isEnabled = true,
-                order = 4
+                order = 4,
+                requiresConfirmation = true
             ),
             AdbCommandConfig(
                 id = UNINSTALL_APP_ID,
                 name = "Uninstall app",
                 command = "pm uninstall {package}",
                 iconId = "trash",
-                isEnabled = false,
-                order = 5
+                isEnabled = true,
+                order = 5,
+                requiresConfirmation = true
             ),
             AdbCommandConfig(
                 id = UNINSTALL_APP_KEEP_DATA_ID,
                 name = "Uninstall app (keep data)",
                 command = "pm uninstall -k {package}",
                 iconId = "delete",
-                isEnabled = false,
-                order = 6
+                isEnabled = true,
+                order = 6,
+                requiresConfirmation = true
             )
         )
     }

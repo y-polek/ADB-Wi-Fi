@@ -2,6 +2,8 @@ package dev.polek.adbwifi.ui.presenter
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.Messages
+import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.model.AdbCommandConfig
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.PinnedDevice
@@ -147,6 +149,23 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
 
     fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig) {
         val packageName = packageService.getPackageName() ?: return
+
+        if (command.requiresConfirmation) {
+            val shellCommand = command.command.replace("{package}", packageName)
+            val fullCommand = "adb -s ${device.id} shell $shellCommand"
+            val result = Messages.showYesNoDialog(
+                PluginBundle.message(
+                    "adbCommandConfirmationMessage",
+                    command.name,
+                    device.titleText,
+                    fullCommand
+                ),
+                PluginBundle.message("adbCommandConfirmationTitle"),
+                Messages.getQuestionIcon()
+            )
+            if (result != Messages.YES) return
+        }
+
         launch {
             withContext(IO) {
                 adbService.executeCommand(command, device.id, packageName)
