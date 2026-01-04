@@ -5,7 +5,6 @@ data class AdbCommandConfig(
     val name: String,
     val command: String,
     val iconId: String,
-    val isBuiltIn: Boolean,
     val isEnabled: Boolean,
     val order: Int
 )

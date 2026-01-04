@@ -7,7 +7,6 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 import com.intellij.util.xmlb.annotations.OptionTag
 import dev.polek.adbwifi.model.AdbCommandConfig
 import dev.polek.adbwifi.model.AdbCommandConfigListConverter
-import java.util.UUID
 
 @State(
     name = "AdbCommandsService",
@@ -20,65 +19,6 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
 
     fun getEnabledCommands(): List<AdbCommandConfig> =
         commands.filter { it.isEnabled }.sortedBy { it.order }
-
-    fun updateCommand(config: AdbCommandConfig) {
-        commands = commands.map { if (it.id == config.id) config else it }
-    }
-
-    fun addCustomCommand(name: String, command: String, iconId: String): AdbCommandConfig {
-        val maxOrder = commands.maxOfOrNull { it.order } ?: -1
-        val newCommand = AdbCommandConfig(
-            id = UUID.randomUUID().toString(),
-            name = name,
-            command = command,
-            iconId = iconId,
-            isBuiltIn = false,
-            isEnabled = true,
-            order = maxOrder + 1
-        )
-        commands = commands + newCommand
-        return newCommand
-    }
-
-    fun removeCustomCommand(id: String) {
-        commands = commands.filter { it.id != id || it.isBuiltIn }
-    }
-
-    fun moveUp(id: String) {
-        val sorted = commands.sortedBy { it.order }
-        val index = sorted.indexOfFirst { it.id == id }
-        if (index <= 0) return
-
-        val current = sorted[index]
-        val above = sorted[index - 1]
-        commands = commands.map { cmd ->
-            when (cmd.id) {
-                current.id -> cmd.copy(order = above.order)
-                above.id -> cmd.copy(order = current.order)
-                else -> cmd
-            }
-        }
-    }
-
-    fun moveDown(id: String) {
-        val sorted = commands.sortedBy { it.order }
-        val index = sorted.indexOfFirst { it.id == id }
-        if (index < 0 || index >= sorted.lastIndex) return
-
-        val current = sorted[index]
-        val below = sorted[index + 1]
-        commands = commands.map { cmd ->
-            when (cmd.id) {
-                current.id -> cmd.copy(order = below.order)
-                below.id -> cmd.copy(order = current.order)
-                else -> cmd
-            }
-        }
-    }
-
-    fun resetToDefaults() {
-        commands = defaultCommands()
-    }
 
     override fun getState() = this
 
@@ -99,7 +39,6 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 name = "Kill app",
                 command = "am force-stop {package}",
                 iconId = "suspend",
-                isBuiltIn = true,
                 isEnabled = true,
                 order = 0
             ),
@@ -108,7 +47,6 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 name = "Start app",
                 command = "monkey -p {package} -c android.intent.category.LAUNCHER 1",
                 iconId = "execute",
-                isBuiltIn = true,
                 isEnabled = true,
                 order = 1
             ),
@@ -117,7 +55,6 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 name = "Restart app",
                 command = "am force-stop {package}\nmonkey -p {package} -c android.intent.category.LAUNCHER 1",
                 iconId = "restart",
-                isBuiltIn = true,
                 isEnabled = true,
                 order = 2
             ),
@@ -126,7 +63,6 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 name = "Clear app data",
                 command = "pm clear {package}",
                 iconId = "clear",
-                isBuiltIn = true,
                 isEnabled = true,
                 order = 3
             ),
@@ -135,7 +71,6 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 name = "Clear app data and restart",
                 command = "pm clear {package}\nmonkey -p {package} -c android.intent.category.LAUNCHER 1",
                 iconId = "forceRefresh",
-                isBuiltIn = true,
                 isEnabled = true,
                 order = 4
             )

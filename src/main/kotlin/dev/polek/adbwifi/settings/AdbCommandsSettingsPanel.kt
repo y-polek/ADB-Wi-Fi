@@ -147,7 +147,6 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
                 name = dialog.commandName,
                 command = dialog.command,
                 iconId = dialog.iconId,
-                isBuiltIn = false,
                 isEnabled = true,
                 order = maxOrder + 1
             )
@@ -180,7 +179,6 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
 
         syncCheckboxStatesToCommands()
         val config = commands[selectedIndex]
-        if (config.isBuiltIn) return
 
         val result = Messages.showYesNoDialog(
             PluginBundle.message("adbCommandDeleteConfirmation", config.name),
@@ -195,8 +193,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
 
     private fun canRemoveSelected(): Boolean {
         val selectedIndex = checkBoxList.selectedIndex
-        if (selectedIndex < 0) return false
-        return !commands[selectedIndex].isBuiltIn
+        return selectedIndex >= 0
     }
 
     private fun moveUp() {
