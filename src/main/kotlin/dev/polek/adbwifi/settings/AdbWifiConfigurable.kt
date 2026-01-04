@@ -14,6 +14,7 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.TitledSeparator
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBUI
@@ -388,8 +389,9 @@ class AdbWifiConfigurable : Configurable {
             lineWrap = true
             margin = JBUI.insets(8)
         }
+        val scrcpyCmdFlagsScrollPane = JBScrollPane(scrcpyCmdFlagsTextArea)
         panel.add(
-            scrcpyCmdFlagsTextArea,
+            scrcpyCmdFlagsScrollPane,
             GridBagConstraints().apply {
                 gridx = 0
                 gridy = 1
