@@ -2,7 +2,7 @@ package dev.polek.adbwifi.ui.presenter
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import dev.polek.adbwifi.adb.AdbCommand
+import dev.polek.adbwifi.model.AdbCommandConfig
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.PinnedDevice
 import dev.polek.adbwifi.services.*
@@ -145,11 +145,11 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
         copyToClipboard(address.ip)
     }
 
-    fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommand) {
+    fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig) {
         val packageName = packageService.getPackageName() ?: return
         launch {
             withContext(IO) {
-                adbService.executeAppCommand(command, device.id, packageName)
+                adbService.executeCommand(command, device.id, packageName)
             }
         }
     }

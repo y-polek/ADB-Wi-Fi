@@ -24,7 +24,7 @@ import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.components.BorderLayoutPanel
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.actions.OpenSettingsNotificationAction
-import dev.polek.adbwifi.adb.AdbCommand
+import dev.polek.adbwifi.model.AdbCommandConfig
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.ui.model.DeviceViewModel
@@ -76,7 +76,7 @@ class AdbWiFiToolWindow(
             presenter.onCopyDeviceAddressClicked(device)
         }
 
-        override fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommand) {
+        override fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig) {
             presenter.onAdbCommandClicked(device, command)
         }
     }

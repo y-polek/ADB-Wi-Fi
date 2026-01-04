@@ -125,6 +125,10 @@ class Adb(
         "-s $deviceId shell monkey -p $packageName -c android.intent.category.LAUNCHER 1".execAndLog(this)
     }
 
+    fun executeShellCommand(deviceId: String, shellCommand: String): Flow<LogEntry> = flow {
+        "-s $deviceId shell $shellCommand".execAndLog(this)
+    }
+
     private fun serialNumber(deviceId: String): String {
         return "-s $deviceId shell getprop ro.serialno".exec().firstLine()
     }

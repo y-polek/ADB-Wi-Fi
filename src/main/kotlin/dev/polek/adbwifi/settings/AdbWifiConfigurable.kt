@@ -19,6 +19,7 @@ import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
+import dev.polek.adbwifi.services.AdbCommandsService
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.utils.*
 import java.awt.Dimension
@@ -31,6 +32,7 @@ import javax.swing.*
 class AdbWifiConfigurable : Configurable {
 
     private val properties = service<PropertiesService>()
+    private val commandsService = service<AdbCommandsService>()
 
     private lateinit var adbPortField: JTextField
     private lateinit var adbSystemPathCheckbox: JBCheckBox
@@ -49,6 +51,8 @@ class AdbWifiConfigurable : Configurable {
 
     private lateinit var confirmDeviceRemovalCheckbox: JBCheckBox
 
+    private lateinit var commandsPanel: AdbCommandsSettingsPanel
+
     override fun getDisplayName(): String {
         return PluginBundle.message("settingsPageName")
     }
@@ -60,6 +64,8 @@ class AdbWifiConfigurable : Configurable {
         panel.add(createAdbSettingsPanel())
         panel.add(Box.createRigidArea(Dimension(0, GROUP_VERTICAL_INSET)))
         panel.add(createScrcpySettingsPanel())
+        panel.add(Box.createRigidArea(Dimension(0, GROUP_VERTICAL_INSET)))
+        panel.add(createAdbCommandsSettingsPanel())
         panel.add(Box.createRigidArea(Dimension(0, GROUP_VERTICAL_INSET)))
         panel.add(createGeneralSettingsPanel())
 
@@ -424,6 +430,37 @@ class AdbWifiConfigurable : Configurable {
         return panel
     }
 
+    private fun createAdbCommandsSettingsPanel(): JPanel {
+        val panel = GridBagLayoutPanel()
+
+        val separator = TitledSeparator(PluginBundle.message("adbCommandsSettingsTitle"))
+        panel.add(
+            separator,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 0
+                fill = GridBagConstraints.HORIZONTAL
+                weightx = 1.0
+            }
+        )
+
+        commandsPanel = AdbCommandsSettingsPanel()
+        commandsPanel.loadFromService(commandsService)
+        panel.add(
+            commandsPanel,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 1
+                fill = GridBagConstraints.BOTH
+                weightx = 1.0
+                weighty = 1.0
+                insets = JBUI.insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
+            }
+        )
+
+        return panel
+    }
+
     private fun createGeneralSettingsPanel(): JPanel {
         val panel = GridBagLayoutPanel()
 
@@ -465,6 +502,8 @@ class AdbWifiConfigurable : Configurable {
 
         if (confirmDeviceRemovalCheckbox.isSelected != properties.confirmDeviceRemoval) return true
 
+        if (commandsPanel.isModified(commandsService)) return true
+
         return false
     }
 
@@ -480,6 +519,8 @@ class AdbWifiConfigurable : Configurable {
         properties.scrcpyCmdFlags = scrcpyCmdFlagsTextArea.text.trim()
 
         properties.confirmDeviceRemoval = confirmDeviceRemovalCheckbox.isSelected
+
+        commandsPanel.applyToService(commandsService)
     }
 
     override fun reset() {
@@ -493,6 +534,8 @@ class AdbWifiConfigurable : Configurable {
         scrcpyCmdFlagsTextArea.text = properties.scrcpyCmdFlags
 
         confirmDeviceRemovalCheckbox.isSelected = properties.confirmDeviceRemoval
+
+        commandsPanel.loadFromService(commandsService)
     }
 
     private fun executableChooserDescriptor(): FileChooserDescriptor = when {

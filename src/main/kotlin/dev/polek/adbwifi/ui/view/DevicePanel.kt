@@ -1,6 +1,8 @@
 package dev.polek.adbwifi.ui.view
 
 import com.intellij.icons.AllIcons
+import com.intellij.openapi.components.service
+import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.ui.JBMenuItem
 import com.intellij.openapi.ui.JBPopupMenu
 import com.intellij.ui.JBColor
@@ -9,7 +11,9 @@ import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
-import dev.polek.adbwifi.adb.AdbCommand
+import dev.polek.adbwifi.model.AdbCommandConfig
+import dev.polek.adbwifi.model.CommandIcon
+import dev.polek.adbwifi.services.AdbCommandsService
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.ButtonType
 import dev.polek.adbwifi.utils.Icons
@@ -225,6 +229,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
 
     private fun openAdbCommandsMenu(device: DeviceViewModel, event: MouseEvent) {
         val menu = JBPopupMenu()
+        val commandsService = service<AdbCommandsService>()
 
         val packageName = device.packageName
         if (packageName != null) {
@@ -239,22 +244,25 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             menu.addSeparator()
         }
 
-        AdbCommand.entries.forEach { command ->
-            val item = JBMenuItem(PluginBundle.message(command.messageKey), getIconForCommand(command))
+        commandsService.getEnabledCommands().forEach { config ->
+            val icon = CommandIcon.fromId(config.iconId)?.icon
+            val item = JBMenuItem(config.name, icon)
             item.isEnabled = packageName != null
-            item.addActionListener { listener?.onAdbCommandClicked(device, command) }
+            item.addActionListener { listener?.onAdbCommandClicked(device, config) }
             menu.add(item)
         }
 
-        menu.show(event.component, event.x, event.y)
-    }
+        menu.addSeparator()
+        val customizeItem = JBMenuItem(
+            PluginBundle.message("adbCommandsCustomize"),
+            AllIcons.General.Settings
+        )
+        customizeItem.addActionListener {
+            ShowSettingsUtil.getInstance().showSettingsDialog(null, PluginBundle.message("settingsPageName"))
+        }
+        menu.add(customizeItem)
 
-    private fun getIconForCommand(command: AdbCommand) = when (command) {
-        AdbCommand.KILL_APP -> AllIcons.Actions.Suspend
-        AdbCommand.START_APP -> AllIcons.Actions.Execute
-        AdbCommand.RESTART_APP -> AllIcons.Actions.Restart
-        AdbCommand.CLEAR_DATA -> AllIcons.Actions.ClearCash
-        AdbCommand.CLEAR_DATA_AND_RESTART -> AllIcons.Actions.ForceRefresh
+        menu.show(event.component, event.x, event.y)
     }
 
     interface Listener {
@@ -265,7 +273,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         fun onRenameDeviceClicked(device: DeviceViewModel)
         fun onCopyDeviceIdClicked(device: DeviceViewModel)
         fun onCopyDeviceAddressClicked(device: DeviceViewModel)
-        fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommand)
+        fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig)
     }
 
     private companion object {

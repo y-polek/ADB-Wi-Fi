@@ -4,8 +4,8 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import dev.polek.adbwifi.adb.ADB_DISPATCHER
 import dev.polek.adbwifi.adb.Adb
-import dev.polek.adbwifi.adb.AdbCommand
 import dev.polek.adbwifi.commandexecutor.RuntimeCommandExecutor
+import dev.polek.adbwifi.model.AdbCommandConfig
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.utils.appCoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -70,16 +70,16 @@ class AdbService {
         }
     }
 
-    suspend fun executeAppCommand(command: AdbCommand, deviceId: String, packageName: String) {
-        val flow = when (command) {
-            AdbCommand.KILL_APP -> adb.killApp(deviceId, packageName)
-            AdbCommand.START_APP -> adb.startApp(deviceId, packageName)
-            AdbCommand.RESTART_APP -> adb.restartApp(deviceId, packageName)
-            AdbCommand.CLEAR_DATA -> adb.clearAppData(deviceId, packageName)
-            AdbCommand.CLEAR_DATA_AND_RESTART -> adb.clearDataAndRestart(deviceId, packageName)
-        }
-        flow.collect { logEntry ->
-            logService.commandHistory.add(logEntry)
+    suspend fun executeCommand(config: AdbCommandConfig, deviceId: String, packageName: String) {
+        val shellCommands = config.command.split("\n").filter { it.isNotBlank() }
+        shellCommands.forEachIndexed { index, cmd ->
+            val shellCommand = cmd.trim().replace("{package}", packageName)
+            adb.executeShellCommand(deviceId, shellCommand).collect { logEntry ->
+                logService.commandHistory.add(logEntry)
+            }
+            if (index < shellCommands.lastIndex) {
+                delay(500)
+            }
         }
     }
 
