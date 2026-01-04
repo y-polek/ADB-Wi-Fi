@@ -1,6 +1,9 @@
 package dev.polek.adbwifi.settings
 
 import com.intellij.icons.AllIcons
+import com.intellij.openapi.actionSystem.ActionUpdateThread
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.ui.Messages
 import com.intellij.ui.CheckBoxList
 import com.intellij.ui.ToolbarDecorator
@@ -47,25 +50,31 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
             .setRemoveAction { removeCommand() }
             .setMoveUpAction { moveUp() }
             .setMoveDownAction { moveDown() }
-            .addExtraAction(object : ToolbarDecorator.ElementActionButton(
+            .addExtraAction(object : DumbAwareAction(
                 PluginBundle.message("adbCommandEditButton"),
+                null,
                 AllIcons.Actions.Edit
             ) {
-                override fun actionPerformed(e: com.intellij.openapi.actionSystem.AnActionEvent) {
+                override fun actionPerformed(e: AnActionEvent) {
                     editCommand()
                 }
 
-                override fun isEnabled(): Boolean {
-                    return checkBoxList.selectedIndex >= 0
+                override fun update(e: AnActionEvent) {
+                    e.presentation.isEnabled = checkBoxList.selectedIndex >= 0
                 }
+
+                override fun getActionUpdateThread() = ActionUpdateThread.EDT
             })
-            .addExtraAction(object : ToolbarDecorator.ElementActionButton(
+            .addExtraAction(object : DumbAwareAction(
                 PluginBundle.message("adbCommandResetButton"),
+                null,
                 AllIcons.Actions.ForceRefresh
             ) {
-                override fun actionPerformed(e: com.intellij.openapi.actionSystem.AnActionEvent) {
+                override fun actionPerformed(e: AnActionEvent) {
                     resetToDefaults()
                 }
+
+                override fun getActionUpdateThread() = ActionUpdateThread.EDT
             })
             .setRemoveActionUpdater { canRemoveSelected() }
 
