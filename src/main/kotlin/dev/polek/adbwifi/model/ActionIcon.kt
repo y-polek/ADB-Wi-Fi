@@ -81,12 +81,8 @@ object ActionIconsProvider {
         ActionIcon("more", "More", AllIcons.Actions.More),
     ).sortedBy { it.displayName }
 
-    fun getAllIcons(): List<ActionIcon> = icons
-
     fun getIconById(id: String): ActionIcon? =
         icons.find { it.id.equals(id, ignoreCase = true) }
-
-    fun getDefaultIcon(): ActionIcon = icons.find { it.id == "play" } ?: icons.first()
 
     fun search(query: String): List<ActionIcon> {
         if (query.isBlank()) return icons
