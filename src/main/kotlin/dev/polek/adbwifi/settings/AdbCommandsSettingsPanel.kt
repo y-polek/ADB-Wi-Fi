@@ -1,25 +1,20 @@
 package dev.polek.adbwifi.settings
 
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.ui.Messages
 import com.intellij.ui.CheckBoxList
 import com.intellij.ui.ToolbarDecorator
 import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.JBUI
 import dev.polek.adbwifi.PluginBundle
+import dev.polek.adbwifi.model.ActionIconsProvider
 import dev.polek.adbwifi.model.AdbCommandConfig
-import dev.polek.adbwifi.model.CommandIcon
 import dev.polek.adbwifi.services.AdbCommandsService
 import dev.polek.adbwifi.ui.view.AdbCommandEditorDialog
-import java.awt.BorderLayout
-import java.awt.Component
-import java.awt.FlowLayout
+import java.awt.*
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import javax.swing.JCheckBox
-import javax.swing.JLabel
-import javax.swing.JList
-import javax.swing.JPanel
-import javax.swing.ListCellRenderer
+import javax.swing.*
 
 class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout()) {
 
@@ -33,18 +28,11 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
         init {
             addMouseListener(object : MouseAdapter() {
                 override fun mouseClicked(e: MouseEvent) {
-                    val index = locationToIndex(e.point)
-                    if (index < 0 || index >= itemsCount) return
-
-                    val cellBounds = getCellBounds(index, index) ?: return
-                    val relativeX = e.x - cellBounds.x
-
-                    when {
-                        e.clickCount == 2 -> {
-                            // Double-click opens edit dialog
-                            selectedIndex = index
-                            editCommand()
-                        }
+                    if (e.clickCount == 2) {
+                        val index = locationToIndex(e.point)
+                        if (index < 0 || index >= itemsCount) return
+                        selectedIndex = index
+                        editCommand()
                     }
                 }
             })
@@ -61,7 +49,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
             .setMoveDownAction { moveDown() }
             .addExtraAction(object : ToolbarDecorator.ElementActionButton(
                 PluginBundle.message("adbCommandEditButton"),
-                CommandIcon.EDIT.icon
+                AllIcons.Actions.Edit
             ) {
                 override fun actionPerformed(e: com.intellij.openapi.actionSystem.AnActionEvent) {
                     editCommand()
@@ -73,7 +61,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
             })
             .addExtraAction(object : ToolbarDecorator.ElementActionButton(
                 PluginBundle.message("adbCommandResetButton"),
-                CommandIcon.FORCE_REFRESH.icon
+                AllIcons.Actions.ForceRefresh
             ) {
                 override fun actionPerformed(e: com.intellij.openapi.actionSystem.AnActionEvent) {
                     resetToDefaults()
@@ -268,7 +256,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
 
             if (index >= 0 && index < commands.size) {
                 val config = commands[index]
-                iconLabel.icon = CommandIcon.fromId(config.iconId)?.icon
+                iconLabel.icon = ActionIconsProvider.getIconById(config.iconId)?.icon
             }
 
             return panel

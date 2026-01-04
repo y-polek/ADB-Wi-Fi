@@ -11,8 +11,8 @@ import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
+import dev.polek.adbwifi.model.ActionIconsProvider
 import dev.polek.adbwifi.model.AdbCommandConfig
-import dev.polek.adbwifi.model.CommandIcon
 import dev.polek.adbwifi.services.AdbCommandsService
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.ButtonType
@@ -245,7 +245,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         }
 
         commandsService.getEnabledCommands().forEach { config ->
-            val icon = CommandIcon.fromId(config.iconId)?.icon
+            val icon = ActionIconsProvider.getIconById(config.iconId)?.icon
             val item = JBMenuItem(config.name, icon)
             item.isEnabled = packageName != null
             item.addActionListener { listener?.onAdbCommandClicked(device, config) }

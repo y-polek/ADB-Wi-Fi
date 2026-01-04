@@ -38,7 +38,7 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 id = KILL_APP_ID,
                 name = "Kill app",
                 command = "am force-stop {package}",
-                iconId = "suspend",
+                iconId = "Suspend",
                 isEnabled = true,
                 order = 0
             ),
@@ -46,7 +46,7 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 id = START_APP_ID,
                 name = "Start app",
                 command = "monkey -p {package} -c android.intent.category.LAUNCHER 1",
-                iconId = "execute",
+                iconId = "Execute",
                 isEnabled = true,
                 order = 1
             ),
@@ -54,7 +54,7 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 id = RESTART_APP_ID,
                 name = "Restart app",
                 command = "am force-stop {package}\nmonkey -p {package} -c android.intent.category.LAUNCHER 1",
-                iconId = "restart",
+                iconId = "Restart",
                 isEnabled = true,
                 order = 2
             ),
@@ -62,7 +62,7 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 id = CLEAR_DATA_ID,
                 name = "Clear app data",
                 command = "pm clear {package}",
-                iconId = "clear",
+                iconId = "GC",
                 isEnabled = true,
                 order = 3
             ),
@@ -70,7 +70,7 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 id = CLEAR_DATA_AND_RESTART_ID,
                 name = "Clear app data and restart",
                 command = "pm clear {package}\nmonkey -p {package} -c android.intent.category.LAUNCHER 1",
-                iconId = "forceRefresh",
+                iconId = "ForceRefresh",
                 isEnabled = true,
                 order = 4
             )
