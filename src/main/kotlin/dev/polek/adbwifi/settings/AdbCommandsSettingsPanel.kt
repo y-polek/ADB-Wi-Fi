@@ -66,6 +66,21 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
                 override fun getActionUpdateThread() = ActionUpdateThread.EDT
             })
             .addExtraAction(object : DumbAwareAction(
+                PluginBundle.message("adbCommandDuplicateButton"),
+                null,
+                AllIcons.Actions.Copy
+            ) {
+                override fun actionPerformed(e: AnActionEvent) {
+                    duplicateCommand()
+                }
+
+                override fun update(e: AnActionEvent) {
+                    e.presentation.isEnabled = checkBoxList.selectedIndex >= 0
+                }
+
+                override fun getActionUpdateThread() = ActionUpdateThread.EDT
+            })
+            .addExtraAction(object : DumbAwareAction(
                 PluginBundle.message("adbCommandResetButton"),
                 null,
                 AllIcons.Actions.ForceRefresh
@@ -167,6 +182,33 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
             )
             refreshList()
             checkBoxList.selectedIndex = selectedIndex
+        }
+    }
+
+    private fun duplicateCommand() {
+        val selectedIndex = checkBoxList.selectedIndex
+        if (selectedIndex < 0) return
+
+        syncCheckboxStatesToCommands()
+        val config = commands[selectedIndex]
+        val duplicatedConfig = config.copy(
+            id = java.util.UUID.randomUUID().toString(),
+            name = "${config.name} (copy)"
+        )
+        val dialog = AdbCommandEditorDialog(duplicatedConfig)
+        if (dialog.showAndGet()) {
+            val maxOrder = commands.maxOfOrNull { it.order } ?: -1
+            val newCommand = AdbCommandConfig(
+                id = duplicatedConfig.id,
+                name = dialog.commandName,
+                command = dialog.command,
+                iconId = dialog.iconId,
+                isEnabled = true,
+                order = maxOrder + 1
+            )
+            commands.add(newCommand)
+            refreshList()
+            checkBoxList.selectedIndex = commands.lastIndex
         }
     }
 
