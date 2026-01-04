@@ -138,7 +138,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         }
 
         if (device.isAdbCommandsButtonVisible) {
-            val adbCommandsButton = IconButton(AllIcons.Actions.Execute, PluginBundle.message("adbCommandsTooltip"))
+            val adbCommandsButton = IconButton(Icons.ADB_COMMANDS, PluginBundle.message("adbCommandsTooltip"))
             adbCommandsButton.onClickedListener = { event ->
                 openAdbCommandsMenu(device, event)
             }
