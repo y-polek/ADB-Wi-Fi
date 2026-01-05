@@ -254,19 +254,20 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
 
     private fun openAdbCommandsMenu(device: DeviceViewModel, event: MouseEvent) {
         val commandsService = service<AdbCommandsService>()
-        val packageName = device.packageName
+        val selectedPackage = listener?.getSelectedPackage(device)
+        val projectPackage = device.packageName
         val commands = commandsService.getEnabledCommands()
 
         // Build list of menu items
         val items = mutableListOf<AdbCommandMenuItem>()
 
-        // Add header
-        val headerText = packageName ?: PluginBundle.message("adbCommandNoPackage")
-        items.add(AdbCommandMenuItem.Header(headerText))
+        // Add package selector
+        val packageText = selectedPackage ?: PluginBundle.message("adbCommandNoPackage")
+        items.add(AdbCommandMenuItem.PackageSelector(packageText))
 
         // Add command items
         commands.forEach { config ->
-            items.add(AdbCommandMenuItem.Command(config, packageName != null))
+            items.add(AdbCommandMenuItem.Command(config, selectedPackage != null))
         }
 
         // Add customize item
@@ -274,13 +275,13 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
 
         val step = object : BaseListPopupStep<AdbCommandMenuItem>(null, items) {
             override fun getTextFor(value: AdbCommandMenuItem): String = when (value) {
-                is AdbCommandMenuItem.Header -> value.text
+                is AdbCommandMenuItem.PackageSelector -> value.text
                 is AdbCommandMenuItem.Command -> value.config.name
                 is AdbCommandMenuItem.Customize -> PluginBundle.message("adbCommandsCustomize")
             }
 
             override fun getIconFor(value: AdbCommandMenuItem): Icon? = when (value) {
-                is AdbCommandMenuItem.Header -> null
+                is AdbCommandMenuItem.PackageSelector -> null
                 is AdbCommandMenuItem.Command ->
                     if (value.config.iconId.isNotEmpty()) {
                         ActionIconsProvider.getIconById(value.config.iconId)?.icon
@@ -291,9 +292,13 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             }
 
             override fun isSelectable(value: AdbCommandMenuItem): Boolean = when (value) {
-                is AdbCommandMenuItem.Header -> false
+                is AdbCommandMenuItem.PackageSelector -> true
                 is AdbCommandMenuItem.Command -> value.isEnabled
                 is AdbCommandMenuItem.Customize -> true
+            }
+
+            override fun hasSubstep(selectedValue: AdbCommandMenuItem?): Boolean {
+                return selectedValue is AdbCommandMenuItem.PackageSelector
             }
 
             override fun getSeparatorAbove(value: AdbCommandMenuItem): ListSeparator? = when (value) {
@@ -304,18 +309,18 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             }
 
             override fun onChosen(selectedValue: AdbCommandMenuItem, finalChoice: Boolean): PopupStep<*>? {
-                return doFinalStep {
-                    when (selectedValue) {
-                        is AdbCommandMenuItem.Command -> {
-                            listener?.onAdbCommandClicked(device, selectedValue.config)
-                        }
-                        is AdbCommandMenuItem.Customize -> {
-                            ShowSettingsUtil.getInstance().showSettingsDialog(
-                                null,
-                                PluginBundle.message("settingsPageName")
-                            )
-                        }
-                        else -> {}
+                return when (selectedValue) {
+                    is AdbCommandMenuItem.PackageSelector -> {
+                        createPackageSelectionStep(device, projectPackage, selectedPackage)
+                    }
+                    is AdbCommandMenuItem.Command -> doFinalStep {
+                        listener?.onAdbCommandClicked(device, selectedValue.config)
+                    }
+                    is AdbCommandMenuItem.Customize -> doFinalStep {
+                        ShowSettingsUtil.getInstance().showSettingsDialog(
+                            null,
+                            PluginBundle.message("settingsPageName")
+                        )
                     }
                 }
             }
@@ -336,6 +341,82 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         popup.showUnderneathOf(event.component)
     }
 
+    private fun createPackageSelectionStep(
+        device: DeviceViewModel,
+        projectPackage: String?,
+        selectedPackage: String?
+    ): PopupStep<*> {
+        val packageItems = mutableListOf<PackageMenuItem>()
+
+        // Add project package option if available
+        if (projectPackage != null) {
+            packageItems.add(
+                PackageMenuItem.ProjectPackage(
+                    projectPackage,
+                    isSelected = selectedPackage == projectPackage || selectedPackage == null
+                )
+            )
+        }
+
+        // Add installed packages
+        val installedPackages = listener?.getInstalledPackages(device) ?: emptyList()
+        if (installedPackages.isEmpty() && projectPackage == null) {
+            packageItems.add(PackageMenuItem.NoPackages)
+        } else {
+            installedPackages.forEach { pkg ->
+                if (pkg != projectPackage) {
+                    packageItems.add(PackageMenuItem.InstalledPackage(pkg, isSelected = pkg == selectedPackage))
+                }
+            }
+        }
+
+        return object : BaseListPopupStep<PackageMenuItem>(
+            PluginBundle.message("adbCommandSelectPackage"),
+            packageItems
+        ) {
+            override fun getTextFor(value: PackageMenuItem): String = when (value) {
+                is PackageMenuItem.ProjectPackage ->
+                    PluginBundle.message("adbCommandPackageFromProject", value.packageName)
+                is PackageMenuItem.InstalledPackage -> value.packageName
+                is PackageMenuItem.NoPackages -> PluginBundle.message("adbCommandNoPackagesInstalled")
+            }
+
+            override fun getIconFor(value: PackageMenuItem): Icon? = when (value) {
+                is PackageMenuItem.ProjectPackage ->
+                    if (value.isSelected) AllIcons.Actions.Checked else null
+                is PackageMenuItem.InstalledPackage ->
+                    if (value.isSelected) AllIcons.Actions.Checked else null
+                is PackageMenuItem.NoPackages -> null
+            }
+
+            override fun isSelectable(value: PackageMenuItem): Boolean = when (value) {
+                is PackageMenuItem.NoPackages -> false
+                else -> true
+            }
+
+            override fun getSeparatorAbove(value: PackageMenuItem): ListSeparator? = when {
+                value is PackageMenuItem.InstalledPackage &&
+                    packageItems.indexOf(value) == 1 &&
+                    packageItems.firstOrNull() is PackageMenuItem.ProjectPackage -> ListSeparator()
+                else -> null
+            }
+
+            override fun onChosen(selectedValue: PackageMenuItem, finalChoice: Boolean): PopupStep<*>? {
+                return doFinalStep {
+                    when (selectedValue) {
+                        is PackageMenuItem.ProjectPackage -> {
+                            listener?.onPackageSelected(device, null) // null means use project package
+                        }
+                        is PackageMenuItem.InstalledPackage -> {
+                            listener?.onPackageSelected(device, selectedValue.packageName)
+                        }
+                        is PackageMenuItem.NoPackages -> {}
+                    }
+                }
+            }
+        }
+    }
+
     private sealed class DeviceMenuItem {
         data object Rename : DeviceMenuItem()
         data object CopyId : DeviceMenuItem()
@@ -343,9 +424,15 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
     }
 
     private sealed class AdbCommandMenuItem {
-        data class Header(val text: String) : AdbCommandMenuItem()
+        data class PackageSelector(val text: String) : AdbCommandMenuItem()
         data class Command(val config: AdbCommandConfig, val isEnabled: Boolean) : AdbCommandMenuItem()
         data object Customize : AdbCommandMenuItem()
+    }
+
+    private sealed class PackageMenuItem {
+        data class ProjectPackage(val packageName: String, val isSelected: Boolean) : PackageMenuItem()
+        data class InstalledPackage(val packageName: String, val isSelected: Boolean) : PackageMenuItem()
+        data object NoPackages : PackageMenuItem()
     }
 
     interface Listener {
@@ -357,6 +444,9 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         fun onCopyDeviceIdClicked(device: DeviceViewModel)
         fun onCopyDeviceAddressClicked(device: DeviceViewModel)
         fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig)
+        fun onPackageSelected(device: DeviceViewModel, packageName: String?)
+        fun getInstalledPackages(device: DeviceViewModel): List<String>
+        fun getSelectedPackage(device: DeviceViewModel): String?
     }
 
     private companion object {

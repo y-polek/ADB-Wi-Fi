@@ -83,6 +83,10 @@ class AdbService {
         }
     }
 
+    fun listPackages(deviceId: String): List<String> {
+        return adb.listPackages(deviceId)
+    }
+
     private companion object {
         const val POLLING_INTERVAL_MILLIS = 3000L
     }

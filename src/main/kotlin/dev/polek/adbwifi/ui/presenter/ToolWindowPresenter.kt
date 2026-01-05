@@ -34,6 +34,8 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
     private var pinnedDevices: List<DeviceViewModel> = pinDeviceService.pinnedDevices.toViewModel()
 
     private var connectingDevices = mutableSetOf<Pair<String/*Device's unique ID*/, String/*IP address*/>>()
+    private val selectedPackages = mutableMapOf<String, String>()
+    private val installedPackagesCache = mutableMapOf<String, List<String>>()
     private var deviceCollectionJob: Job? = null
     private var logVisibilityJob: Job? = null
     private var logEntriesJob: Job? = null
@@ -147,8 +149,26 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
         copyToClipboard(address.ip)
     }
 
+    fun getSelectedPackage(device: DeviceViewModel): String? {
+        return selectedPackages[device.id] ?: packageService.getPackageName()
+    }
+
+    fun setSelectedPackage(device: DeviceViewModel, packageName: String?) {
+        if (packageName == null) {
+            selectedPackages.remove(device.id)
+        } else {
+            selectedPackages[device.id] = packageName
+        }
+    }
+
+    fun getInstalledPackages(device: DeviceViewModel): List<String> {
+        return installedPackagesCache.getOrPut(device.id) {
+            adbService.listPackages(device.id)
+        }
+    }
+
     fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig) {
-        val packageName = packageService.getPackageName() ?: return
+        val packageName = getSelectedPackage(device) ?: return
 
         if (command.requiresConfirmation) {
             val shellCommand = command.command.replace("{package}", packageName)

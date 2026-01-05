@@ -161,6 +161,15 @@ class Adb(
             .toList()
     }
 
+    fun listPackages(deviceId: String): List<String> {
+        return "-s $deviceId shell pm list packages -3".exec()
+            .mapNotNull { line ->
+                line.removePrefix("package:").takeIf { it.isNotBlank() }
+            }
+            .sorted()
+            .toList()
+    }
+
     private fun adbCommand(args: String): String {
         val adb = if (properties.useAdbFromPath) {
             findAdbExecInSystemPath() ?: run {

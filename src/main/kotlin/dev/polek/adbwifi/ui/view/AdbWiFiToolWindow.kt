@@ -79,6 +79,18 @@ class AdbWiFiToolWindow(
         override fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig) {
             presenter.onAdbCommandClicked(device, command)
         }
+
+        override fun onPackageSelected(device: DeviceViewModel, packageName: String?) {
+            presenter.setSelectedPackage(device, packageName)
+        }
+
+        override fun getInstalledPackages(device: DeviceViewModel): List<String> {
+            return presenter.getInstalledPackages(device)
+        }
+
+        override fun getSelectedPackage(device: DeviceViewModel): String? {
+            return presenter.getSelectedPackage(device)
+        }
     }
 
     private val splitter = JBSplitter(true, "AdbWifi.ShellPaneProportion", DEFAULT_PANEL_PROPORTION)
