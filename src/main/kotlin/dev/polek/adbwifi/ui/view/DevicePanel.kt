@@ -172,6 +172,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
 
         val actionsPanel = flowPanel(*actionButtons.toTypedArray(), menuButton, hgap = 10)
         actionsPanel.isOpaque = false
+        actionsPanel.minimumSize = actionsPanel.preferredSize
         add(
             actionsPanel,
             GridBagConstraints().apply {
