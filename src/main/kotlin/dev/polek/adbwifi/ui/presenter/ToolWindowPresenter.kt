@@ -35,7 +35,6 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
 
     private var connectingDevices = mutableSetOf<Pair<String/*Device's unique ID*/, String/*IP address*/>>()
     private val selectedPackages = mutableMapOf<String, String>()
-    private val installedPackagesCache = mutableMapOf<String, List<String>>()
     private var deviceCollectionJob: Job? = null
     private var logVisibilityJob: Job? = null
     private var logEntriesJob: Job? = null
@@ -162,9 +161,7 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
     }
 
     fun getInstalledPackages(device: DeviceViewModel): List<String> {
-        return installedPackagesCache.getOrPut(device.id) {
-            adbService.listPackages(device.id)
-        }
+        return adbService.listPackages(device.id)
     }
 
     fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig) {
