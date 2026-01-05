@@ -2,6 +2,7 @@ package dev.polek.adbwifi.ui.presenter
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.MessageDialogBuilder
 import com.intellij.openapi.ui.Messages
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.model.AdbCommandConfig
@@ -21,6 +22,7 @@ import kotlinx.coroutines.withContext
 class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWindowView>() {
 
     private val adbService by lazy { service<AdbService>() }
+    private val adbCommandsService by lazy { service<AdbCommandsService>() }
     private val scrcpyService by lazy { service<ScrcpyService>() }
     private val logService by lazy { service<LogService>() }
     private val propertiesService by lazy { service<PropertiesService>() }
@@ -165,22 +167,43 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
     }
 
     fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig) {
-        val packageName = getSelectedPackage(device) ?: return
+        val packageName = if (command.requiresPackage) {
+            getSelectedPackage(device) ?: return
+        } else {
+            ""
+        }
 
         if (command.requiresConfirmation) {
-            val shellCommand = command.command.replace("{package}", packageName)
-            val fullCommand = "adb -s ${device.id} shell $shellCommand"
-            val result = Messages.showYesNoDialog(
+            val commandText = command.command.replace("{package}", packageName)
+            val fullCommand = commandText.lines()
+                .filter { it.isNotBlank() }
+                .joinToString("\n") { "adb -s ${device.id} ${it.trim()}" }
+
+            val result = MessageDialogBuilder.yesNo(
+                PluginBundle.message("adbCommandConfirmationTitle"),
                 PluginBundle.message(
                     "adbCommandConfirmationMessage",
                     command.name,
                     device.titleText,
                     fullCommand
-                ),
-                PluginBundle.message("adbCommandConfirmationTitle"),
-                Messages.getQuestionIcon()
+                )
             )
-            if (result != Messages.YES) return
+                .icon(Messages.getQuestionIcon())
+                .doNotAsk(object : com.intellij.openapi.ui.DoNotAskOption {
+                    override fun isToBeShown() = true
+                    override fun setToBeShown(toBeShown: Boolean, exitCode: Int) {
+                        if (!toBeShown && exitCode == Messages.YES) {
+                            disableConfirmationForCommand(command)
+                        }
+                    }
+                    override fun canBeHidden() = true
+                    override fun shouldSaveOptionsOnCancel() = false
+                    override fun getDoNotShowMessage() =
+                        PluginBundle.message("adbCommandConfirmationCheckbox")
+                })
+                .ask(project)
+
+            if (!result) return
         }
 
         launch {
@@ -188,6 +211,17 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
                 adbService.executeCommand(command, device.id, packageName)
             }
         }
+    }
+
+    private fun disableConfirmationForCommand(command: AdbCommandConfig) {
+        val updatedCommands = adbCommandsService.commands.map {
+            if (it.id == command.id) {
+                it.copy(requiresConfirmation = false)
+            } else {
+                it
+            }
+        }
+        adbCommandsService.commands = updatedCommands
     }
 
     private fun onDevicesUpdated(model: List<Device>) {
