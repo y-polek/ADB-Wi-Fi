@@ -21,6 +21,8 @@ import java.awt.event.MouseEvent
 import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.border.CompoundBorder
+import javax.swing.event.DocumentEvent
+import javax.swing.event.DocumentListener
 
 class AdbCommandEditorDialog(
     existingCommand: AdbCommandConfig? = null
@@ -31,6 +33,7 @@ class AdbCommandEditorDialog(
     private var selectedIcon: ActionIcon? = null
     private val iconButton = createIconButton()
     private val confirmationCheckbox = JBCheckBox(PluginBundle.message("adbCommandEditorConfirmationLabel"))
+    private val previewArea = JBTextArea(3, 40)
 
     val commandName: String get() = nameField.text.trim()
     val command: String get() = commandArea.text.trim()
@@ -54,11 +57,18 @@ class AdbCommandEditorDialog(
                 updateIconButton()
             }
         }
+
+        updatePreview()
     }
 
     override fun createCenterPanel(): JComponent {
         commandArea.lineWrap = true
         commandArea.wrapStyleWord = true
+        commandArea.document.addDocumentListener(object : DocumentListener {
+            override fun insertUpdate(e: DocumentEvent) = updatePreview()
+            override fun removeUpdate(e: DocumentEvent) = updatePreview()
+            override fun changedUpdate(e: DocumentEvent) = updatePreview()
+        })
 
         val commandScrollPane = JBScrollPane(commandArea)
         commandScrollPane.preferredSize = Dimension(400, 100)
@@ -66,13 +76,30 @@ class AdbCommandEditorDialog(
         val hintLabel = JBLabel(PluginBundle.message("adbCommandEditorCommandHint"))
         hintLabel.foreground = JBUI.CurrentTheme.ContextHelp.FOREGROUND
 
+        previewArea.isEditable = false
+        previewArea.lineWrap = true
+        previewArea.wrapStyleWord = true
+        previewArea.foreground = JBUI.CurrentTheme.ContextHelp.FOREGROUND
+        previewArea.font = JBUI.Fonts.smallFont()
+        val previewScrollPane = JBScrollPane(previewArea)
+        previewScrollPane.preferredSize = Dimension(400, 60)
+
         return FormBuilder.createFormBuilder()
             .addLabeledComponent(PluginBundle.message("adbCommandEditorNameLabel"), nameField)
             .addLabeledComponent(PluginBundle.message("adbCommandEditorCommandLabel"), commandScrollPane)
             .addComponentToRightColumn(hintLabel)
+            .addLabeledComponent(PluginBundle.message("adbCommandEditorPreviewLabel"), previewScrollPane)
             .addLabeledComponent(PluginBundle.message("adbCommandEditorIconLabel"), iconButton)
             .addComponent(confirmationCheckbox)
             .panel
+    }
+
+    private fun updatePreview() {
+        val commands = commandArea.text.split("\n").filter { it.isNotBlank() }
+        val preview = commands.joinToString("\n") { cmd ->
+            "adb -s <device ID> ${cmd.trim().replace("{package}", "<app package name>")}"
+        }
+        previewArea.text = preview.ifEmpty { "adb -s <device ID> <command>" }
     }
 
     override fun doValidate(): ValidationInfo? {
