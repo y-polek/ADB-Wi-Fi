@@ -31,6 +31,7 @@ import javax.swing.Icon
 import javax.swing.JComponent
 import javax.swing.JProgressBar
 import javax.swing.SwingConstants
+import javax.swing.SwingUtilities
 
 class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout()) {
 
@@ -311,7 +312,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
             override fun onChosen(selectedValue: AdbCommandMenuItem, finalChoice: Boolean): PopupStep<*>? {
                 return when (selectedValue) {
                     is AdbCommandMenuItem.PackageSelector -> {
-                        createPackageSelectionStep(device, projectPackage, selectedPackage)
+                        createPackageSelectionStep(device, projectPackage, selectedPackage, event.component)
                     }
                     is AdbCommandMenuItem.Command -> doFinalStep {
                         listener?.onAdbCommandClicked(device, selectedValue.config)
@@ -344,7 +345,8 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
     private fun createPackageSelectionStep(
         device: DeviceViewModel,
         projectPackage: String?,
-        selectedPackage: String?
+        selectedPackage: String?,
+        menuComponent: java.awt.Component
     ): PopupStep<*> {
         val packageItems = mutableListOf<PackageMenuItem>()
 
@@ -412,9 +414,29 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
                         }
                         is PackageMenuItem.NoPackages -> {}
                     }
+                    // Reopen the ADB commands menu with updated package
+                    if (selectedValue !is PackageMenuItem.NoPackages) {
+                        SwingUtilities.invokeLater {
+                            reopenAdbCommandsMenu(device, menuComponent)
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private fun reopenAdbCommandsMenu(device: DeviceViewModel, component: java.awt.Component) {
+        val event = MouseEvent(
+            component,
+            MouseEvent.MOUSE_CLICKED,
+            System.currentTimeMillis(),
+            0,
+            0,
+            0,
+            1,
+            false
+        )
+        openAdbCommandsMenu(device, event)
     }
 
     private sealed class DeviceMenuItem {
