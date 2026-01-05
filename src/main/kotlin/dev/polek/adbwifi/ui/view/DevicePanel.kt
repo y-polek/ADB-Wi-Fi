@@ -269,7 +269,8 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
 
         // Add command items
         commands.forEach { config ->
-            items.add(AdbCommandMenuItem.Command(config, selectedPackage != null))
+            val isEnabled = !config.requiresPackage || selectedPackage != null
+            items.add(AdbCommandMenuItem.Command(config, isEnabled))
         }
 
         // Add customize item

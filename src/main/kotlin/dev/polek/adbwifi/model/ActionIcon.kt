@@ -15,7 +15,9 @@ object ActionIconsProvider {
         // App lifecycle
         ActionIcon("play", "Play", AllIcons.Actions.Execute),
         ActionIcon("stop", "Stop", AllIcons.Actions.Suspend),
-        ActionIcon("restart", "Restart", AllIcons.Actions.Restart),
+        ActionIcon("restart", "Restart 1", AllIcons.Actions.Restart),
+        ActionIcon("restart-2", "Restart 2", AllIcons.Actions.RestartStop),
+        ActionIcon("restart-3", "Restart 3", AllIcons.Actions.RestartFrame),
         ActionIcon("pause", "Pause", AllIcons.Actions.Pause),
 
         // Data & Storage
@@ -28,7 +30,8 @@ object ActionIconsProvider {
 
         // Refresh & Sync
         ActionIcon("refresh", "Refresh 1", AllIcons.Actions.Refresh),
-        ActionIcon("force-refresh", "Refresh 2", AllIcons.Actions.ForceRefresh),
+        ActionIcon("refresh-2", "Refresh 2", AllIcons.Actions.ForceRefresh),
+        ActionIcon("refresh-3", "Refresh 3", AllIcons.Actions.StopRefresh),
 
         // Transfer
         ActionIcon("download", "Download", AllIcons.Actions.Download),

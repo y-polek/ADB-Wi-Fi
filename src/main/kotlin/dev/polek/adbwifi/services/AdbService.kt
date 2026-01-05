@@ -71,13 +71,13 @@ class AdbService {
     }
 
     suspend fun executeCommand(config: AdbCommandConfig, deviceId: String, packageName: String) {
-        val shellCommands = config.command.split("\n").filter { it.isNotBlank() }
-        shellCommands.forEachIndexed { index, cmd ->
-            val shellCommand = cmd.trim().replace("{package}", packageName)
-            adb.executeShellCommand(deviceId, shellCommand).collect { logEntry ->
+        val commands = config.command.split("\n").filter { it.isNotBlank() }
+        commands.forEachIndexed { index, cmd ->
+            val command = cmd.trim().replace("{package}", packageName)
+            adb.executeCommand(deviceId, command).collect { logEntry ->
                 logService.commandHistory.add(logEntry)
             }
-            if (index < shellCommands.lastIndex) {
+            if (index < commands.lastIndex) {
                 delay(500)
             }
         }

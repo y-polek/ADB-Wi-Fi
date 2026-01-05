@@ -34,12 +34,13 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
         private const val CLEAR_DATA_AND_RESTART_ID = "CLEAR_DATA_AND_RESTART"
         private const val UNINSTALL_APP_ID = "UNINSTALL_APP"
         private const val UNINSTALL_APP_KEEP_DATA_ID = "UNINSTALL_APP_KEEP_DATA"
+        private const val REBOOT_DEVICE_ID = "REBOOT_DEVICE"
 
         fun defaultCommands(): List<AdbCommandConfig> = listOf(
             AdbCommandConfig(
                 id = KILL_APP_ID,
                 name = "Kill app",
-                command = "am force-stop {package}",
+                command = "shell am force-stop {package}",
                 iconId = "stop",
                 isEnabled = true,
                 order = 0
@@ -47,7 +48,7 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
             AdbCommandConfig(
                 id = START_APP_ID,
                 name = "Start app",
-                command = "monkey -p {package} -c android.intent.category.LAUNCHER 1",
+                command = "shell monkey -p {package} -c android.intent.category.LAUNCHER 1",
                 iconId = "play",
                 isEnabled = true,
                 order = 1
@@ -55,7 +56,8 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
             AdbCommandConfig(
                 id = RESTART_APP_ID,
                 name = "Restart app",
-                command = "am force-stop {package}\nmonkey -p {package} -c android.intent.category.LAUNCHER 1",
+                command = "shell am force-stop {package}\n" +
+                    "shell monkey -p {package} -c android.intent.category.LAUNCHER 1",
                 iconId = "restart",
                 isEnabled = true,
                 order = 2
@@ -63,7 +65,7 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
             AdbCommandConfig(
                 id = CLEAR_DATA_ID,
                 name = "Clear app data",
-                command = "pm clear {package}",
+                command = "shell pm clear {package}",
                 iconId = "clear-2",
                 isEnabled = true,
                 order = 3,
@@ -72,8 +74,9 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
             AdbCommandConfig(
                 id = CLEAR_DATA_AND_RESTART_ID,
                 name = "Clear app data and restart",
-                command = "pm clear {package}\nmonkey -p {package} -c android.intent.category.LAUNCHER 1",
-                iconId = "force-refresh",
+                command = "shell pm clear {package}\n" +
+                    "shell monkey -p {package} -c android.intent.category.LAUNCHER 1",
+                iconId = "refresh-2",
                 isEnabled = true,
                 order = 4,
                 requiresConfirmation = true
@@ -81,7 +84,7 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
             AdbCommandConfig(
                 id = UNINSTALL_APP_ID,
                 name = "Uninstall app",
-                command = "pm uninstall {package}",
+                command = "shell pm uninstall {package}",
                 iconId = "trash",
                 isEnabled = true,
                 order = 5,
@@ -90,10 +93,19 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
             AdbCommandConfig(
                 id = UNINSTALL_APP_KEEP_DATA_ID,
                 name = "Uninstall app (keep data)",
-                command = "pm uninstall -k {package}",
+                command = "shell pm uninstall -k {package}",
                 iconId = "delete",
                 isEnabled = true,
                 order = 6,
+                requiresConfirmation = true
+            ),
+            AdbCommandConfig(
+                id = REBOOT_DEVICE_ID,
+                name = "Reboot device",
+                command = "reboot",
+                iconId = "restart-2",
+                isEnabled = true,
+                order = 7,
                 requiresConfirmation = true
             )
         )

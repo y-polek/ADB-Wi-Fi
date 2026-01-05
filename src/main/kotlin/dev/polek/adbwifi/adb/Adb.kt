@@ -101,32 +101,8 @@ class Adb(
         "kill-server".execAndLog(this)
     }
 
-    fun killApp(deviceId: String, packageName: String): Flow<LogEntry> = flow {
-        "-s $deviceId shell am force-stop $packageName".execAndLog(this)
-    }
-
-    fun startApp(deviceId: String, packageName: String): Flow<LogEntry> = flow {
-        "-s $deviceId shell monkey -p $packageName -c android.intent.category.LAUNCHER 1".execAndLog(this)
-    }
-
-    fun restartApp(deviceId: String, packageName: String): Flow<LogEntry> = flow {
-        "-s $deviceId shell am force-stop $packageName".execAndLog(this)
-        delay(500)
-        "-s $deviceId shell monkey -p $packageName -c android.intent.category.LAUNCHER 1".execAndLog(this)
-    }
-
-    fun clearAppData(deviceId: String, packageName: String): Flow<LogEntry> = flow {
-        "-s $deviceId shell pm clear $packageName".execAndLog(this)
-    }
-
-    fun clearDataAndRestart(deviceId: String, packageName: String): Flow<LogEntry> = flow {
-        "-s $deviceId shell pm clear $packageName".execAndLog(this)
-        delay(500)
-        "-s $deviceId shell monkey -p $packageName -c android.intent.category.LAUNCHER 1".execAndLog(this)
-    }
-
-    fun executeShellCommand(deviceId: String, shellCommand: String): Flow<LogEntry> = flow {
-        "-s $deviceId shell $shellCommand".execAndLog(this)
+    fun executeCommand(deviceId: String, command: String): Flow<LogEntry> = flow {
+        "-s $deviceId $command".execAndLog(this)
     }
 
     private fun serialNumber(deviceId: String): String {

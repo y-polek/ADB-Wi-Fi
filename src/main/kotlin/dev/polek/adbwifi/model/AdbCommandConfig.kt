@@ -8,4 +8,6 @@ data class AdbCommandConfig(
     val isEnabled: Boolean,
     val order: Int,
     val requiresConfirmation: Boolean = false
-)
+) {
+    val requiresPackage: Boolean get() = command.contains("{package}")
+}
