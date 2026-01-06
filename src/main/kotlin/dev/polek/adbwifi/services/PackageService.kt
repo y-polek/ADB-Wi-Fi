@@ -10,7 +10,7 @@ import com.intellij.psi.xml.XmlFile
 class PackageService(private val project: Project) {
 
     fun getPackageName(): String? {
-        return parseApplicationIdFromGradle() ?: parsePackageFromManifest()
+        return parseApplicationIdFromGradle() ?: parseNamespaceFromGradle() ?: parsePackageFromManifest()
     }
 
     private fun parseApplicationIdFromGradle(): String? {
@@ -25,6 +25,29 @@ class PackageService(private val project: Project) {
             try {
                 val content = String(file.contentsToByteArray())
                 val match = APPLICATION_ID_REGEX.find(content)
+                if (match != null) {
+                    return match.groupValues[1]
+                }
+            } catch (_: Exception) {
+                // Continue to next file
+            }
+        }
+
+        return null
+    }
+
+    private fun parseNamespaceFromGradle(): String? {
+        val basePath = project.basePath ?: return null
+        val paths = listOf(
+            "$basePath/app/build.gradle.kts",
+            "$basePath/app/build.gradle"
+        )
+
+        for (path in paths) {
+            val file = LocalFileSystem.getInstance().findFileByPath(path) ?: continue
+            try {
+                val content = String(file.contentsToByteArray())
+                val match = NAMESPACE_REGEX.find(content)
                 if (match != null) {
                     return match.groupValues[1]
                 }
@@ -61,5 +84,6 @@ class PackageService(private val project: Project) {
 
     private companion object {
         private val APPLICATION_ID_REGEX = """applicationId\s*[=]?\s*["']([^"']+)["']""".toRegex()
+        private val NAMESPACE_REGEX = """namespace\s*[=]?\s*["']([^"']+)["']""".toRegex()
     }
 }
