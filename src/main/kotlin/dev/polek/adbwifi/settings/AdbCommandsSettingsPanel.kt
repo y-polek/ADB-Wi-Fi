@@ -400,8 +400,8 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
 
     private fun showImportModeDialog(importedCommands: List<AdbCommandConfig>) {
         val options = arrayOf(
-            PluginBundle.message("adbCommandImportMerge"),
             PluginBundle.message("adbCommandImportReplace"),
+            PluginBundle.message("adbCommandImportMerge"),
             PluginBundle.message("cancelButton")
         )
 
@@ -409,7 +409,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
             PluginBundle.message("adbCommandImportModeMessage"),
             PluginBundle.message("adbCommandImportTitle"),
             options,
-            1,
+            0,
             Messages.getQuestionIcon()
         )
 
@@ -429,30 +429,12 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
     private fun mergeCommands(importedCommands: List<AdbCommandConfig>) {
         syncCheckboxStatesToCommands()
 
-        val existingSignatures = commands.map { commandSignature(it) }.toSet()
         var nextOrder = (commands.maxOfOrNull { it.order } ?: -1) + 1
-
-        val newCommands = importedCommands
-            .filter { imported -> commandSignature(imported) !in existingSignatures }
-            .map { imported -> imported.copy(order = nextOrder++) }
+        val newCommands = importedCommands.map { it.copy(order = nextOrder++) }
 
         commands.addAll(newCommands)
         refreshList()
-
-        val importedCount = importedCommands.size
-        val addedCount = newCommands.size
-        val skippedCount = importedCount - addedCount
-
-        if (skippedCount > 0) {
-            Messages.showInfoMessage(
-                PluginBundle.message("adbCommandImportMergeResult", addedCount, skippedCount),
-                PluginBundle.message("adbCommandImportTitle")
-            )
-        }
     }
-
-    private fun commandSignature(config: AdbCommandConfig): Triple<String, String, String> =
-        Triple(config.name, config.command, config.iconId)
 
     private inner class CommandCellRenderer : ListCellRenderer<JCheckBox> {
         private val panel = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply { isOpaque = true }
