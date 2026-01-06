@@ -90,6 +90,13 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 isEnabled = true,
                 order = 7,
                 requiresConfirmation = true
+            ),
+            AdbCommandConfig(
+                name = "Simulate incoming SMS (emulator only)",
+                command = "emu sms send ADB-Wi-Fi {param Message}",
+                iconId = "console",
+                isEnabled = true,
+                order = 8
             )
         )
     }

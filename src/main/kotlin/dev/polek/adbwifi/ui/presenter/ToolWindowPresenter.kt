@@ -11,6 +11,7 @@ import dev.polek.adbwifi.model.PinnedDevice
 import dev.polek.adbwifi.services.*
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.Companion.toViewModel
+import dev.polek.adbwifi.ui.view.ParameterInputDialog
 import dev.polek.adbwifi.ui.view.ToolWindowView
 import dev.polek.adbwifi.utils.BasePresenter
 import dev.polek.adbwifi.utils.copyToClipboard
@@ -173,8 +174,19 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
             ""
         }
 
+        val parameterValues = if (command.requiresParameters) {
+            val dialog = ParameterInputDialog(command.name, command.parameterPlaceholders)
+            if (!dialog.showAndGet()) return
+            dialog.getParameterValues()
+        } else {
+            emptyMap()
+        }
+
         if (command.requiresConfirmation) {
-            val commandText = command.command.replace("{package}", packageName)
+            var commandText = command.command.replace("{package}", packageName)
+            parameterValues.forEach { (placeholder, value) ->
+                commandText = commandText.replace(placeholder, value)
+            }
             val fullCommand = commandText.lines()
                 .filter { it.isNotBlank() }
                 .joinToString("\n") { "adb -s ${device.id} ${it.trim()}" }
@@ -208,7 +220,7 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
 
         launch {
             withContext(IO) {
-                adbService.executeCommand(command, device.id, packageName)
+                adbService.executeCommand(command, device.id, packageName, parameterValues)
             }
         }
     }

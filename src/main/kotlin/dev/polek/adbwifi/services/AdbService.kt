@@ -70,10 +70,18 @@ class AdbService {
         }
     }
 
-    suspend fun executeCommand(config: AdbCommandConfig, deviceId: String, packageName: String) {
+    suspend fun executeCommand(
+        config: AdbCommandConfig,
+        deviceId: String,
+        packageName: String,
+        parameterValues: Map<String, String> = emptyMap()
+    ) {
         val commands = config.command.split("\n").filter { it.isNotBlank() }
         commands.forEachIndexed { index, cmd ->
-            val command = cmd.trim().replace("{package}", packageName)
+            var command = cmd.trim().replace("{package}", packageName)
+            parameterValues.forEach { (placeholder, value) ->
+                command = command.replace(placeholder, value)
+            }
             adb.executeCommand(deviceId, command).collect { logEntry ->
                 logService.commandHistory.add(logEntry)
             }

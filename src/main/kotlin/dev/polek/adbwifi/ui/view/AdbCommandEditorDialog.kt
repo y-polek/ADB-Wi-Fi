@@ -100,9 +100,19 @@ class AdbCommandEditorDialog(
     private fun updatePreview() {
         val commands = commandArea.text.split("\n").filter { it.isNotBlank() }
         val preview = commands.joinToString("\n") { cmd ->
-            "adb -s <device ID> ${cmd.trim().replace("{package}", "<app package>")}"
+            var result = cmd.trim().replace("{package}", "<app package>")
+            PARAM_REGEX.findAll(result).forEach { match ->
+                val name = match.groupValues[2].trim().takeIf { it.isNotEmpty() }
+                val placeholder = if (name != null) "<$name>" else "<user input>"
+                result = result.replace(match.value, placeholder)
+            }
+            "adb -s <device ID> $result"
         }
         previewArea.text = preview.ifEmpty { "adb -s <device ID> <command>" }
+    }
+
+    private companion object {
+        private val PARAM_REGEX = """\{(param\d*)(\s+[^}]+)?}""".toRegex()
     }
 
     override fun doValidate(): ValidationInfo? {
