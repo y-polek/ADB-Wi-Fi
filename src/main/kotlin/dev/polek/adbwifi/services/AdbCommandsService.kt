@@ -27,18 +27,8 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
     }
 
     companion object {
-        private const val KILL_APP_ID = "KILL_APP"
-        private const val START_APP_ID = "START_APP"
-        private const val RESTART_APP_ID = "RESTART_APP"
-        private const val CLEAR_DATA_ID = "CLEAR_DATA"
-        private const val CLEAR_DATA_AND_RESTART_ID = "CLEAR_DATA_AND_RESTART"
-        private const val UNINSTALL_APP_ID = "UNINSTALL_APP"
-        private const val UNINSTALL_APP_KEEP_DATA_ID = "UNINSTALL_APP_KEEP_DATA"
-        private const val REBOOT_DEVICE_ID = "REBOOT_DEVICE"
-
         fun defaultCommands(): List<AdbCommandConfig> = listOf(
             AdbCommandConfig(
-                id = KILL_APP_ID,
                 name = "Kill app",
                 command = "shell am force-stop {package}",
                 iconId = "stop",
@@ -46,7 +36,6 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 order = 0
             ),
             AdbCommandConfig(
-                id = START_APP_ID,
                 name = "Start app",
                 command = "shell monkey -p {package} -c android.intent.category.LAUNCHER 1",
                 iconId = "play",
@@ -54,7 +43,6 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 order = 1
             ),
             AdbCommandConfig(
-                id = RESTART_APP_ID,
                 name = "Restart app",
                 command = "shell am force-stop {package}\n" +
                     "shell monkey -p {package} -c android.intent.category.LAUNCHER 1",
@@ -63,7 +51,6 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 order = 2
             ),
             AdbCommandConfig(
-                id = CLEAR_DATA_ID,
                 name = "Clear app data",
                 command = "shell pm clear {package}",
                 iconId = "clear-2",
@@ -72,7 +59,6 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 requiresConfirmation = true
             ),
             AdbCommandConfig(
-                id = CLEAR_DATA_AND_RESTART_ID,
                 name = "Clear app data and restart",
                 command = "shell pm clear {package}\n" +
                     "shell monkey -p {package} -c android.intent.category.LAUNCHER 1",
@@ -82,7 +68,6 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 requiresConfirmation = true
             ),
             AdbCommandConfig(
-                id = UNINSTALL_APP_ID,
                 name = "Uninstall app",
                 command = "shell pm uninstall {package}",
                 iconId = "trash",
@@ -91,7 +76,6 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 requiresConfirmation = true
             ),
             AdbCommandConfig(
-                id = UNINSTALL_APP_KEEP_DATA_ID,
                 name = "Uninstall app (keep data)",
                 command = "shell pm uninstall -k {package}",
                 iconId = "delete",
@@ -100,7 +84,6 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 requiresConfirmation = true
             ),
             AdbCommandConfig(
-                id = REBOOT_DEVICE_ID,
                 name = "Reboot device",
                 command = "reboot",
                 iconId = "restart-2",

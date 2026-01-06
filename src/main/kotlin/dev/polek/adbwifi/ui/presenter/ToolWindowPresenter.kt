@@ -215,7 +215,7 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
 
     private fun disableConfirmationForCommand(command: AdbCommandConfig) {
         val updatedCommands = adbCommandsService.commands.map {
-            if (it.id == command.id) {
+            if (it.matches(command)) {
                 it.copy(requiresConfirmation = false)
             } else {
                 it
@@ -223,6 +223,13 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
         }
         adbCommandsService.commands = updatedCommands
     }
+
+    private fun AdbCommandConfig.matches(other: AdbCommandConfig): Boolean =
+        name == other.name &&
+            command == other.command &&
+            iconId == other.iconId &&
+            isEnabled == other.isEnabled &&
+            order == other.order
 
     private fun onDevicesUpdated(model: List<Device>) {
         devices = model.map {

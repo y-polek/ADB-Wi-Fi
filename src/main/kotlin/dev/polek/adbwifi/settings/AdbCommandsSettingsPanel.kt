@@ -1,10 +1,21 @@
 package dev.polek.adbwifi.settings
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.fileChooser.FileChooser
+import com.intellij.openapi.fileChooser.FileChooserDescriptor
+import com.intellij.openapi.fileChooser.FileChooserFactory
+import com.intellij.openapi.fileChooser.FileSaverDescriptor
 import com.intellij.openapi.project.DumbAwareAction
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.intellij.openapi.ui.popup.PopupStep
+import com.intellij.openapi.ui.popup.util.BaseListPopupStep
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.CheckBoxList
 import com.intellij.ui.ToolbarDecorator
 import com.intellij.ui.components.JBPanel
@@ -12,11 +23,13 @@ import com.intellij.util.ui.JBUI
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.model.ActionIconsProvider
 import dev.polek.adbwifi.model.AdbCommandConfig
+import dev.polek.adbwifi.model.AdbCommandsExportFile
 import dev.polek.adbwifi.services.AdbCommandsService
 import dev.polek.adbwifi.ui.view.AdbCommandEditorDialog
 import java.awt.*
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.io.File
 import javax.swing.*
 
 class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout()) {
@@ -91,6 +104,28 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
 
                 override fun getActionUpdateThread() = ActionUpdateThread.EDT
             })
+            .addExtraAction(object : DumbAwareAction(
+                PluginBundle.message("adbCommandExportButton"),
+                null,
+                AllIcons.ToolbarDecorator.Export
+            ) {
+                override fun actionPerformed(e: AnActionEvent) {
+                    showExportPopup(e)
+                }
+
+                override fun getActionUpdateThread() = ActionUpdateThread.EDT
+            })
+            .addExtraAction(object : DumbAwareAction(
+                PluginBundle.message("adbCommandImportButton"),
+                null,
+                AllIcons.ToolbarDecorator.Import
+            ) {
+                override fun actionPerformed(e: AnActionEvent) {
+                    importCommands()
+                }
+
+                override fun getActionUpdateThread() = ActionUpdateThread.EDT
+            })
             .setRemoveActionUpdater { canRemoveSelected() }
 
         add(decorator.createPanel(), BorderLayout.CENTER)
@@ -124,7 +159,6 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
         commands.forEachIndexed { index, config ->
             val isEnabled = checkBoxList.isItemSelected(index)
             val original = serviceCommands.getOrNull(index) ?: return true
-            if (config.id != original.id) return true
             if (isEnabled != original.isEnabled) return true
             if (config.name != original.name) return true
             if (config.command != original.command) return true
@@ -156,7 +190,6 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
         if (dialog.showAndGet()) {
             val maxOrder = commands.maxOfOrNull { it.order } ?: -1
             val newCommand = AdbCommandConfig(
-                id = java.util.UUID.randomUUID().toString(),
                 name = dialog.commandName,
                 command = dialog.command,
                 iconId = dialog.iconId,
@@ -194,15 +227,11 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
 
         syncCheckboxStatesToCommands()
         val config = commands[selectedIndex]
-        val duplicatedConfig = config.copy(
-            id = java.util.UUID.randomUUID().toString(),
-            name = "${config.name} (copy)"
-        )
+        val duplicatedConfig = config.copy(name = "${config.name} (copy)")
         val dialog = AdbCommandEditorDialog(duplicatedConfig)
         if (dialog.showAndGet()) {
             val maxOrder = commands.maxOfOrNull { it.order } ?: -1
             val newCommand = AdbCommandConfig(
-                id = duplicatedConfig.id,
                 name = dialog.commandName,
                 command = dialog.command,
                 iconId = dialog.iconId,
@@ -274,6 +303,156 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
             refreshList()
         }
     }
+
+    private sealed class ExportMenuItem(val text: String) {
+        data object ExportAll : ExportMenuItem(PluginBundle.message("adbCommandExportAll"))
+        data object ExportEnabled : ExportMenuItem(PluginBundle.message("adbCommandExportEnabled"))
+    }
+
+    private fun showExportPopup(e: AnActionEvent) {
+        val items = listOf(ExportMenuItem.ExportAll, ExportMenuItem.ExportEnabled)
+
+        val step = object : BaseListPopupStep<ExportMenuItem>(null, items) {
+            override fun getTextFor(value: ExportMenuItem): String = value.text
+
+            override fun onChosen(selectedValue: ExportMenuItem, finalChoice: Boolean): PopupStep<*>? {
+                return doFinalStep {
+                    when (selectedValue) {
+                        ExportMenuItem.ExportAll -> exportCommands(exportEnabledOnly = false)
+                        ExportMenuItem.ExportEnabled -> exportCommands(exportEnabledOnly = true)
+                    }
+                }
+            }
+        }
+
+        val popup = JBPopupFactory.getInstance().createListPopup(step)
+        e.inputEvent?.component?.let { popup.showUnderneathOf(it) }
+            ?: popup.showInFocusCenter()
+    }
+
+    private fun exportCommands(exportEnabledOnly: Boolean) {
+        syncCheckboxStatesToCommands()
+
+        val commandsToExport = if (exportEnabledOnly) {
+            commands.filter { it.isEnabled }
+        } else {
+            commands
+        }.sortedBy { it.order }
+
+        if (commandsToExport.isEmpty()) {
+            Messages.showInfoMessage(
+                PluginBundle.message("adbCommandExportNoCommands"),
+                PluginBundle.message("adbCommandExportTitle")
+            )
+            return
+        }
+
+        val exportData = AdbCommandsExportFile(
+            version = 1,
+            commands = commandsToExport
+        )
+
+        val descriptor = FileSaverDescriptor(
+            PluginBundle.message("adbCommandExportTitle"),
+            PluginBundle.message("adbCommandExportDescription"),
+            "json"
+        )
+
+        val saveFileDialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, null as Project?)
+        val wrapper = saveFileDialog.save(null as VirtualFile?, "adb-commands.json")
+
+        if (wrapper != null) {
+            val gson = GsonBuilder().setPrettyPrinting().create()
+            val json = gson.toJson(exportData)
+            wrapper.file.writeText(json)
+        }
+    }
+
+    private fun importCommands() {
+        val descriptor = FileChooserDescriptor(true, false, false, false, false, false)
+            .withFileFilter { it.extension == "json" }
+            .withTitle(PluginBundle.message("adbCommandImportTitle"))
+
+        FileChooser.chooseFile(descriptor, null, this, null) { selectedFile ->
+            @Suppress("TooGenericExceptionCaught")
+            try {
+                val json = File(selectedFile.path).readText()
+                val gson = Gson()
+                val exportFile = gson.fromJson(json, AdbCommandsExportFile::class.java)
+
+                if (exportFile?.commands.isNullOrEmpty()) {
+                    Messages.showWarningDialog(
+                        PluginBundle.message("adbCommandImportEmpty"),
+                        PluginBundle.message("adbCommandImportTitle")
+                    )
+                    return@chooseFile
+                }
+
+                showImportModeDialog(exportFile.commands)
+            } catch (e: Exception) {
+                Messages.showErrorDialog(
+                    PluginBundle.message("adbCommandImportError", e.message ?: "Unknown error"),
+                    PluginBundle.message("adbCommandImportTitle")
+                )
+            }
+        }
+    }
+
+    private fun showImportModeDialog(importedCommands: List<AdbCommandConfig>) {
+        val options = arrayOf(
+            PluginBundle.message("adbCommandImportMerge"),
+            PluginBundle.message("adbCommandImportReplace"),
+            PluginBundle.message("cancelButton")
+        )
+
+        val result = Messages.showDialog(
+            PluginBundle.message("adbCommandImportModeMessage"),
+            PluginBundle.message("adbCommandImportTitle"),
+            options,
+            1,
+            Messages.getQuestionIcon()
+        )
+
+        when (result) {
+            0 -> mergeCommands(importedCommands)
+            1 -> replaceCommands(importedCommands)
+        }
+    }
+
+    private fun replaceCommands(importedCommands: List<AdbCommandConfig>) {
+        commands = importedCommands.mapIndexed { index, config ->
+            config.copy(order = index)
+        }.toMutableList()
+        refreshList()
+    }
+
+    private fun mergeCommands(importedCommands: List<AdbCommandConfig>) {
+        syncCheckboxStatesToCommands()
+
+        val existingSignatures = commands.map { commandSignature(it) }.toSet()
+        var nextOrder = (commands.maxOfOrNull { it.order } ?: -1) + 1
+
+        val newCommands = importedCommands
+            .filter { imported -> commandSignature(imported) !in existingSignatures }
+            .map { imported -> imported.copy(order = nextOrder++) }
+
+        commands.addAll(newCommands)
+        refreshList()
+
+        val importedCount = importedCommands.size
+        val addedCount = newCommands.size
+        val skippedCount = importedCount - addedCount
+
+        if (skippedCount > 0) {
+            Messages.showInfoMessage(
+                PluginBundle.message("adbCommandImportMergeResult", addedCount, skippedCount),
+                PluginBundle.message("adbCommandImportTitle")
+            )
+        }
+    }
+
+    private fun commandSignature(config: AdbCommandConfig): Triple<String, String, String> =
+        Triple(config.name, config.command, config.iconId)
 
     private inner class CommandCellRenderer : ListCellRenderer<JCheckBox> {
         private val panel = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply { isOpaque = true }
