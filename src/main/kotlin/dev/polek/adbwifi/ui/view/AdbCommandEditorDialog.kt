@@ -2,6 +2,7 @@ package dev.polek.adbwifi.ui.view
 
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.ValidationInfo
+import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
@@ -64,6 +65,7 @@ class AdbCommandEditorDialog(
     override fun createCenterPanel(): JComponent {
         commandArea.lineWrap = true
         commandArea.wrapStyleWord = true
+        commandArea.margin = JBUI.insets(8)
         commandArea.document.addDocumentListener(object : DocumentListener {
             override fun insertUpdate(e: DocumentEvent) = updatePreview()
             override fun removeUpdate(e: DocumentEvent) = updatePreview()
@@ -79,6 +81,7 @@ class AdbCommandEditorDialog(
         previewArea.isEditable = false
         previewArea.lineWrap = true
         previewArea.wrapStyleWord = true
+        previewArea.margin = JBUI.insets(4)
         previewArea.foreground = JBUI.CurrentTheme.ContextHelp.FOREGROUND
         previewArea.font = JBUI.Fonts.smallFont()
         val previewScrollPane = JBScrollPane(previewArea)
@@ -97,7 +100,7 @@ class AdbCommandEditorDialog(
     private fun updatePreview() {
         val commands = commandArea.text.split("\n").filter { it.isNotBlank() }
         val preview = commands.joinToString("\n") { cmd ->
-            "adb -s <device ID> ${cmd.trim().replace("{package}", "<app package name>")}"
+            "adb -s <device ID> ${cmd.trim().replace("{package}", "<app package>")}"
         }
         previewArea.text = preview.ifEmpty { "adb -s <device ID> <command>" }
     }
@@ -121,9 +124,9 @@ class AdbCommandEditorDialog(
     private fun createIconButton(): JPanel {
         val panel = JPanel(BorderLayout(JBUI.scale(8), 0))
         panel.isOpaque = true
-        panel.background = JBUI.CurrentTheme.List.Hover.background(false)
+        panel.background = JBColor.background()
         panel.border = CompoundBorder(
-            JBUI.Borders.customLine(JBUI.CurrentTheme.Focus.defaultButtonColor()),
+            JBUI.Borders.customLine(JBColor.border()),
             JBUI.Borders.empty(4, 8)
         )
         panel.cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
@@ -138,7 +141,7 @@ class AdbCommandEditorDialog(
             }
 
             override fun mouseExited(e: MouseEvent) {
-                panel.background = JBUI.CurrentTheme.List.Hover.background(false)
+                panel.background = JBColor.background()
             }
         })
 
