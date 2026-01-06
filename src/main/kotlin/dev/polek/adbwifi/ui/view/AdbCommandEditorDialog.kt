@@ -121,7 +121,7 @@ class AdbCommandEditorDialog(
     private fun createIconButton(): JPanel {
         val panel = JPanel(BorderLayout(JBUI.scale(8), 0))
         panel.isOpaque = true
-        panel.background = JBUI.CurrentTheme.ActionButton.hoverBackground()
+        panel.background = JBUI.CurrentTheme.List.Hover.background(false)
         panel.border = CompoundBorder(
             JBUI.Borders.customLine(JBUI.CurrentTheme.Focus.defaultButtonColor()),
             JBUI.Borders.empty(4, 8)
@@ -134,11 +134,11 @@ class AdbCommandEditorDialog(
             }
 
             override fun mouseEntered(e: MouseEvent) {
-                panel.background = JBUI.CurrentTheme.ActionButton.pressedBackground()
+                panel.background = JBUI.CurrentTheme.List.Hover.background(true)
             }
 
             override fun mouseExited(e: MouseEvent) {
-                panel.background = JBUI.CurrentTheme.ActionButton.hoverBackground()
+                panel.background = JBUI.CurrentTheme.List.Hover.background(false)
             }
         })
 
