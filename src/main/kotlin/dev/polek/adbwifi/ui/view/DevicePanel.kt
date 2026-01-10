@@ -185,7 +185,6 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
             iconButtonsPanel.add(removeButton)
         }
 
-        iconButtonsPanel.add(Box.createHorizontalStrut(BUTTON_GAP))
         val menuButton = createIconButton(Icons.MENU, null, showBorder = false)
         menuButton.addActionListener {
             val event = MouseEvent(
