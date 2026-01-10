@@ -7,6 +7,7 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.ListSeparator
 import com.intellij.openapi.ui.popup.PopupStep
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
+import com.intellij.ui.AnimatedIcon
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
@@ -128,10 +129,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
 
         // Main action button (Connect/Disconnect) - expands to fill width
         if (device.isInProgress) {
-            val progressBar = JProgressBar()
-            progressBar.isIndeterminate = true
-            progressBar.preferredSize = Dimension(0, BUTTON_HEIGHT)
-            actionsPanel.add(progressBar, BorderLayout.CENTER)
+            actionsPanel.add(createLoadingButton(), BorderLayout.CENTER)
         } else {
             val mainButton = createMainButton()
             mainButton.addActionListener {
@@ -243,12 +241,22 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
                 g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
 
-                // Draw background
-                g2.color = if (model.isPressed) Colors.GREEN_BUTTON_BG.darker() else background
-                g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
+                if (isEnabled) {
+                    // Draw background
+                    g2.color = if (model.isPressed) Colors.GREEN_BUTTON_BG.darker() else background
+                    g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
 
-                // Draw text centered
-                g2.color = foreground
+                    // Draw text centered
+                    g2.color = foreground
+                } else {
+                    // Draw grayed out background
+                    g2.color = Colors.CARD_BORDER
+                    g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
+
+                    // Draw text centered with reduced opacity
+                    g2.color = Colors.SECONDARY_TEXT
+                }
+
                 g2.font = font
                 val fm = g2.fontMetrics
                 val textWidth = fm.stringWidth(text)
@@ -279,16 +287,26 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
                 g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
 
-                // Draw background
-                g2.color = if (model.isPressed) Colors.CARD_BORDER else background
-                g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
+                if (isEnabled) {
+                    // Draw background
+                    g2.color = if (model.isPressed) Colors.CARD_BORDER else background
+                    g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
 
-                // Draw border
-                g2.color = Colors.CARD_BORDER
-                g2.drawRoundRect(0, 0, width - 1, height - 1, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
+                    // Draw border
+                    g2.color = Colors.CARD_BORDER
+                    g2.drawRoundRect(0, 0, width - 1, height - 1, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
 
-                // Draw text centered
-                g2.color = foreground
+                    // Draw text centered
+                    g2.color = foreground
+                } else {
+                    // Draw grayed out background
+                    g2.color = Colors.CARD_BORDER
+                    g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
+
+                    // Draw text centered with reduced opacity
+                    g2.color = Colors.SECONDARY_TEXT
+                }
+
                 g2.font = font
                 val fm = g2.fontMetrics
                 val textWidth = fm.stringWidth(text)
@@ -337,6 +355,31 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 g2.drawString(text, x, y)
 
                 g2.dispose()
+            }
+        }
+    }
+
+    private fun createLoadingButton(): JPanel {
+        return object : JPanel(GridBagLayout()) {
+            private val spinnerIcon = AnimatedIcon.Default()
+
+            init {
+                preferredSize = Dimension(0, BUTTON_HEIGHT)
+                minimumSize = Dimension(0, BUTTON_HEIGHT)
+                isOpaque = false
+                add(JBLabel(spinnerIcon))
+            }
+
+            override fun paintComponent(g: Graphics) {
+                val g2 = g.create() as Graphics2D
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+
+                // Draw grayed out background (same as disabled button)
+                g2.color = Colors.CARD_BORDER
+                g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
+
+                g2.dispose()
+                super.paintComponent(g)
             }
         }
     }
