@@ -115,6 +115,7 @@ class AdbWiFiToolWindow(
         panel.add(deviceListPanel)
         panel.add(pinnedDeviceListPanel)
         this.setViewportView(panel)
+        this.horizontalScrollBarPolicy = JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
     }
     private val bottomPanel: JComponent
     private val emptyStatePanel = EmptyStatePanel(
