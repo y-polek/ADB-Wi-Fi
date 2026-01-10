@@ -2,7 +2,6 @@ package dev.polek.adbwifi.utils
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.util.IconLoader
-import com.intellij.ui.LayeredIcon
 import javax.swing.Icon
 
 object Icons {
@@ -29,14 +28,5 @@ object Icons {
     val PLUS = IconLoader.getIcon("/icons/plusIcon.svg", Icons::class.java)
     val HELP = IconLoader.getIcon("/icons/helpIcon.svg", Icons::class.java)
 
-    val ADB_COMMANDS: Icon by lazy {
-        val baseIcon = AllIcons.Debugger.Console
-        val dropdownIcon = AllIcons.General.Dropdown
-        val xOffset = baseIcon.iconWidth - dropdownIcon.iconWidth + 2
-        val yOffset = baseIcon.iconHeight - dropdownIcon.iconHeight + 2
-        LayeredIcon(2).apply {
-            setIcon(baseIcon, 0)
-            setIcon(dropdownIcon, 1, xOffset, yOffset)
-        }
-    }
+    val ADB_COMMANDS: Icon = AllIcons.Actions.Execute
 }
