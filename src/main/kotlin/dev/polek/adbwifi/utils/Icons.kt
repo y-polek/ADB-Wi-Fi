@@ -21,7 +21,6 @@ object Icons {
     val ERROR = IconLoader.getIcon("AllIcons.General.Error", Icons::class.java)
 
     // Device type icons
-    val EMULATOR = IconLoader.getIcon("/icons/emulatorIcon.svg", Icons::class.java)
     val PHONE = IconLoader.getIcon("/icons/phoneIcon.svg", Icons::class.java)
 
     // UI icons

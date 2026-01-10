@@ -1,13 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg">
-    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g stroke="#AFB1B3" stroke-width="1.2">
-            <!-- Phone body -->
-            <rect x="5" y="1" width="10" height="18" rx="2" stroke-linejoin="round"/>
-            <!-- Speaker/notch -->
-            <path d="M8,3 L12,3" stroke-linecap="round"/>
-            <!-- Home button/indicator -->
-            <circle cx="10" cy="16" r="1" fill="#AFB1B3" stroke="none"/>
-        </g>
-    </g>
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M5.83335 1.66663H14.1667C15.0872 1.66663 15.8334 2.41282 15.8334 3.33329V16.6666C15.8334 17.5871 15.0872 18.3333 14.1667 18.3333H5.83335C4.91288 18.3333 4.16669 17.5871 4.16669 16.6666V3.33329C4.16669 2.41282 4.91288 1.66663 5.83335 1.66663V1.66663" stroke="#BCBEC4" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M10 15H10.0083" stroke="#BCBEC4" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

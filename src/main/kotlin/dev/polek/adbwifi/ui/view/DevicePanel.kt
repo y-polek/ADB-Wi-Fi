@@ -56,9 +56,9 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         val contentPanel = JPanel(BorderLayout(ICON_GAP, 0))
         contentPanel.isOpaque = false
 
-        // Device icon (only show for non-pinned/previously connected devices)
-        if (!device.isRemoveButtonVisible) {
-            val iconLabel = JBLabel(device.icon)
+        // Device icon (only show when icon is available)
+        device.icon?.let { icon ->
+            val iconLabel = JBLabel(icon)
             iconLabel.verticalAlignment = SwingConstants.TOP
             iconLabel.border = JBUI.Borders.emptyTop(2)
             contentPanel.add(iconLabel, BorderLayout.WEST)

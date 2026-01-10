@@ -12,7 +12,7 @@ data class DeviceViewModel(
     val titleText: String,
     val subtitleText: String,
     val subtitleIcon: Icon?,
-    val icon: Icon,
+    val icon: Icon?,
     val hasAddress: Boolean,
     val buttonType: ButtonType,
     var isShareScreenButtonVisible: Boolean,
@@ -56,9 +56,9 @@ data class DeviceViewModel(
                 titleText = customName ?: device.name,
                 subtitleText = device.subtitleText(),
                 subtitleIcon = device.addressIcon(),
-                icon = device.icon(),
+                icon = device.icon(deviceType, isRemoveButtonVisible),
                 hasAddress = device.hasAddress(),
-                buttonType = device.buttonType(),
+                buttonType = device.buttonType(deviceType),
                 isShareScreenButtonVisible = false,
                 isRemoveButtonVisible = isRemoveButtonVisible,
                 deviceType = deviceType,
@@ -90,10 +90,19 @@ data class DeviceViewModel(
             }
         }
 
-        private fun Device.icon(): Icon = when (connectionType) {
-            USB -> Icons.PHONE
-            WIFI -> Icons.WIFI
-            NONE -> Icons.PHONE
+        private fun Device.icon(deviceType: DeviceType, isPreviouslyConnected: Boolean): Icon? {
+            // Previously connected device - no icon
+            if (isPreviouslyConnected) return null
+
+            // Emulator - use phone icon
+            if (deviceType == DeviceType.EMULATOR) return Icons.PHONE
+
+            // Physical device - based on connection type
+            return when (connectionType) {
+                USB -> Icons.USB
+                WIFI -> Icons.WIFI
+                NONE -> null
+            }
         }
 
         private fun Device.addressIcon(): Icon? {
@@ -109,10 +118,11 @@ data class DeviceViewModel(
 
         private fun Device.hasAddress() = this.address != null
 
-        private fun Device.buttonType(): ButtonType {
+        private fun Device.buttonType(deviceType: DeviceType): ButtonType {
             val device = this
             return when {
                 device.isWifiDevice -> ButtonType.DISCONNECT
+                deviceType == DeviceType.EMULATOR -> ButtonType.CONNECT_DISABLED
                 device.address?.ip.isNullOrBlank() -> ButtonType.CONNECT_DISABLED
                 device.isUsbDevice && device.isConnected -> ButtonType.CONNECT_DISABLED
                 else -> ButtonType.CONNECT
