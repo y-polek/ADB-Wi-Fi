@@ -21,6 +21,14 @@ object Icons {
     val OK = IconLoader.getIcon("AllIcons.General.InspectionsOK", Icons::class.java)
     val ERROR = IconLoader.getIcon("AllIcons.General.Error", Icons::class.java)
 
+    // Device type icons
+    val EMULATOR = IconLoader.getIcon("/icons/emulatorIcon.svg", Icons::class.java)
+    val PHONE = IconLoader.getIcon("/icons/phoneIcon.svg", Icons::class.java)
+
+    // UI icons
+    val PLUS = IconLoader.getIcon("/icons/plusIcon.svg", Icons::class.java)
+    val HELP = IconLoader.getIcon("/icons/helpIcon.svg", Icons::class.java)
+
     val ADB_COMMANDS: Icon by lazy {
         val baseIcon = AllIcons.Debugger.Console
         val dropdownIcon = AllIcons.General.Dropdown

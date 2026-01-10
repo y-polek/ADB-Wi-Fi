@@ -19,7 +19,9 @@ data class DeviceViewModel(
     val isRemoveButtonVisible: Boolean,
     var isInProgress: Boolean = false,
     var packageName: String? = null,
-    var isAdbCommandsButtonVisible: Boolean = false
+    var isAdbCommandsButtonVisible: Boolean = false,
+    val deviceType: DeviceType = DeviceType.PHYSICAL,
+    val isConnected: Boolean = false
 ) {
     val id: String
         get() = device.id
@@ -37,6 +39,10 @@ data class DeviceViewModel(
         CONNECT, CONNECT_DISABLED, DISCONNECT
     }
 
+    enum class DeviceType {
+        EMULATOR, PHYSICAL
+    }
+
     companion object {
 
         fun Device.toViewModel(
@@ -44,6 +50,7 @@ data class DeviceViewModel(
             isRemoveButtonVisible: Boolean = false
         ): DeviceViewModel {
             val device = this
+            val deviceType = device.detectDeviceType()
             return DeviceViewModel(
                 device = device,
                 titleText = customName ?: device.name,
@@ -53,7 +60,9 @@ data class DeviceViewModel(
                 hasAddress = device.hasAddress(),
                 buttonType = device.buttonType(),
                 isShareScreenButtonVisible = false,
-                isRemoveButtonVisible = isRemoveButtonVisible
+                isRemoveButtonVisible = isRemoveButtonVisible,
+                deviceType = deviceType,
+                isConnected = device.isWifiDevice
             )
         }
 
@@ -71,10 +80,20 @@ data class DeviceViewModel(
             append("</html>")
         }
 
+        private fun Device.detectDeviceType(): DeviceType {
+            return when {
+                id.startsWith("emulator-") -> DeviceType.EMULATOR
+                name.contains("emulator", ignoreCase = true) -> DeviceType.EMULATOR
+                name.contains("sdk", ignoreCase = true) -> DeviceType.EMULATOR
+                serialNumber.contains("emulator", ignoreCase = true) -> DeviceType.EMULATOR
+                else -> DeviceType.PHYSICAL
+            }
+        }
+
         private fun Device.icon(): Icon = when (connectionType) {
-            USB -> Icons.USB
+            USB -> Icons.PHONE
             WIFI -> Icons.WIFI
-            NONE -> Icons.NO_USB
+            NONE -> Icons.PHONE
         }
 
         private fun Device.addressIcon(): Icon? {

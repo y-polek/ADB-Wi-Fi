@@ -36,7 +36,11 @@ import dev.polek.adbwifi.utils.setFontSize
 import java.awt.GridBagConstraints
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import javax.swing.*
+import javax.swing.BorderFactory
+import javax.swing.BoxLayout
+import javax.swing.JComponent
+import javax.swing.JPanel
+import javax.swing.SwingConstants
 
 class AdbWiFiToolWindow(
     private val project: Project,
@@ -113,18 +117,11 @@ class AdbWiFiToolWindow(
         this.setViewportView(panel)
     }
     private val bottomPanel: JComponent
-    private val emptyMessageLabel = JBLabel().apply {
-        text = PluginBundle.message("deviceListEmptyMessage")
-        icon = Icons.DEVICE_LINEUP
-        horizontalAlignment = SwingConstants.CENTER
-        horizontalTextPosition = SwingConstants.CENTER
-        verticalTextPosition = SwingConstants.BOTTOM
-        setFontSize(16f)
-        background = JBColor.background()
-        foreground = JBColor.gray
-        isOpaque = true
-        border = BorderFactory.createLineBorder(JBColor.border())
-    }
+    private val emptyStatePanel = EmptyStatePanel(
+        onEnterIpPort = {
+            ConnectDeviceDialogWrapper().show()
+        }
+    )
     private val errorMessagePanel = GridBagLayoutPanel().apply {
         background = JBColor.background()
         border = BorderFactory.createLineBorder(JBColor.border())
@@ -224,7 +221,7 @@ class AdbWiFiToolWindow(
     }
 
     override fun showEmptyMessage() {
-        splitter.firstComponent = emptyMessageLabel
+        splitter.firstComponent = emptyStatePanel
     }
 
     override fun showInvalidAdbLocationError() {
