@@ -40,7 +40,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         g2.fillRoundRect(0, 0, width, height, CORNER_RADIUS * 2, CORNER_RADIUS * 2)
 
         // Draw rounded border
-        g2.color = if (device.isConnected) Colors.CONNECTED_CARD_BORDER else Colors.CARD_BORDER
+        g2.color = Colors.CARD_BORDER
         g2.drawRoundRect(0, 0, width - 1, height - 1, CORNER_RADIUS * 2, CORNER_RADIUS * 2)
 
         g2.dispose()
@@ -208,8 +208,20 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
 
     private fun createMainButton(): JButton {
         return when (device.buttonType) {
-            ButtonType.CONNECT -> createConnectButton()
-            ButtonType.CONNECT_DISABLED -> createConnectButton().apply { isEnabled = false }
+            ButtonType.CONNECT -> {
+                if (device.isRemoveButtonVisible) {
+                    createSecondaryConnectButton()
+                } else {
+                    createConnectButton()
+                }
+            }
+            ButtonType.CONNECT_DISABLED -> {
+                if (device.isRemoveButtonVisible) {
+                    createSecondaryConnectButton().apply { isEnabled = false }
+                } else {
+                    createConnectButton().apply { isEnabled = false }
+                }
+            }
             ButtonType.DISCONNECT -> createDisconnectButton()
         }
     }
@@ -235,6 +247,46 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 // Draw background
                 g2.color = if (model.isPressed) Colors.GREEN_BUTTON_BG.darker() else background
                 g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
+
+                // Draw text centered
+                g2.color = foreground
+                g2.font = font
+                val fm = g2.fontMetrics
+                val textWidth = fm.stringWidth(text)
+                val x = (width - textWidth) / 2
+                val y = (height - fm.height) / 2 + fm.ascent
+                g2.drawString(text, x, y)
+
+                g2.dispose()
+            }
+        }
+    }
+
+    private fun createSecondaryConnectButton(): JButton {
+        return object : JButton(PluginBundle.message("connectButton")) {
+            init {
+                preferredSize = Dimension(0, BUTTON_HEIGHT)
+                minimumSize = Dimension(0, BUTTON_HEIGHT)
+                isOpaque = false
+                isContentAreaFilled = false
+                isFocusPainted = false
+                isBorderPainted = false
+                background = Colors.ICON_BUTTON_BG
+                foreground = Colors.PRIMARY_TEXT
+            }
+
+            override fun paintComponent(g: Graphics) {
+                val g2 = g.create() as Graphics2D
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+                g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+
+                // Draw background
+                g2.color = if (model.isPressed) Colors.CARD_BORDER else background
+                g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
+
+                // Draw border
+                g2.color = Colors.CARD_BORDER
+                g2.drawRoundRect(0, 0, width - 1, height - 1, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
 
                 // Draw text centered
                 g2.color = foreground
@@ -469,7 +521,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         device: DeviceViewModel,
         projectPackage: String?,
         selectedPackage: String?,
-        menuComponent: java.awt.Component
+        menuComponent: Component
     ): PopupStep<*> {
         val packageItems = mutableListOf<PackageMenuItem>()
 
@@ -548,7 +600,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         }
     }
 
-    private fun reopenAdbCommandsMenu(device: DeviceViewModel, component: java.awt.Component) {
+    private fun reopenAdbCommandsMenu(device: DeviceViewModel, component: Component) {
         val event = MouseEvent(
             component,
             MouseEvent.MOUSE_CLICKED,
