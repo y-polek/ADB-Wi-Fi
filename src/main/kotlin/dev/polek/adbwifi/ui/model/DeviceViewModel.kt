@@ -16,7 +16,7 @@ data class DeviceViewModel(
     val hasAddress: Boolean,
     val buttonType: ButtonType,
     var isShareScreenButtonVisible: Boolean,
-    val isRemoveButtonVisible: Boolean,
+    val isPreviouslyConnected: Boolean,
     var isInProgress: Boolean = false,
     var packageName: String? = null,
     var isAdbCommandsButtonVisible: Boolean = false,
@@ -35,6 +35,9 @@ data class DeviceViewModel(
     val uniqueId: String
         get() = device.uniqueId
 
+    val isRemoveButtonVisible: Boolean
+        get() = isPreviouslyConnected
+
     enum class ButtonType {
         CONNECT, CONNECT_DISABLED, DISCONNECT
     }
@@ -47,7 +50,7 @@ data class DeviceViewModel(
 
         fun Device.toViewModel(
             customName: String?,
-            isRemoveButtonVisible: Boolean = false
+            isPreviouslyConnected: Boolean = false
         ): DeviceViewModel {
             val device = this
             val deviceType = device.detectDeviceType()
@@ -56,18 +59,18 @@ data class DeviceViewModel(
                 titleText = customName ?: device.name,
                 subtitleText = device.subtitleText(),
                 subtitleIcon = device.addressIcon(),
-                icon = device.icon(deviceType, isRemoveButtonVisible),
+                icon = device.icon(deviceType, isPreviouslyConnected),
                 hasAddress = device.hasAddress(),
                 buttonType = device.buttonType(deviceType),
                 isShareScreenButtonVisible = false,
-                isRemoveButtonVisible = isRemoveButtonVisible,
+                isPreviouslyConnected = isPreviouslyConnected,
                 deviceType = deviceType,
                 isConnected = device.isWifiDevice
             )
         }
 
         fun PinnedDevice.toViewModel(customName: String?): DeviceViewModel {
-            return toDevice().toViewModel(customName, isRemoveButtonVisible = true)
+            return toDevice().toViewModel(customName, isPreviouslyConnected = true)
         }
 
         private fun Device.subtitleText() = buildString {
