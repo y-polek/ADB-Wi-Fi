@@ -7,7 +7,6 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.ListSeparator
 import com.intellij.openapi.ui.popup.PopupStep
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
-import com.intellij.ui.AnimatedIcon
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
@@ -19,6 +18,9 @@ import dev.polek.adbwifi.model.AdbCommandConfig
 import dev.polek.adbwifi.services.AdbCommandsService
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.ButtonType
+import dev.polek.adbwifi.ui.view.buttons.IconButton
+import dev.polek.adbwifi.ui.view.buttons.LoadingPanel
+import dev.polek.adbwifi.ui.view.buttons.StyledButton
 import dev.polek.adbwifi.utils.Colors
 import dev.polek.adbwifi.utils.Icons
 import dev.polek.adbwifi.utils.makeBold
@@ -129,7 +131,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
 
         // Main action button (Connect/Disconnect) - expands to fill width
         if (device.isInProgress) {
-            actionsPanel.add(createLoadingButton(), BorderLayout.CENTER)
+            actionsPanel.add(LoadingPanel(LoadingPanel.Size.FULL_WIDTH), BorderLayout.CENTER)
         } else {
             val mainButton = createMainButton()
             mainButton.addActionListener {
@@ -148,7 +150,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
 
         if (device.isAdbCommandsButtonVisible) {
             iconButtonsPanel.add(Box.createHorizontalStrut(BUTTON_GAP))
-            val adbCommandsButton = createIconButton(Icons.ADB_COMMANDS, PluginBundle.message("adbCommandsTooltip"))
+            val adbCommandsButton = IconButton(Icons.ADB_COMMANDS, PluginBundle.message("adbCommandsTooltip"))
             adbCommandsButton.addActionListener {
                 val event = MouseEvent(
                     adbCommandsButton,
@@ -168,9 +170,9 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         if (device.isShareScreenButtonVisible) {
             iconButtonsPanel.add(Box.createHorizontalStrut(BUTTON_GAP))
             if (device.isShareScreenInProgress) {
-                iconButtonsPanel.add(createLoadingIconButton())
+                iconButtonsPanel.add(LoadingPanel(LoadingPanel.Size.ICON))
             } else {
-                val shareScreenButton = createIconButton(Icons.SHARE_SCREEN, PluginBundle.message("shareScreenTooltip"))
+                val shareScreenButton = IconButton(Icons.SHARE_SCREEN, PluginBundle.message("shareScreenTooltip"))
                 shareScreenButton.addActionListener {
                     listener?.onShareScreenClicked(device)
                 }
@@ -180,14 +182,14 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
 
         if (device.isRemoveButtonVisible) {
             iconButtonsPanel.add(Box.createHorizontalStrut(BUTTON_GAP))
-            val removeButton = createIconButton(Icons.DELETE, PluginBundle.message("removeDeviceTooltip"))
+            val removeButton = IconButton(Icons.DELETE, PluginBundle.message("removeDeviceTooltip"))
             removeButton.addActionListener {
                 listener?.onRemoveDeviceClicked(device)
             }
             iconButtonsPanel.add(removeButton)
         }
 
-        val menuButton = createIconButton(Icons.MENU, null, showBorder = false)
+        val menuButton = IconButton(Icons.MENU, showBorder = false)
         menuButton.addActionListener {
             val event = MouseEvent(
                 menuButton,
@@ -208,268 +210,25 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
     }
 
     private fun createMainButton(): JButton {
+        val connectText = PluginBundle.message("connectButton")
+        val disconnectText = PluginBundle.message("disconnectButton")
+
         return when (device.buttonType) {
             ButtonType.CONNECT -> {
-                if (device.isRemoveButtonVisible) {
-                    createSecondaryConnectButton()
+                if (device.isPreviouslyConnected) {
+                    StyledButton(connectText, StyledButton.Style.SECONDARY)
                 } else {
-                    createConnectButton()
+                    StyledButton(connectText, StyledButton.Style.PRIMARY)
                 }
             }
             ButtonType.CONNECT_DISABLED -> {
-                if (device.isRemoveButtonVisible) {
-                    createSecondaryConnectButton().apply { isEnabled = false }
+                if (device.isPreviouslyConnected) {
+                    StyledButton(connectText, StyledButton.Style.SECONDARY).apply { isEnabled = false }
                 } else {
-                    createConnectButton().apply { isEnabled = false }
+                    StyledButton(connectText, StyledButton.Style.PRIMARY).apply { isEnabled = false }
                 }
             }
-            ButtonType.DISCONNECT -> createDisconnectButton()
-        }
-    }
-
-    private fun createConnectButton(): JButton {
-        return object : JButton(PluginBundle.message("connectButton")) {
-            init {
-                preferredSize = Dimension(0, BUTTON_HEIGHT)
-                minimumSize = Dimension(0, BUTTON_HEIGHT)
-                isOpaque = false
-                isContentAreaFilled = false
-                isFocusPainted = false
-                isBorderPainted = false
-                isRolloverEnabled = true
-                background = Colors.GREEN_BUTTON_BG
-                foreground = Colors.GREEN_BUTTON_TEXT
-            }
-
-            override fun paintComponent(g: Graphics) {
-                val g2 = g.create() as Graphics2D
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-                g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
-
-                if (isEnabled) {
-                    // Draw background with hover/pressed states
-                    g2.color = when {
-                        model.isPressed -> Colors.GREEN_BUTTON_BG.darker()
-                        model.isRollover -> Colors.GREEN_BUTTON_BG.darker()
-                        else -> background
-                    }
-                    g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
-
-                    // Draw text centered
-                    g2.color = foreground
-                } else {
-                    // Draw grayed out background
-                    g2.color = Colors.DISABLED_BUTTON_BG
-                    g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
-
-                    // Draw text centered with reduced opacity
-                    g2.color = Colors.SECONDARY_TEXT
-                }
-
-                g2.font = font
-                val fm = g2.fontMetrics
-                val textWidth = fm.stringWidth(text)
-                val x = (width - textWidth) / 2
-                val y = (height - fm.height) / 2 + fm.ascent
-                g2.drawString(text, x, y)
-
-                g2.dispose()
-            }
-        }
-    }
-
-    private fun createSecondaryConnectButton(): JButton {
-        return object : JButton(PluginBundle.message("connectButton")) {
-            init {
-                preferredSize = Dimension(0, BUTTON_HEIGHT)
-                minimumSize = Dimension(0, BUTTON_HEIGHT)
-                isOpaque = false
-                isContentAreaFilled = false
-                isFocusPainted = false
-                isBorderPainted = false
-                isRolloverEnabled = true
-                background = Colors.ICON_BUTTON_BG
-                foreground = Colors.PRIMARY_TEXT
-            }
-
-            override fun paintComponent(g: Graphics) {
-                val g2 = g.create() as Graphics2D
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-                g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
-
-                if (isEnabled) {
-                    // Draw background with hover/pressed states
-                    g2.color = when {
-                        model.isPressed -> Colors.BUTTON_HOVER_BG
-                        model.isRollover -> Colors.BUTTON_HOVER_BG
-                        else -> background
-                    }
-                    g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
-
-                    // Draw border
-                    g2.color = Colors.CARD_BORDER
-                    g2.drawRoundRect(0, 0, width - 1, height - 1, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
-
-                    // Draw text centered
-                    g2.color = foreground
-                } else {
-                    // Draw grayed out background
-                    g2.color = Colors.DISABLED_BUTTON_BG
-                    g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
-
-                    // Draw text centered with reduced opacity
-                    g2.color = Colors.SECONDARY_TEXT
-                }
-
-                g2.font = font
-                val fm = g2.fontMetrics
-                val textWidth = fm.stringWidth(text)
-                val x = (width - textWidth) / 2
-                val y = (height - fm.height) / 2 + fm.ascent
-                g2.drawString(text, x, y)
-
-                g2.dispose()
-            }
-        }
-    }
-
-    private fun createDisconnectButton(): JButton {
-        return object : JButton(PluginBundle.message("disconnectButton")) {
-            init {
-                preferredSize = Dimension(0, BUTTON_HEIGHT)
-                minimumSize = Dimension(0, BUTTON_HEIGHT)
-                isOpaque = false
-                isContentAreaFilled = false
-                isFocusPainted = false
-                isBorderPainted = false
-                isRolloverEnabled = true
-                background = Colors.RED_BUTTON_BG
-                foreground = Colors.RED_BUTTON_TEXT
-            }
-
-            override fun paintComponent(g: Graphics) {
-                val g2 = g.create() as Graphics2D
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-                g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
-
-                // Draw background with hover/pressed states
-                g2.color = when {
-                    model.isPressed -> Colors.RED_BUTTON_BORDER
-                    model.isRollover -> Colors.RED_BUTTON_BORDER
-                    else -> background
-                }
-                g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
-
-                // Draw border
-                g2.color = Colors.RED_BUTTON_BORDER
-                g2.drawRoundRect(0, 0, width - 1, height - 1, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
-
-                // Draw text centered
-                g2.color = foreground
-                g2.font = font
-                val fm = g2.fontMetrics
-                val textWidth = fm.stringWidth(text)
-                val x = (width - textWidth) / 2
-                val y = (height - fm.height) / 2 + fm.ascent
-                g2.drawString(text, x, y)
-
-                g2.dispose()
-            }
-        }
-    }
-
-    private fun createLoadingButton(): JPanel {
-        return object : JPanel(GridBagLayout()) {
-            private val spinnerIcon = AnimatedIcon.Default()
-
-            init {
-                preferredSize = Dimension(0, BUTTON_HEIGHT)
-                minimumSize = Dimension(0, BUTTON_HEIGHT)
-                isOpaque = false
-                add(JBLabel(spinnerIcon))
-            }
-
-            override fun paintComponent(g: Graphics) {
-                val g2 = g.create() as Graphics2D
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-
-                // Draw grayed out background (same as disabled button)
-                g2.color = Colors.DISABLED_BUTTON_BG
-                g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
-
-                g2.dispose()
-                super.paintComponent(g)
-            }
-        }
-    }
-
-    private fun createLoadingIconButton(): JPanel {
-        return object : JPanel(GridBagLayout()) {
-            private val spinnerIcon = AnimatedIcon.Default()
-
-            init {
-                preferredSize = Dimension(ICON_BUTTON_SIZE, ICON_BUTTON_SIZE)
-                minimumSize = Dimension(ICON_BUTTON_SIZE, ICON_BUTTON_SIZE)
-                maximumSize = Dimension(ICON_BUTTON_SIZE, ICON_BUTTON_SIZE)
-                isOpaque = false
-                add(JBLabel(spinnerIcon))
-            }
-
-            override fun paintComponent(g: Graphics) {
-                val g2 = g.create() as Graphics2D
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-
-                // Draw grayed out background with border (same style as icon buttons)
-                g2.color = Colors.ICON_BUTTON_BG
-                g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
-
-                g2.color = Colors.CARD_BORDER
-                g2.drawRoundRect(0, 0, width - 1, height - 1, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
-
-                g2.dispose()
-                super.paintComponent(g)
-            }
-        }
-    }
-
-    private fun createIconButton(icon: Icon, tooltip: String?, showBorder: Boolean = true): JButton {
-        return object : JButton() {
-            init {
-                preferredSize = Dimension(ICON_BUTTON_SIZE, ICON_BUTTON_SIZE)
-                minimumSize = Dimension(ICON_BUTTON_SIZE, ICON_BUTTON_SIZE)
-                maximumSize = Dimension(ICON_BUTTON_SIZE, ICON_BUTTON_SIZE)
-                isOpaque = false
-                isContentAreaFilled = false
-                isFocusPainted = false
-                isBorderPainted = false
-                isRolloverEnabled = true
-                toolTipText = tooltip
-                background = Colors.ICON_BUTTON_BG
-            }
-
-            override fun paintComponent(g: Graphics) {
-                val g2 = g.create() as Graphics2D
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-
-                if (showBorder) {
-                    g2.color = when {
-                        model.isPressed -> Colors.BUTTON_HOVER_BG
-                        model.isRollover -> Colors.BUTTON_HOVER_BG
-                        else -> background
-                    }
-                    g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
-
-                    g2.color = Colors.CARD_BORDER
-                    g2.drawRoundRect(0, 0, width - 1, height - 1, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
-                }
-
-                // Draw icon centered
-                val iconX = (width - icon.iconWidth) / 2
-                val iconY = (height - icon.iconHeight) / 2
-                icon.paintIcon(this, g2, iconX, iconY)
-
-                g2.dispose()
-            }
+            ButtonType.DISCONNECT -> StyledButton(disconnectText, StyledButton.Style.DANGER)
         }
     }
 
@@ -741,12 +500,9 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
 
     private companion object {
         private const val CORNER_RADIUS = 5
-        private const val BUTTON_CORNER_RADIUS = 5
         private const val CARD_PADDING = 10
         private const val ICON_GAP = 8
         private const val SEPARATOR_MARGIN = 12
         private const val BUTTON_GAP = 8
-        private const val BUTTON_HEIGHT = 32
-        private const val ICON_BUTTON_SIZE = 32
     }
 }
