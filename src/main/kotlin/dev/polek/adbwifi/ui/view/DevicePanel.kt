@@ -167,11 +167,15 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
 
         if (device.isShareScreenButtonVisible) {
             iconButtonsPanel.add(Box.createHorizontalStrut(BUTTON_GAP))
-            val shareScreenButton = createIconButton(Icons.SHARE_SCREEN, PluginBundle.message("shareScreenTooltip"))
-            shareScreenButton.addActionListener {
-                listener?.onShareScreenClicked(device)
+            if (device.isShareScreenInProgress) {
+                iconButtonsPanel.add(createLoadingIconButton())
+            } else {
+                val shareScreenButton = createIconButton(Icons.SHARE_SCREEN, PluginBundle.message("shareScreenTooltip"))
+                shareScreenButton.addActionListener {
+                    listener?.onShareScreenClicked(device)
+                }
+                iconButtonsPanel.add(shareScreenButton)
             }
-            iconButtonsPanel.add(shareScreenButton)
         }
 
         if (device.isRemoveButtonVisible) {
@@ -232,6 +236,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 isContentAreaFilled = false
                 isFocusPainted = false
                 isBorderPainted = false
+                isRolloverEnabled = true
                 background = Colors.GREEN_BUTTON_BG
                 foreground = Colors.GREEN_BUTTON_TEXT
             }
@@ -242,8 +247,12 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
 
                 if (isEnabled) {
-                    // Draw background
-                    g2.color = if (model.isPressed) Colors.GREEN_BUTTON_BG.darker() else background
+                    // Draw background with hover/pressed states
+                    g2.color = when {
+                        model.isPressed -> Colors.GREEN_BUTTON_BG.darker()
+                        model.isRollover -> Colors.GREEN_BUTTON_BG.darker()
+                        else -> background
+                    }
                     g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
 
                     // Draw text centered
@@ -278,6 +287,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 isContentAreaFilled = false
                 isFocusPainted = false
                 isBorderPainted = false
+                isRolloverEnabled = true
                 background = Colors.ICON_BUTTON_BG
                 foreground = Colors.PRIMARY_TEXT
             }
@@ -288,8 +298,12 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
 
                 if (isEnabled) {
-                    // Draw background
-                    g2.color = if (model.isPressed) Colors.CARD_BORDER else background
+                    // Draw background with hover/pressed states
+                    g2.color = when {
+                        model.isPressed -> Colors.CARD_BORDER
+                        model.isRollover -> Colors.CARD_BORDER
+                        else -> background
+                    }
                     g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
 
                     // Draw border
@@ -328,6 +342,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 isContentAreaFilled = false
                 isFocusPainted = false
                 isBorderPainted = false
+                isRolloverEnabled = true
                 background = Colors.RED_BUTTON_BG
                 foreground = Colors.RED_BUTTON_TEXT
             }
@@ -337,8 +352,12 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
                 g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
 
-                // Draw background
-                g2.color = if (model.isPressed) Colors.RED_BUTTON_BORDER else background
+                // Draw background with hover/pressed states
+                g2.color = when {
+                    model.isPressed -> Colors.RED_BUTTON_BORDER
+                    model.isRollover -> Colors.RED_BUTTON_BORDER
+                    else -> background
+                }
                 g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
 
                 // Draw border
@@ -384,6 +403,35 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         }
     }
 
+    private fun createLoadingIconButton(): JPanel {
+        return object : JPanel(GridBagLayout()) {
+            private val spinnerIcon = AnimatedIcon.Default()
+
+            init {
+                preferredSize = Dimension(ICON_BUTTON_SIZE, ICON_BUTTON_SIZE)
+                minimumSize = Dimension(ICON_BUTTON_SIZE, ICON_BUTTON_SIZE)
+                maximumSize = Dimension(ICON_BUTTON_SIZE, ICON_BUTTON_SIZE)
+                isOpaque = false
+                add(JBLabel(spinnerIcon))
+            }
+
+            override fun paintComponent(g: Graphics) {
+                val g2 = g.create() as Graphics2D
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+
+                // Draw grayed out background with border (same style as icon buttons)
+                g2.color = Colors.ICON_BUTTON_BG
+                g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
+
+                g2.color = Colors.CARD_BORDER
+                g2.drawRoundRect(0, 0, width - 1, height - 1, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
+
+                g2.dispose()
+                super.paintComponent(g)
+            }
+        }
+    }
+
     private fun createIconButton(icon: Icon, tooltip: String?, showBorder: Boolean = true): JButton {
         return object : JButton() {
             init {
@@ -394,6 +442,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 isContentAreaFilled = false
                 isFocusPainted = false
                 isBorderPainted = false
+                isRolloverEnabled = true
                 toolTipText = tooltip
                 background = Colors.ICON_BUTTON_BG
             }
@@ -403,11 +452,13 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
                 if (showBorder) {
-                    // Draw background
-                    g2.color = if (model.isPressed) Colors.CARD_BORDER else background
+                    g2.color = when {
+                        model.isPressed -> Colors.CARD_BORDER
+                        model.isRollover -> Colors.CARD_BORDER
+                        else -> background
+                    }
                     g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
 
-                    // Draw border
                     g2.color = Colors.CARD_BORDER
                     g2.drawRoundRect(0, 0, width - 1, height - 1, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
                 }

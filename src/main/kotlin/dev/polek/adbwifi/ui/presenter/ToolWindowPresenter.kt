@@ -17,6 +17,7 @@ import dev.polek.adbwifi.utils.BasePresenter
 import dev.polek.adbwifi.utils.copyToClipboard
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -37,6 +38,7 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
     private var pinnedDevices: List<DeviceViewModel> = pinDeviceService.pinnedDevices.toViewModel()
 
     private var connectingDevices = mutableSetOf<Pair<String/*Device's unique ID*/, String/*IP address*/>>()
+    private var sharingScreenDevices = mutableSetOf<Pair<String/*Device's unique ID*/, String/*IP address*/>>()
     private val selectedPackages = mutableMapOf<String, String>()
     private var deviceCollectionJob: Job? = null
     private var logVisibilityJob: Job? = null
@@ -98,11 +100,25 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
 
     fun onShareScreenButtonClicked(device: DeviceViewModel) {
         if (scrcpyService.isScrcpyValid()) {
+            sharingScreenDevices.add(device)
+            updateDeviceLists()
+
+            // Hide progress after 3 seconds max
+            val timeoutJob = launch {
+                delay(SHARE_SCREEN_PROGRESS_DURATION_TIMEOUT_MS)
+                sharingScreenDevices.remove(device)
+                updateDeviceLists()
+            }
+
             launch(IO) {
                 val result = scrcpyService.share(device.device)
                 if (result.isError) {
                     view?.showScrcpyError(result.output)
                 }
+            }.invokeOnCompletion {
+                timeoutJob.cancel()
+                sharingScreenDevices.remove(device)
+                updateDeviceLists()
             }
         } else {
             view?.showInvalidScrcpyLocationError()
@@ -259,6 +275,7 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
         devices.forEach {
             it.isInProgress = connectingDevices.contains(it)
             it.isShareScreenButtonVisible = isScrcpyEnabled
+            it.isShareScreenInProgress = sharingScreenDevices.contains(it)
             it.isAdbCommandsButtonVisible = true
             it.packageName = packageName
         }
@@ -372,6 +389,7 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
     }
 
     private companion object {
+        private const val SHARE_SCREEN_PROGRESS_DURATION_TIMEOUT_MS = 3000L
 
         private fun MutableSet<Pair<String/*Unique ID*/, String/*IP address*/>>.add(device: DeviceViewModel) {
             this.add(device.uniqueId to device.address.orEmpty())
