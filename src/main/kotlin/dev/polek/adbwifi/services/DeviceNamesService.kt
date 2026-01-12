@@ -12,19 +12,35 @@ import com.intellij.util.xmlb.annotations.OptionTag
 )
 class DeviceNamesService : PersistentStateComponent<DeviceNamesService> {
 
+    // Legacy: maps serial number to name (kept for backwards compatibility)
     @OptionTag
-    private val deviceNames = mutableMapOf<String/*Serial number*/, String/*Name*/>()
+    private val deviceNames = mutableMapOf<String, String>()
 
-    fun setName(serialNumber: String, name: String) {
-        deviceNames[serialNumber] = name
+    // Maps unique ID (serial:address) to custom name
+    @OptionTag
+    private val deviceNamesByUniqueId = mutableMapOf<String, String>()
+
+    /**
+     * Sets a custom name for a specific device by unique ID.
+     */
+    fun setNameByUniqueId(uniqueId: String, name: String) {
+        deviceNamesByUniqueId[uniqueId] = name
     }
 
-    fun removeName(serialNumber: String) {
+    /**
+     * Removes all custom names for a device (both by unique ID and legacy serial-based).
+     */
+    fun removeAllNames(serialNumber: String, uniqueId: String) {
+        deviceNamesByUniqueId.remove(uniqueId)
         deviceNames.remove(serialNumber)
     }
 
-    fun findName(serialNumber: String): String? {
-        return deviceNames[serialNumber]
+    /**
+     * Finds a custom name for a device.
+     * First checks for a name by unique ID, then falls back to legacy serial-based name.
+     */
+    fun findName(serialNumber: String, uniqueId: String): String? {
+        return deviceNamesByUniqueId[uniqueId] ?: deviceNames[serialNumber]
     }
 
     override fun getState() = this

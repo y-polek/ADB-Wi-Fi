@@ -8,13 +8,13 @@ import com.intellij.util.ui.JBUI
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.services.DeviceNamesService
 import dev.polek.adbwifi.ui.model.DeviceViewModel
-import dev.polek.adbwifi.utils.GridBagLayoutPanel
 import dev.polek.adbwifi.utils.makeMonospaced
 import dev.polek.adbwifi.utils.onTextChanged
-import java.awt.GridBagConstraints
-import javax.swing.Action
-import javax.swing.JButton
+import java.awt.BorderLayout
+import javax.swing.Box
+import javax.swing.BoxLayout
 import javax.swing.JComponent
+import javax.swing.JPanel
 
 class RenameDeviceDialogWrapper(
     private val device: DeviceViewModel
@@ -23,45 +23,33 @@ class RenameDeviceDialogWrapper(
     private val deviceNamesService = service<DeviceNamesService>()
 
     private lateinit var textField: JBTextField
-    private lateinit var renameButton: JButton
 
     init {
         init()
         isResizable = false
         title = PluginBundle.message("renameDeviceTitle")
+        setOKButtonText(PluginBundle.message("renameButton"))
     }
 
     override fun createCenterPanel(): JComponent {
-        val panel = GridBagLayoutPanel()
+        val panel = JPanel(BorderLayout())
+        panel.border = JBUI.Borders.empty(0, 0, 8, 0)
 
-        textField = JBTextField(device.titleText, 25)
+        val contentPanel = JPanel()
+        contentPanel.layout = BoxLayout(contentPanel, BoxLayout.Y_AXIS)
+
+        // Text field
+        textField = JBTextField(device.titleText, 30)
         textField.selectionStart = 0
         textField.selectionEnd = textField.text.length
         textField.makeMonospaced()
         textField.onTextChanged(::updateUi)
-        textField.addActionListener {
-            renameDeviceAndDismiss()
-        }
-        panel.add(
-            textField,
-            GridBagConstraints().apply {
-                fill = GridBagConstraints.HORIZONTAL
-                weightx = 1.0
-                insets = JBUI.insetsRight(10)
-            }
-        )
+        textField.alignmentX = JComponent.LEFT_ALIGNMENT
+        contentPanel.add(textField)
 
-        renameButton = JButton(PluginBundle.message("renameButton"))
-        renameButton.addActionListener {
-            renameDeviceAndDismiss()
-        }
-        panel.add(
-            renameButton,
-            GridBagConstraints().apply {
-                gridx = 3
-            }
-        )
+        contentPanel.add(Box.createVerticalStrut(4))
 
+        // Reset link
         val resetLink = HyperlinkLabel(PluginBundle.message("resetToOriginalName", device.device.name))
         resetLink.addHyperlinkListener {
             textField.text = device.device.name
@@ -69,33 +57,35 @@ class RenameDeviceDialogWrapper(
             textField.requestFocus()
             updateUi()
         }
-        panel.add(
-            resetLink,
-            GridBagConstraints().apply {
-                gridy = 1
-                gridwidth = 4
-                insets = JBUI.insetsTop(5)
-            }
-        )
+        resetLink.alignmentX = JComponent.LEFT_ALIGNMENT
+        contentPanel.add(resetLink)
+
+        panel.add(contentPanel, BorderLayout.CENTER)
 
         updateUi()
 
         return panel
     }
 
-    override fun createActions(): Array<Action> = emptyArray()
+    override fun doOKAction() {
+        renameDevice()
+        super.doOKAction()
+    }
 
-    private fun renameDeviceAndDismiss() {
+    private fun renameDevice() {
         val newName = textField.text.trim()
-        if (newName == device.device.name) {
-            deviceNamesService.removeName(device.serialNumber)
+        val isOriginalName = newName == device.device.name
+
+        if (isOriginalName) {
+            // Reset to original name - remove all custom names (unique ID and legacy serial-based)
+            deviceNamesService.removeAllNames(device.serialNumber, device.uniqueId)
         } else {
-            deviceNamesService.setName(device.serialNumber, newName)
+            // Set custom name for this specific device
+            deviceNamesService.setNameByUniqueId(device.uniqueId, newName)
         }
-        dispose()
     }
 
     private fun updateUi() {
-        renameButton.isEnabled = textField.text.isNotBlank()
+        isOKActionEnabled = textField.text.isNotBlank()
     }
 }

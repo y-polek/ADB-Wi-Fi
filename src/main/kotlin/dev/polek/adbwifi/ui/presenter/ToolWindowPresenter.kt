@@ -8,6 +8,7 @@ import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.model.AdbCommandConfig
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.PinnedDevice
+import dev.polek.adbwifi.model.PinnedDevice.Companion.toDevice
 import dev.polek.adbwifi.services.*
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.Companion.toViewModel
@@ -152,7 +153,9 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
 
     private fun updateDeviceNames() {
         devices = devices.map {
-            it.device.toViewModel(customName = deviceNamesService.findName(it.serialNumber))
+            it.device.toViewModel(
+                customName = deviceNamesService.findName(it.serialNumber, it.uniqueId)
+            )
         }
         pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
         updateDeviceLists()
@@ -261,7 +264,7 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
 
     private fun onDevicesUpdated(model: List<Device>) {
         devices = model.map {
-            it.toViewModel(customName = deviceNamesService.findName(it.serialNumber))
+            it.toViewModel(customName = deviceNamesService.findName(it.serialNumber, it.uniqueId))
         }
         pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
 
@@ -383,7 +386,11 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
             }
             .sortedBy { it.name }
             .map {
-                it.toViewModel(customName = deviceNamesService.findName(it.serialNumber))
+                val device = it.toDevice()
+                device.toViewModel(
+                    customName = deviceNamesService.findName(device.serialNumber, device.uniqueId),
+                    isPreviouslyConnected = true
+                )
             }
             .toList()
     }
