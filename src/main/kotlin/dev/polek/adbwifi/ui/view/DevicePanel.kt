@@ -259,7 +259,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                     g2.color = foreground
                 } else {
                     // Draw grayed out background
-                    g2.color = Colors.CARD_BORDER
+                    g2.color = Colors.DISABLED_BUTTON_BG
                     g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
 
                     // Draw text centered with reduced opacity
@@ -300,8 +300,8 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 if (isEnabled) {
                     // Draw background with hover/pressed states
                     g2.color = when {
-                        model.isPressed -> Colors.CARD_BORDER
-                        model.isRollover -> Colors.CARD_BORDER
+                        model.isPressed -> Colors.BUTTON_HOVER_BG
+                        model.isRollover -> Colors.BUTTON_HOVER_BG
                         else -> background
                     }
                     g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
@@ -314,7 +314,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                     g2.color = foreground
                 } else {
                     // Draw grayed out background
-                    g2.color = Colors.CARD_BORDER
+                    g2.color = Colors.DISABLED_BUTTON_BG
                     g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
 
                     // Draw text centered with reduced opacity
@@ -394,7 +394,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
                 // Draw grayed out background (same as disabled button)
-                g2.color = Colors.CARD_BORDER
+                g2.color = Colors.DISABLED_BUTTON_BG
                 g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
 
                 g2.dispose()
@@ -453,8 +453,8 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
 
                 if (showBorder) {
                     g2.color = when {
-                        model.isPressed -> Colors.CARD_BORDER
-                        model.isRollover -> Colors.CARD_BORDER
+                        model.isPressed -> Colors.BUTTON_HOVER_BG
+                        model.isRollover -> Colors.BUTTON_HOVER_BG
                         else -> background
                     }
                     g2.fillRoundRect(0, 0, width, height, BUTTON_CORNER_RADIUS * 2, BUTTON_CORNER_RADIUS * 2)
