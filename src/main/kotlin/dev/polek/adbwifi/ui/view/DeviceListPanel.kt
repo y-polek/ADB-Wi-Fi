@@ -1,9 +1,11 @@
 package dev.polek.adbwifi.ui.view
 
 import com.intellij.icons.AllIcons
+import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.JBUI
+import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.utils.Colors
 import java.awt.Cursor
@@ -24,7 +26,8 @@ class DeviceListPanel(
     showHeader: Boolean = false,
     private val title: String? = null,
     isHeaderExpanded: Boolean = true,
-    private val onHeaderExpandChanged: ((isExpanded: Boolean) -> Unit)? = null
+    private val onHeaderExpandChanged: ((isExpanded: Boolean) -> Unit)? = null,
+    private val onClearClicked: (() -> Unit)? = null
 ) : JBPanel<DeviceListPanel>() {
 
     var devices: List<DeviceViewModel> = emptyList()
@@ -104,11 +107,27 @@ class DeviceListPanel(
             }
         )
 
+        // Clear link
+        if (onClearClicked != null) {
+            val clearLink = HyperlinkLabel(PluginBundle.message("clearPreviouslyConnectedButton"))
+            clearLink.addHyperlinkListener {
+                onClearClicked.invoke()
+            }
+            headerPanel.add(
+                clearLink,
+                GridBagConstraints().apply {
+                    gridx = 1
+                    gridy = 0
+                    insets = JBUI.insets(0, 8)
+                }
+            )
+        }
+
         headerIcon = JBLabel(ICON_EXPANDED)
         headerPanel.add(
             headerIcon!!,
             GridBagConstraints().apply {
-                gridx = 1
+                gridx = 2
                 gridy = 0
             }
         )

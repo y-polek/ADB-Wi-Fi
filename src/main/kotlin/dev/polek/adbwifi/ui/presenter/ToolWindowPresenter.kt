@@ -146,6 +146,16 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
         updateDeviceLists()
     }
 
+    fun onClearPreviouslyConnectedClicked() {
+        view?.showClearPreviouslyConnectedConfirmation()
+    }
+
+    fun onClearPreviouslyConnectedConfirmed() {
+        pinDeviceService.clearAllPreviouslyConnectedDevices()
+        pinnedDevices = emptyList()
+        updateDeviceLists()
+    }
+
     fun onRenameDeviceClicked(device: DeviceViewModel) {
         view?.showRenameDeviceDialog(device)
         updateDeviceNames()

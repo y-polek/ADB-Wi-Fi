@@ -25,5 +25,7 @@ interface ToolWindowView {
 
     fun showRemoveDeviceConfirmation(device: DeviceViewModel)
 
+    fun showClearPreviouslyConnectedConfirmation()
+
     fun showRenameDeviceDialog(device: DeviceViewModel)
 }

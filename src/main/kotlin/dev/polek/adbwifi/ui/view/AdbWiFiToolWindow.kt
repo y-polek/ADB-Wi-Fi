@@ -106,6 +106,9 @@ class AdbWiFiToolWindow(
         isHeaderExpanded = propertiesService.isPreviouslyConnectedDevicesExpanded,
         onHeaderExpandChanged = { isExpanded ->
             propertiesService.isPreviouslyConnectedDevicesExpanded = isExpanded
+        },
+        onClearClicked = {
+            presenter.onClearPreviouslyConnectedClicked()
         }
     )
     private val logPanel = LogPanel()
@@ -280,6 +283,20 @@ class AdbWiFiToolWindow(
             .noText(PluginBundle.message("cancelButton"))
             .doNotAsk(doNotAskAgain)
             .ask(project)
+    }
+
+    override fun showClearPreviouslyConnectedConfirmation() {
+        val confirmed = MessageDialogBuilder.yesNo(
+            title = PluginBundle.message("previouslyConnectedTitle"),
+            message = PluginBundle.message("clearPreviouslyConnectedConfirmation")
+        )
+            .yesText(PluginBundle.message("clearPreviouslyConnectedButton"))
+            .noText(PluginBundle.message("cancelButton"))
+            .ask(project)
+
+        if (confirmed) {
+            presenter.onClearPreviouslyConnectedConfirmed()
+        }
     }
 
     override fun showRenameDeviceDialog(device: DeviceViewModel) {

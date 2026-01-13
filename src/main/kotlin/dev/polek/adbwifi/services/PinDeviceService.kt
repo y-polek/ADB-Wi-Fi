@@ -32,6 +32,10 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
         pinnedDevices = pinnedDevices.remove(device)
     }
 
+    fun clearAllPreviouslyConnectedDevices() {
+        pinnedDevices = emptyList()
+    }
+
     override fun getState() = this
 
     override fun loadState(state: PinDeviceService) {
