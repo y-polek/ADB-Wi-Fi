@@ -6,6 +6,7 @@ import java.awt.Dimension
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.RenderingHints
+import javax.swing.Icon
 import javax.swing.JButton
 
 /**
@@ -13,12 +14,14 @@ import javax.swing.JButton
  */
 class StyledButton(
     text: String,
-    private val style: Style
+    private val style: Style,
+    private val icon: Icon? = null
 ) : JButton(text) {
 
     init {
         preferredSize = Dimension(0, BUTTON_HEIGHT)
         minimumSize = Dimension(0, BUTTON_HEIGHT)
+        maximumSize = Dimension(Int.MAX_VALUE, BUTTON_HEIGHT)
         isOpaque = false
         isContentAreaFilled = false
         isFocusPainted = false
@@ -48,23 +51,37 @@ class StyledButton(
                 g2.drawRoundRect(0, 0, width - 1, height - 1, CORNER_RADIUS * 2, CORNER_RADIUS * 2)
             }
 
-            // Draw text centered
             g2.color = foreground
         } else {
             // Draw grayed out background
             g2.color = Colors.DISABLED_BUTTON_BG
             g2.fillRoundRect(0, 0, width, height, CORNER_RADIUS * 2, CORNER_RADIUS * 2)
 
-            // Draw text centered with reduced opacity
             g2.color = Colors.SECONDARY_TEXT
         }
 
         g2.font = font
         val fm = g2.fontMetrics
         val textWidth = fm.stringWidth(text)
-        val x = (width - textWidth) / 2
-        val y = (height - fm.height) / 2 + fm.ascent
-        g2.drawString(text, x, y)
+
+        if (icon != null) {
+            // Draw icon + text centered
+            val iconWidth = icon.iconWidth
+            val totalWidth = iconWidth + ICON_TEXT_GAP + textWidth
+            val startX = (width - totalWidth) / 2
+
+            val iconY = (height - icon.iconHeight) / 2
+            icon.paintIcon(this, g2, startX, iconY)
+
+            val textX = startX + iconWidth + ICON_TEXT_GAP
+            val textY = (height - fm.height) / 2 + fm.ascent
+            g2.drawString(text, textX, textY)
+        } else {
+            // Draw text only, centered
+            val x = (width - textWidth) / 2
+            val y = (height - fm.height) / 2 + fm.ascent
+            g2.drawString(text, x, y)
+        }
 
         g2.dispose()
     }
@@ -107,5 +124,6 @@ class StyledButton(
     private companion object {
         private const val BUTTON_HEIGHT = 32
         private const val CORNER_RADIUS = 5
+        private const val ICON_TEXT_GAP = 8
     }
 }

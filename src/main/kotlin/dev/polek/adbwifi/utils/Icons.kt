@@ -25,6 +25,7 @@ object Icons {
 
     // UI icons
     val PLUS = IconLoader.getIcon("/icons/plusIcon.svg", Icons::class.java)
+    val PLUS_WHITE = IconLoader.getIcon("/icons/plusIconWhite.svg", Icons::class.java)
     val HELP = IconLoader.getIcon("/icons/helpIcon.svg", Icons::class.java)
 
     val ADB_COMMANDS: Icon = AllIcons.Actions.Execute
