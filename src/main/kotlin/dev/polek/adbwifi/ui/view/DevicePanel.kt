@@ -7,7 +7,6 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.ListSeparator
 import com.intellij.openapi.ui.popup.PopupStep
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
-import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.JBUI
@@ -34,6 +33,8 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
 
     var listener: Listener? = null
 
+    private var isWideLayout = false
+
     override fun paintComponent(g: Graphics) {
         val g2 = g.create() as Graphics2D
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
@@ -54,6 +55,41 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         isOpaque = false // Don't paint default background - we paint rounded rect ourselves
         border = JBUI.Borders.empty(CARD_PADDING)
 
+        buildLayout()
+
+        addComponentListener(object : java.awt.event.ComponentAdapter() {
+            override fun componentResized(e: java.awt.event.ComponentEvent) {
+                val shouldBeWide = width >= WIDE_LAYOUT_THRESHOLD
+                if (shouldBeWide != isWideLayout) {
+                    isWideLayout = shouldBeWide
+                    rebuildLayout()
+                }
+            }
+        })
+    }
+
+    private fun rebuildLayout() {
+        removeAll()
+        buildLayout()
+        // Update maximum size since layout changed
+        maximumSize = Dimension(Int.MAX_VALUE, preferredSize.height)
+        revalidate()
+        repaint()
+        // Also revalidate parent to adjust for new size
+        parent?.revalidate()
+    }
+
+    private fun buildLayout() {
+        isWideLayout = width >= WIDE_LAYOUT_THRESHOLD
+
+        if (isWideLayout) {
+            buildWideLayout()
+        } else {
+            buildNarrowLayout()
+        }
+    }
+
+    private fun buildNarrowLayout() {
         // Main content panel
         val contentPanel = JPanel(BorderLayout(ICON_GAP, 0))
         contentPanel.isOpaque = false
@@ -66,7 +102,93 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
             contentPanel.add(iconLabel, BorderLayout.WEST)
         }
 
-        // Device info panel (name, android version, IP)
+        contentPanel.add(createInfoPanel(), BorderLayout.CENTER)
+        add(contentPanel, BorderLayout.NORTH)
+
+        // Separator
+        add(createSeparator(), BorderLayout.CENTER)
+
+        // Action buttons panel - use BorderLayout for flex-grow behavior
+        val actionsPanel = JPanel(BorderLayout(0, 0))
+        actionsPanel.isOpaque = false
+        actionsPanel.border = JBUI.Borders.emptyTop(SEPARATOR_MARGIN)
+
+        // Main action button (Connect/Disconnect) - expands to fill width
+        if (device.isInProgress) {
+            actionsPanel.add(LoadingPanel(LoadingPanel.Size.FULL_WIDTH), BorderLayout.CENTER)
+        } else {
+            val mainButton = createMainButton()
+            mainButton.addActionListener {
+                when (device.buttonType) {
+                    ButtonType.CONNECT, ButtonType.CONNECT_DISABLED -> listener?.onConnectButtonClicked(device)
+                    ButtonType.DISCONNECT -> listener?.onDisconnectButtonClicked(device)
+                }
+            }
+            actionsPanel.add(mainButton, BorderLayout.CENTER)
+        }
+
+        // Icon buttons panel (fixed width buttons on the right)
+        actionsPanel.add(createIconButtonsPanel(includeStrut = true), BorderLayout.EAST)
+        add(actionsPanel, BorderLayout.SOUTH)
+    }
+
+    private fun buildWideLayout() {
+        // Main content panel with device info on left and buttons on right
+        val contentPanel = JPanel(BorderLayout(WIDE_LAYOUT_GAP, 0))
+        contentPanel.isOpaque = false
+
+        // Left side: device icon + info
+        val leftPanel = JPanel(BorderLayout(ICON_GAP, 0))
+        leftPanel.isOpaque = false
+
+        device.icon?.let { icon ->
+            val iconLabel = JBLabel(icon)
+            iconLabel.verticalAlignment = SwingConstants.TOP
+            iconLabel.border = JBUI.Borders.emptyTop(2)
+            leftPanel.add(iconLabel, BorderLayout.WEST)
+        }
+
+        leftPanel.add(createInfoPanel(), BorderLayout.CENTER)
+        contentPanel.add(leftPanel, BorderLayout.CENTER)
+
+        // Right side: main button on top, icon buttons below (top-aligned)
+        val rightPanel = JPanel()
+        rightPanel.layout = BoxLayout(rightPanel, BoxLayout.Y_AXIS)
+        rightPanel.isOpaque = false
+
+        // Main action button (Connect/Disconnect) with fixed width
+        if (device.isInProgress) {
+            val loadingPanel = LoadingPanel(LoadingPanel.Size.FULL_WIDTH)
+            loadingPanel.preferredSize = Dimension(MAIN_BUTTON_WIDTH, loadingPanel.preferredSize.height)
+            loadingPanel.maximumSize = loadingPanel.preferredSize
+            loadingPanel.alignmentX = RIGHT_ALIGNMENT
+            rightPanel.add(loadingPanel)
+        } else {
+            val mainButton = createMainButton()
+            mainButton.preferredSize = Dimension(MAIN_BUTTON_WIDTH, mainButton.preferredSize.height)
+            mainButton.maximumSize = mainButton.preferredSize
+            mainButton.alignmentX = RIGHT_ALIGNMENT
+            mainButton.addActionListener {
+                when (device.buttonType) {
+                    ButtonType.CONNECT, ButtonType.CONNECT_DISABLED -> listener?.onConnectButtonClicked(device)
+                    ButtonType.DISCONNECT -> listener?.onDisconnectButtonClicked(device)
+                }
+            }
+            rightPanel.add(mainButton)
+        }
+
+        rightPanel.add(Box.createVerticalStrut(BUTTON_GAP))
+
+        // Icon buttons below the main button
+        val iconButtonsPanel = createIconButtonsPanel(includeStrut = false)
+        iconButtonsPanel.alignmentX = RIGHT_ALIGNMENT
+        rightPanel.add(iconButtonsPanel)
+
+        contentPanel.add(rightPanel, BorderLayout.EAST)
+        add(contentPanel, BorderLayout.NORTH)
+    }
+
+    private fun createInfoPanel(): JPanel {
         val infoPanel = JPanel()
         infoPanel.layout = BoxLayout(infoPanel, BoxLayout.Y_AXIS)
         infoPanel.isOpaque = false
@@ -94,7 +216,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         versionLabel.componentStyle = UIUtil.ComponentStyle.SMALL
         versionLabel.alignmentX = LEFT_ALIGNMENT
         infoPanel.add(versionLabel)
-        infoPanel.add(Box.createVerticalStrut(2))
+        infoPanel.add(Box.createVerticalStrut(4))
 
         // IP address
         val addressText = device.address?.let { "$it:${device.device.port}" } ?: ""
@@ -104,52 +226,31 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
             addressLabel.makeMonospaced()
             addressLabel.componentStyle = UIUtil.ComponentStyle.SMALL
             addressLabel.alignmentX = LEFT_ALIGNMENT
-            // Make it slightly more transparent
-            addressLabel.foreground = JBColor(
-                Colors.SECONDARY_TEXT.rgb and 0x00FFFFFF or (0xB3 shl 24),
-                Colors.SECONDARY_TEXT.rgb and 0x00FFFFFF or (0xB3 shl 24)
-            )
             infoPanel.add(addressLabel)
         }
 
-        contentPanel.add(infoPanel, BorderLayout.CENTER)
-        add(contentPanel, BorderLayout.NORTH)
+        return infoPanel
+    }
 
-        // Separator
+    private fun createSeparator(): JPanel {
         val separatorPanel = JPanel(BorderLayout())
         separatorPanel.isOpaque = false
         separatorPanel.border = JBUI.Borders.emptyTop(SEPARATOR_MARGIN)
         val separator = JSeparator()
         separator.foreground = Colors.SEPARATOR
         separatorPanel.add(separator, BorderLayout.CENTER)
-        add(separatorPanel, BorderLayout.CENTER)
+        return separatorPanel
+    }
 
-        // Action buttons panel - use BorderLayout for flex-grow behavior
-        val actionsPanel = JPanel(BorderLayout(0, 0))
-        actionsPanel.isOpaque = false
-        actionsPanel.border = JBUI.Borders.emptyTop(SEPARATOR_MARGIN)
-
-        // Main action button (Connect/Disconnect) - expands to fill width
-        if (device.isInProgress) {
-            actionsPanel.add(LoadingPanel(LoadingPanel.Size.FULL_WIDTH), BorderLayout.CENTER)
-        } else {
-            val mainButton = createMainButton()
-            mainButton.addActionListener {
-                when (device.buttonType) {
-                    ButtonType.CONNECT, ButtonType.CONNECT_DISABLED -> listener?.onConnectButtonClicked(device)
-                    ButtonType.DISCONNECT -> listener?.onDisconnectButtonClicked(device)
-                }
-            }
-            actionsPanel.add(mainButton, BorderLayout.CENTER)
-        }
-
-        // Icon buttons panel (fixed width buttons on the right)
+    private fun createIconButtonsPanel(includeStrut: Boolean): JPanel {
         val iconButtonsPanel = JPanel()
         iconButtonsPanel.layout = BoxLayout(iconButtonsPanel, BoxLayout.X_AXIS)
         iconButtonsPanel.isOpaque = false
 
         if (device.isAdbCommandsButtonVisible) {
-            iconButtonsPanel.add(Box.createHorizontalStrut(BUTTON_GAP))
+            if (includeStrut) {
+                iconButtonsPanel.add(Box.createHorizontalStrut(BUTTON_GAP))
+            }
             val adbCommandsButton = IconButton(Icons.ADB_COMMANDS, PluginBundle.message("adbCommandsTooltip"))
             adbCommandsButton.addActionListener {
                 val event = MouseEvent(
@@ -189,6 +290,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
             iconButtonsPanel.add(removeButton)
         }
 
+        iconButtonsPanel.add(Box.createHorizontalStrut(BUTTON_GAP))
         val menuButton = IconButton(Icons.MENU, showBorder = false)
         menuButton.addActionListener {
             val event = MouseEvent(
@@ -205,8 +307,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         }
         iconButtonsPanel.add(menuButton)
 
-        actionsPanel.add(iconButtonsPanel, BorderLayout.EAST)
-        add(actionsPanel, BorderLayout.SOUTH)
+        return iconButtonsPanel
     }
 
     private fun createMainButton(): JButton {
@@ -504,5 +605,8 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         private const val ICON_GAP = 8
         private const val SEPARATOR_MARGIN = 12
         private const val BUTTON_GAP = 8
+        private const val WIDE_LAYOUT_THRESHOLD = 400
+        private const val WIDE_LAYOUT_GAP = 16
+        private const val MAIN_BUTTON_WIDTH = 120
     }
 }
