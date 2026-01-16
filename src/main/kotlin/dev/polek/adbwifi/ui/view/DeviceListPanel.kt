@@ -8,13 +8,7 @@ import com.intellij.util.ui.JBUI
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.utils.Colors
-import java.awt.Cursor
-import java.awt.Dimension
-import java.awt.Graphics
-import java.awt.Graphics2D
-import java.awt.GridBagConstraints
-import java.awt.GridBagLayout
-import java.awt.RenderingHints
+import java.awt.*
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import javax.swing.Box
@@ -95,7 +89,7 @@ class DeviceListPanel(
 
         headerLabel = JBLabel().apply {
             foreground = Colors.PRIMARY_TEXT
-            font = font.deriveFont(java.awt.Font.BOLD, 12f)
+            font = font.deriveFont(Font.BOLD, 12f)
         }
         headerPanel.add(
             headerLabel!!,

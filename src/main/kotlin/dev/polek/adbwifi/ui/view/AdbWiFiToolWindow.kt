@@ -29,18 +29,11 @@ import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.presenter.ToolWindowPresenter
-import dev.polek.adbwifi.utils.GridBagLayoutPanel
-import dev.polek.adbwifi.utils.Icons
-import dev.polek.adbwifi.utils.panel
-import dev.polek.adbwifi.utils.setFontSize
+import dev.polek.adbwifi.utils.*
 import java.awt.GridBagConstraints
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import javax.swing.BorderFactory
-import javax.swing.BoxLayout
-import javax.swing.JComponent
-import javax.swing.JPanel
-import javax.swing.SwingConstants
+import javax.swing.*
 
 class AdbWiFiToolWindow(
     private val project: Project,
@@ -114,6 +107,7 @@ class AdbWiFiToolWindow(
     private val logPanel = LogPanel()
     private val topPanel = JBScrollPane().apply {
         val panel = JPanel()
+        panel.background = Colors.PANEL_BACKGROUND
         panel.layout = BoxLayout(panel, BoxLayout.PAGE_AXIS)
         panel.add(deviceListPanel)
         panel.add(pinnedDeviceListPanel)
