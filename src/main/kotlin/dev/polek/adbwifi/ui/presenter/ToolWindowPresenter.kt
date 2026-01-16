@@ -161,6 +161,14 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
         updateDeviceNames()
     }
 
+    fun onEditDeviceClicked(device: DeviceViewModel) {
+        view?.showEditDeviceDialog(device)
+        // Refresh pinned devices after editing (IP/port may have changed)
+        pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
+        updateDeviceNames()
+        updateDeviceLists()
+    }
+
     private fun updateDeviceNames() {
         devices = devices.map {
             it.device.toViewModel(

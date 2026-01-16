@@ -66,6 +66,17 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 }
             }
         })
+
+        // For previously connected devices, double-clicking on the panel opens the Edit dialog
+        if (device.isPreviouslyConnected) {
+            addMouseListener(object : MouseAdapter() {
+                override fun mouseClicked(e: MouseEvent) {
+                    if (e.clickCount == 2) {
+                        listener?.onEditDeviceClicked(device)
+                    }
+                }
+            })
+        }
     }
 
     private fun rebuildLayout() {
@@ -202,7 +213,11 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         nameLabel.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
                 if (e.clickCount == 2) {
-                    listener?.onRenameDeviceClicked(device)
+                    if (device.isPreviouslyConnected) {
+                        listener?.onEditDeviceClicked(device)
+                    } else {
+                        listener?.onRenameDeviceClicked(device)
+                    }
                 }
             }
         })
@@ -334,21 +349,31 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
     }
 
     private fun openDeviceMenu(device: DeviceViewModel, event: MouseEvent) {
-        val items = listOf(
-            DeviceMenuItem.Rename,
-            DeviceMenuItem.CopyId,
-            DeviceMenuItem.CopyAddress(device.hasAddress)
-        )
+        val items = if (device.isPreviouslyConnected) {
+            listOf(
+                DeviceMenuItem.Edit,
+                DeviceMenuItem.CopyId,
+                DeviceMenuItem.CopyAddress(device.hasAddress)
+            )
+        } else {
+            listOf(
+                DeviceMenuItem.Rename,
+                DeviceMenuItem.CopyId,
+                DeviceMenuItem.CopyAddress(device.hasAddress)
+            )
+        }
 
         val step = object : BaseListPopupStep<DeviceMenuItem>(null, items) {
             override fun getTextFor(value: DeviceMenuItem): String = when (value) {
                 is DeviceMenuItem.Rename -> PluginBundle.message("renameDeviceMenuItem")
+                is DeviceMenuItem.Edit -> PluginBundle.message("editDeviceMenuItem")
                 is DeviceMenuItem.CopyId -> PluginBundle.message("copyDeviceIdMenuItem")
                 is DeviceMenuItem.CopyAddress -> PluginBundle.message("copyIpAddressMenuItem")
             }
 
-            override fun getIconFor(value: DeviceMenuItem): Icon? = when (value) {
+            override fun getIconFor(value: DeviceMenuItem): Icon = when (value) {
                 is DeviceMenuItem.Rename -> AllIcons.Actions.Edit
+                is DeviceMenuItem.Edit -> AllIcons.Actions.Edit
                 is DeviceMenuItem.CopyId -> AllIcons.Actions.Copy
                 is DeviceMenuItem.CopyAddress -> AllIcons.Actions.Copy
             }
@@ -362,6 +387,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 return doFinalStep {
                     when (selectedValue) {
                         is DeviceMenuItem.Rename -> listener?.onRenameDeviceClicked(device)
+                        is DeviceMenuItem.Edit -> listener?.onEditDeviceClicked(device)
                         is DeviceMenuItem.CopyId -> listener?.onCopyDeviceIdClicked(device)
                         is DeviceMenuItem.CopyAddress -> listener?.onCopyDeviceAddressClicked(device)
                     }
@@ -569,6 +595,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
 
     private sealed class DeviceMenuItem {
         data object Rename : DeviceMenuItem()
+        data object Edit : DeviceMenuItem()
         data object CopyId : DeviceMenuItem()
         data class CopyAddress(val isEnabled: Boolean) : DeviceMenuItem()
     }
@@ -591,6 +618,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         fun onShareScreenClicked(device: DeviceViewModel)
         fun onRemoveDeviceClicked(device: DeviceViewModel)
         fun onRenameDeviceClicked(device: DeviceViewModel)
+        fun onEditDeviceClicked(device: DeviceViewModel)
         fun onCopyDeviceIdClicked(device: DeviceViewModel)
         fun onCopyDeviceAddressClicked(device: DeviceViewModel)
         fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig)

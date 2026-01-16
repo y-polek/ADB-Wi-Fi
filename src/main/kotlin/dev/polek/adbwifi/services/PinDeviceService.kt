@@ -36,6 +36,16 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
         pinnedDevices = emptyList()
     }
 
+    fun updatePinnedDevice(serialNumber: String, oldAddress: String, newAddress: String, newPort: Int) {
+        pinnedDevices = pinnedDevices.map { device ->
+            if (device.serialNumber == serialNumber && device.address == oldAddress) {
+                device.copy(address = newAddress, port = newPort)
+            } else {
+                device
+            }
+        }
+    }
+
     override fun getState() = this
 
     override fun loadState(state: PinDeviceService) {

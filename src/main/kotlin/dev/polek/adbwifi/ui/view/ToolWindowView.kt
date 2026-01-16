@@ -28,4 +28,6 @@ interface ToolWindowView {
     fun showClearPreviouslyConnectedConfirmation()
 
     fun showRenameDeviceDialog(device: DeviceViewModel)
+
+    fun showEditDeviceDialog(device: DeviceViewModel)
 }

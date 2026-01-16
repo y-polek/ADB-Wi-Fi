@@ -65,6 +65,10 @@ class AdbWiFiToolWindow(
             presenter.onRenameDeviceClicked(device)
         }
 
+        override fun onEditDeviceClicked(device: DeviceViewModel) {
+            presenter.onEditDeviceClicked(device)
+        }
+
         override fun onCopyDeviceIdClicked(device: DeviceViewModel) {
             presenter.onCopyDeviceIdClicked(device)
         }
@@ -295,6 +299,10 @@ class AdbWiFiToolWindow(
 
     override fun showRenameDeviceDialog(device: DeviceViewModel) {
         RenameDeviceDialogWrapper(device).show()
+    }
+
+    override fun showEditDeviceDialog(device: DeviceViewModel) {
+        EditDeviceDialogWrapper(device).show()
     }
 
     private companion object {
