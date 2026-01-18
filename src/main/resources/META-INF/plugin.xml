@@ -64,8 +64,28 @@
             class="dev.polek.adbwifi.actions.ClearLogAction"
             icon="/icons/deleteIcon.svg"
             text="Clear Log" />
+        <action
+            id="AdbWifi.WrapLog"
+            class="dev.polek.adbwifi.actions.WrapLogAction"
+            icon="AllIcons.Actions.ToggleSoftWrap"
+            text="Wrap Content" />
+        <action
+            id="AdbWifi.CollapseLog"
+            class="dev.polek.adbwifi.actions.CollapseLogAction"
+            icon="AllIcons.General.ChevronDown"
+            text="Collapse Log" />
+        <action
+            id="AdbWifi.ExpandLog"
+            class="dev.polek.adbwifi.actions.ExpandLogAction"
+            icon="AllIcons.General.ChevronUp"
+            text="Expand Log" />
         <group id="AdbWifi.LogToolbarActions">
             <reference ref="AdbWifi.ClearLog" />
+            <reference ref="AdbWifi.WrapLog" />
+            <reference ref="AdbWifi.CollapseLog" />
+        </group>
+        <group id="AdbWifi.ExpandLogActions">
+            <reference ref="AdbWifi.ExpandLog" />
         </group>
     </actions>
 </idea-plugin>

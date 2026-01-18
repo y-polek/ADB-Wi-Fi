@@ -44,6 +44,7 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
     private var deviceCollectionJob: Job? = null
     private var logVisibilityJob: Job? = null
     private var logEntriesJob: Job? = null
+    private var logWrapContentJob: Job? = null
     private var adbLocationJob: Job? = null
     private var scrcpyEnabledJob: Job? = null
 
@@ -337,11 +338,18 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
                 updateLogVisibility(isVisible)
             }
         }
+        logWrapContentJob = launch {
+            logService.isLogWrapContent.collect { wrap ->
+                view?.setLogWrapContent(wrap)
+            }
+        }
     }
 
     private fun unsubscribeFromLogEvents() {
         logVisibilityJob?.cancel()
         logVisibilityJob = null
+        logWrapContentJob?.cancel()
+        logWrapContentJob = null
     }
 
     private fun subscribeToScrcpyEnabledState() {
@@ -370,6 +378,10 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
             logEntriesJob?.cancel()
             logEntriesJob = null
         }
+    }
+
+    fun onExpandLogClicked() {
+        logService.setLogVisible(true)
     }
 
     private fun subscribeToAdbLocationChanges() {

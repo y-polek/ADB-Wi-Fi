@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface PropertiesService {
     var isLogVisible: Boolean
+    var isLogWrapContent: Boolean
 
     var isPreviouslyConnectedDevicesExpanded: Boolean
     var confirmDeviceRemoval: Boolean

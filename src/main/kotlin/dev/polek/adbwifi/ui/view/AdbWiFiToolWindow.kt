@@ -109,6 +109,9 @@ class AdbWiFiToolWindow(
         }
     )
     private val logPanel = LogPanel()
+    private val collapsedLogHeader = CollapsedLogHeader(
+        onExpandClicked = { presenter.onExpandLogClicked() }
+    )
     private val topPanel = JBScrollPane().apply {
         val panel = JPanel()
         panel.background = Colors.PANEL_BACKGROUND
@@ -117,8 +120,8 @@ class AdbWiFiToolWindow(
         panel.add(pinnedDeviceListPanel)
         this.setViewportView(panel)
         this.horizontalScrollBarPolicy = JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        this.border = JBUI.Borders.empty()
     }
-    private val bottomPanel: JComponent
     private val emptyStatePanel = EmptyStatePanel(
         onEnterIpPort = {
             ConnectDeviceDialogWrapper().show()
@@ -179,15 +182,6 @@ class AdbWiFiToolWindow(
         addToTop(toolbar.component)
         addToCenter(splitter)
 
-        val logToolbarActionGroup = actionManager.getAction("AdbWifi.LogToolbarActions") as DefaultActionGroup
-        val logToolbar = actionManager.createActionToolbar(
-            ActionPlaces.TOOLWINDOW_CONTENT,
-            logToolbarActionGroup,
-            false
-        )
-        logToolbar.targetComponent = this
-        bottomPanel = panel(center = JBScrollPane(logPanel), left = logToolbar.component)
-
         splitter.firstComponent = topPanel
 
         project.messageBus
@@ -231,15 +225,27 @@ class AdbWiFiToolWindow(
     }
 
     override fun openLog() {
-        splitter.secondComponent = bottomPanel
+        removeFromBottom()
+        splitter.secondComponent = logPanel
     }
 
     override fun closeLog() {
         splitter.secondComponent = null
+        addToBottom(collapsedLogHeader)
+    }
+
+    private fun removeFromBottom() {
+        remove(collapsedLogHeader)
+        revalidate()
+        repaint()
     }
 
     override fun setLogEntries(entries: List<LogEntry>) {
         logPanel.setLogEntries(entries)
+    }
+
+    override fun setLogWrapContent(wrap: Boolean) {
+        logPanel.setWrapContent(wrap)
     }
 
     override fun showInvalidScrcpyLocationError() {

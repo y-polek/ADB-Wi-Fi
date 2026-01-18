@@ -23,6 +23,8 @@ interface ToolWindowView {
 
     fun setLogEntries(entries: List<LogEntry>)
 
+    fun setLogWrapContent(wrap: Boolean)
+
     fun showRemoveDeviceConfirmation(device: DeviceViewModel)
 
     fun showClearPreviouslyConnectedConfirmation()

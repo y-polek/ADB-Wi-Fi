@@ -21,6 +21,12 @@ class PropertiesServiceImpl : PropertiesService {
             properties.setValue(IS_LOG_VISIBLE_PROPERTY, value)
         }
 
+    override var isLogWrapContent: Boolean
+        get() = properties.getBoolean(IS_LOG_WRAP_CONTENT_PROPERTY, false)
+        set(value) {
+            properties.setValue(IS_LOG_WRAP_CONTENT_PROPERTY, value)
+        }
+
     override var isPreviouslyConnectedDevicesExpanded: Boolean
         get() = properties.getBoolean(IS_PREVIOUSLY_CONNECTED_DEVICES_EXPANDED, true)
         set(value) {
@@ -104,6 +110,7 @@ class PropertiesServiceImpl : PropertiesService {
 
     private companion object {
         private const val IS_LOG_VISIBLE_PROPERTY = "dev.polek.adbwifi.IS_LOG_VISIBLE_PROPERTY"
+        private const val IS_LOG_WRAP_CONTENT_PROPERTY = "dev.polek.adbwifi.IS_LOG_WRAP_CONTENT_PROPERTY"
 
         private const val IS_PREVIOUSLY_CONNECTED_DEVICES_EXPANDED =
             "dev.polek.adbwifi.IS_PREVIOUSLY_CONNECTED_DEVICES_EXPANDED"
