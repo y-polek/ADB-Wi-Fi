@@ -157,8 +157,8 @@ class LogPanel : BorderLayoutPanel() {
         }
 
         private fun html(entries: List<LogEntry>, wrapContent: Boolean): String {
-            val commandColor = toHex(Colors.SECONDARY_TEXT)
-            val outputColor = toHex(Colors.PRIMARY_TEXT)
+            val commandColor = toHex(Colors.PRIMARY_TEXT)
+            val outputColor = toHex(Colors.SECONDARY_TEXT)
             val fontFamily = JBUI.Fonts.label().family
             val whiteSpace = if (wrapContent) "pre-wrap" else "pre"
             return """
@@ -175,9 +175,14 @@ class LogPanel : BorderLayoutPanel() {
                             }
                             .command {
                                 color: $commandColor;
+                                margin-top: 4px;
+                            }
+                            .command:first-child {
+                                margin-top: 0;
                             }
                             .output {
                                 color: $outputColor;
+                                margin-top: 4px;
                             }
                         </style>
                     </head>

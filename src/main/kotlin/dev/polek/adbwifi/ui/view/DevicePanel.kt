@@ -633,7 +633,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         private const val ICON_GAP = 8
         private const val SEPARATOR_MARGIN = 12
         private const val BUTTON_GAP = 8
-        private const val WIDE_LAYOUT_THRESHOLD = 400
+        private const val WIDE_LAYOUT_THRESHOLD = 500
         private const val WIDE_LAYOUT_GAP = 16
         private const val MAIN_BUTTON_WIDTH = 120
     }
