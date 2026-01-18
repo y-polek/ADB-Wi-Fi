@@ -1,9 +1,11 @@
 package dev.polek.adbwifi.ui.view
 
 import com.intellij.icons.AllIcons
+import com.intellij.ide.ui.LafManagerListener
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ActionPlaces
 import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.components.BorderLayoutPanel
@@ -12,11 +14,8 @@ import dev.polek.adbwifi.utils.Colors
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Font
-import javax.swing.JLabel
-import javax.swing.JPanel
-import javax.swing.JTextPane
-import javax.swing.ScrollPaneConstants
-import javax.swing.SwingUtilities
+import java.util.Locale
+import javax.swing.*
 
 class LogPanel : BorderLayoutPanel() {
 
@@ -48,6 +47,20 @@ class LogPanel : BorderLayoutPanel() {
         border = JBUI.Borders.empty()
         addToTop(headerPanel)
         addToCenter(scrollPane)
+
+        // Listen for theme changes to update colors
+        ApplicationManager.getApplication().messageBus
+            .connect()
+            .subscribe(LafManagerListener.TOPIC, LafManagerListener {
+                updateBackgrounds()
+                updateContent()
+            })
+    }
+
+    private fun updateBackgrounds() {
+        background = Colors.PANEL_BACKGROUND
+        textPane.background = Colors.PANEL_BACKGROUND
+        scrollPane.viewport.background = Colors.PANEL_BACKGROUND
     }
 
     private fun createHeaderPanel(): JPanel {
@@ -139,14 +152,13 @@ class LogPanel : BorderLayoutPanel() {
         private const val TAB_HORIZONTAL_PADDING = 12
         private const val ICON_TEXT_GAP = 8
 
-        private val COMMAND_COLOR = toHex(Colors.SECONDARY_TEXT)
-        private val OUTPUT_COLOR = toHex(Colors.PRIMARY_TEXT)
-
         private fun toHex(color: java.awt.Color): String {
-            return String.format(java.util.Locale.US, "#%02x%02x%02x", color.red, color.green, color.blue)
+            return String.format(Locale.US, "#%02x%02x%02x", color.red, color.green, color.blue)
         }
 
         private fun html(entries: List<LogEntry>, wrapContent: Boolean): String {
+            val commandColor = toHex(Colors.SECONDARY_TEXT)
+            val outputColor = toHex(Colors.PRIMARY_TEXT)
             val fontFamily = JBUI.Fonts.label().family
             val whiteSpace = if (wrapContent) "pre-wrap" else "pre"
             return """
@@ -162,10 +174,10 @@ class LogPanel : BorderLayoutPanel() {
                                 white-space: $whiteSpace;
                             }
                             .command {
-                                color: $COMMAND_COLOR;
+                                color: $commandColor;
                             }
                             .output {
-                                color: $OUTPUT_COLOR;
+                                color: $outputColor;
                             }
                         </style>
                     </head>
