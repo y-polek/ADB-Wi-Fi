@@ -51,10 +51,13 @@ class LogPanel : BorderLayoutPanel() {
         // Listen for theme changes to update colors
         ApplicationManager.getApplication().messageBus
             .connect()
-            .subscribe(LafManagerListener.TOPIC, LafManagerListener {
-                updateBackgrounds()
-                updateContent()
-            })
+            .subscribe(
+                LafManagerListener.TOPIC,
+                LafManagerListener {
+                    updateBackgrounds()
+                    updateContent()
+                }
+            )
     }
 
     private fun updateBackgrounds() {
