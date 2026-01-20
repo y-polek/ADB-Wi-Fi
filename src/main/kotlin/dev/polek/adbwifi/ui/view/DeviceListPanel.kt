@@ -70,7 +70,7 @@ class DeviceListPanel(
             }
         )
 
-        headerIcon = JBLabel(AllIcons.General.ArrowUp)
+        headerIcon = JBLabel(ICON_EXPANDED)
         header.add(
             headerIcon!!,
             GridBagConstraints().apply {
@@ -83,7 +83,7 @@ class DeviceListPanel(
         header.minimumSize = Dimension(0, HEADER_HEIGHT)
         header.maximumSize = Dimension(Int.MAX_VALUE, HEADER_HEIGHT)
         header.preferredSize = Dimension(0, HEADER_HEIGHT)
-        header.background = HEADER_BACKGROUND_COLOR
+        header.background = JBColor.background()
         add(header)
 
         header.addMouseListener(object : MouseAdapter() {
@@ -113,16 +113,12 @@ class DeviceListPanel(
 
     private companion object {
         private const val HEADER_HEIGHT = 28
-        private val HEADER_BACKGROUND_COLOR = JBColor.namedColor(
-            "Plugins.lightSelectionBackground",
-            JBColor(0xF5F9FF, 0x36393B)
-        )
         private val HEADER_FOREGROUND_COLOR = JBColor(0x787878, 0xBBBBBB)
 
         private val HEADER_BORDER_EXPANDED = BorderFactory.createMatteBorder(1, 0, 0, 0, JBColor.border())
         private val HEADER_BORDER_COLLAPSED = BorderFactory.createMatteBorder(1, 0, 1, 0, JBColor.border())
 
-        private val ICON_EXPANDED = AllIcons.General.ArrowUp
-        private val ICON_COLLAPSED = AllIcons.General.ArrowDown
+        private val ICON_EXPANDED = AllIcons.General.ChevronUp
+        private val ICON_COLLAPSED = AllIcons.General.ChevronDown
     }
 }

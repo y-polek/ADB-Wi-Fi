@@ -10,6 +10,9 @@ import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JTextField
+import javax.swing.event.DocumentEvent
+import javax.swing.event.DocumentListener
+import javax.swing.text.JTextComponent
 
 fun panel(
     center: JComponent? = null,
@@ -62,4 +65,12 @@ inline fun Container.removeIf(shouldRemove: (child: Component) -> Boolean) {
             this.remove(child)
         }
     }
+}
+
+fun JTextComponent.onTextChanged(action: () -> Unit) {
+    document.addDocumentListener(object : DocumentListener {
+        override fun insertUpdate(e: DocumentEvent) = action()
+        override fun removeUpdate(e: DocumentEvent) = action()
+        override fun changedUpdate(e: DocumentEvent) = action()
+    })
 }

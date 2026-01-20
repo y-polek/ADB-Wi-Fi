@@ -13,6 +13,7 @@
             serviceImplementation="dev.polek.adbwifi.services.PropertiesServiceImpl" />
         <applicationService serviceImplementation="dev.polek.adbwifi.services.PinDeviceService" />
         <applicationService serviceImplementation="dev.polek.adbwifi.services.DeviceNamesService" />
+        <applicationService serviceImplementation="dev.polek.adbwifi.services.AdbCommandsService" />
         <toolWindow
             id="ADB Wi-Fi"
             anchor="right"

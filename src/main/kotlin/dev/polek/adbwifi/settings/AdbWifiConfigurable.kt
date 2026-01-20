@@ -2,37 +2,38 @@ package dev.polek.adbwifi.settings
 
 import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.components.service
+import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.Configurable
-import com.intellij.openapi.ui.TextComponentAccessor
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.SystemInfo
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.ContextHelpLabel
 import com.intellij.ui.HyperlinkLabel
 import com.intellij.ui.JBColor
 import com.intellij.ui.TitledSeparator
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
+import dev.polek.adbwifi.services.AdbCommandsService
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.utils.*
 import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.io.File
 import javax.swing.*
-import javax.swing.event.DocumentEvent
-import javax.swing.event.DocumentListener
 
 class AdbWifiConfigurable : Configurable {
 
     private val properties = service<PropertiesService>()
+    private val commandsService = service<AdbCommandsService>()
 
     private lateinit var adbPortField: JTextField
     private lateinit var adbSystemPathCheckbox: JBCheckBox
@@ -51,6 +52,8 @@ class AdbWifiConfigurable : Configurable {
 
     private lateinit var confirmDeviceRemovalCheckbox: JBCheckBox
 
+    private lateinit var commandsPanel: AdbCommandsSettingsPanel
+
     override fun getDisplayName(): String {
         return PluginBundle.message("settingsPageName")
     }
@@ -62,6 +65,8 @@ class AdbWifiConfigurable : Configurable {
         panel.add(createAdbSettingsPanel())
         panel.add(Box.createRigidArea(Dimension(0, GROUP_VERTICAL_INSET)))
         panel.add(createScrcpySettingsPanel())
+        panel.add(Box.createRigidArea(Dimension(0, GROUP_VERTICAL_INSET)))
+        panel.add(createAdbCommandsSettingsPanel())
         panel.add(Box.createRigidArea(Dimension(0, GROUP_VERTICAL_INSET)))
         panel.add(createGeneralSettingsPanel())
 
@@ -89,18 +94,25 @@ class AdbWifiConfigurable : Configurable {
 
     private fun createAdbLocationField() = TextFieldWithBrowseButton().apply {
         text = properties.adbLocation
-        textField.document.addDocumentListener(object : DocumentListener {
-            override fun insertUpdate(e: DocumentEvent) = verifyAdbLocation()
-            override fun removeUpdate(e: DocumentEvent) = verifyAdbLocation()
-            override fun changedUpdate(e: DocumentEvent) = verifyAdbLocation()
-        })
-        addBrowseFolderListener(
-            null,
-            null,
-            null,
-            executableChooserDescriptor(),
-            ExecutablePathTextComponentAccessor()
-        )
+        textField.onTextChanged(::verifyAdbLocation)
+        addActionListener {
+            val currentPath = textField.text.takeIf { it.isNotBlank() }?.let {
+                LocalFileSystem.getInstance().findFileByPath(it)
+            }
+            FileChooser.chooseFile(
+                executableChooserDescriptor(),
+                null,
+                this,
+                currentPath
+            ) { selectedFile ->
+                val path = if (selectedFile.isDirectory) {
+                    selectedFile.path
+                } else {
+                    selectedFile.parent?.path.orEmpty()
+                }
+                textField.text = path
+            }
+        }
     }
 
     private fun createDefaultAdbLocationButton() =
@@ -260,7 +272,7 @@ class AdbWifiConfigurable : Configurable {
         )
 
         scrcpyEnabledCheckbox = JBCheckBox(PluginBundle.message("scrcpyEnabled"))
-        scrcpyEnabledCheckbox.isSelected = properties.scrcpyEnabled
+        scrcpyEnabledCheckbox.isSelected = properties.isScrcpyEnabled.value
         scrcpyEnabledCheckbox.addItemListener {
             updateScrcpySettingsState()
         }
@@ -334,18 +346,25 @@ class AdbWifiConfigurable : Configurable {
 
         scrcpyLocationField = TextFieldWithBrowseButton()
         scrcpyLocationField.text = properties.scrcpyLocation
-        scrcpyLocationField.textField.document.addDocumentListener(object : DocumentListener {
-            override fun insertUpdate(e: DocumentEvent) = verifyScrcpyLocation()
-            override fun removeUpdate(e: DocumentEvent) = verifyScrcpyLocation()
-            override fun changedUpdate(e: DocumentEvent) = verifyScrcpyLocation()
-        })
-        scrcpyLocationField.addBrowseFolderListener(
-            null,
-            null,
-            null,
-            executableChooserDescriptor(),
-            ExecutablePathTextComponentAccessor()
-        )
+        scrcpyLocationField.textField.onTextChanged(::verifyScrcpyLocation)
+        scrcpyLocationField.addActionListener {
+            val currentPath = scrcpyLocationField.text.takeIf { it.isNotBlank() }?.let {
+                LocalFileSystem.getInstance().findFileByPath(it)
+            }
+            FileChooser.chooseFile(
+                executableChooserDescriptor(),
+                null,
+                scrcpyLocationField,
+                currentPath
+            ) { selectedFile ->
+                val path = if (selectedFile.isDirectory) {
+                    selectedFile.path
+                } else {
+                    selectedFile.parent?.path.orEmpty()
+                }
+                scrcpyLocationField.text = path
+            }
+        }
         panel.add(
             scrcpyLocationField,
             GridBagConstraints().apply {
@@ -392,8 +411,9 @@ class AdbWifiConfigurable : Configurable {
             lineWrap = true
             margin = JBUI.insets(8)
         }
+        val scrcpyCmdFlagsScrollPane = JBScrollPane(scrcpyCmdFlagsTextArea)
         panel.add(
-            scrcpyCmdFlagsTextArea,
+            scrcpyCmdFlagsScrollPane,
             GridBagConstraints().apply {
                 gridx = 0
                 gridy = 1
@@ -409,6 +429,7 @@ class AdbWifiConfigurable : Configurable {
         val subtitle = JBLabel(PluginBundle.message("scrcpyFlagsSubtitle"))
         subtitle.componentStyle = UIUtil.ComponentStyle.SMALL
         subtitle.fontColor = UIUtil.FontColor.BRIGHTER
+        subtitle.setCopyable(true)
         panel.add(
             subtitle,
             GridBagConstraints().apply {
@@ -428,6 +449,37 @@ class AdbWifiConfigurable : Configurable {
                 gridy = 2
                 anchor = GridBagConstraints.LINE_END
                 insets = JBUI.insetsTop(4)
+            }
+        )
+
+        return panel
+    }
+
+    private fun createAdbCommandsSettingsPanel(): JPanel {
+        val panel = GridBagLayoutPanel()
+
+        val separator = TitledSeparator(PluginBundle.message("adbCommandsSettingsTitle"))
+        panel.add(
+            separator,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 0
+                fill = GridBagConstraints.HORIZONTAL
+                weightx = 1.0
+            }
+        )
+
+        commandsPanel = AdbCommandsSettingsPanel()
+        commandsPanel.loadFromService(commandsService)
+        panel.add(
+            commandsPanel,
+            GridBagConstraints().apply {
+                gridx = 0
+                gridy = 1
+                fill = GridBagConstraints.BOTH
+                weightx = 1.0
+                weighty = 1.0
+                insets = JBUI.insets(GROUP_VERTICAL_INSET, GROUP_LEFT_INSET, 0, 0)
             }
         )
 
@@ -468,12 +520,14 @@ class AdbWifiConfigurable : Configurable {
         if (adbLocationField.text != properties.adbLocation) return true
         if ((adbPortField.text.toIntOrNull() ?: ADB_DEFAULT_PORT) != properties.adbPort) return true
 
-        if (scrcpyEnabledCheckbox.isSelected != properties.scrcpyEnabled) return true
+        if (scrcpyEnabledCheckbox.isSelected != properties.isScrcpyEnabled.value) return true
         if (scrcpySystemPathCheckbox.isSelected != properties.useScrcpyFromPath) return true
         if (scrcpyLocationField.text != properties.scrcpyLocation) return true
         if (scrcpyCmdFlagsTextArea.text.trim() != properties.scrcpyCmdFlags) return true
 
         if (confirmDeviceRemovalCheckbox.isSelected != properties.confirmDeviceRemoval) return true
+
+        if (commandsPanel.isModified(commandsService)) return true
 
         return false
     }
@@ -484,12 +538,14 @@ class AdbWifiConfigurable : Configurable {
         properties.adbPort = adbPortField.text.toIntOrNull() ?: ADB_DEFAULT_PORT
         adbPortField.text = properties.adbPort.toString()
 
-        properties.scrcpyEnabled = scrcpyEnabledCheckbox.isSelected
+        properties.setScrcpyEnabled(scrcpyEnabledCheckbox.isSelected)
         properties.scrcpyLocation = scrcpyLocationField.text
         properties.useScrcpyFromPath = scrcpySystemPathCheckbox.isSelected
         properties.scrcpyCmdFlags = scrcpyCmdFlagsTextArea.text.trim()
 
         properties.confirmDeviceRemoval = confirmDeviceRemovalCheckbox.isSelected
+
+        commandsPanel.applyToService(commandsService)
     }
 
     override fun reset() {
@@ -497,12 +553,14 @@ class AdbWifiConfigurable : Configurable {
         adbLocationField.text = properties.adbLocation
         adbPortField.text = properties.adbPort.toString()
 
-        scrcpyEnabledCheckbox.isSelected = properties.scrcpyEnabled
+        scrcpyEnabledCheckbox.isSelected = properties.isScrcpyEnabled.value
         scrcpySystemPathCheckbox.isSelected = properties.useScrcpyFromPath
         scrcpyLocationField.text = properties.scrcpyLocation
         scrcpyCmdFlagsTextArea.text = properties.scrcpyCmdFlags
 
         confirmDeviceRemovalCheckbox.isSelected = properties.confirmDeviceRemoval
+
+        commandsPanel.loadFromService(commandsService)
     }
 
     private fun executableChooserDescriptor(): FileChooserDescriptor = when {
@@ -582,21 +640,6 @@ class AdbWifiConfigurable : Configurable {
         scrcpyLocationTitle.isEnabled = locationEnabled
         scrcpyLocationField.isEnabled = locationEnabled
         scrcpyStatusLabel.isVisible = locationEnabled
-    }
-
-    private class ExecutablePathTextComponentAccessor(
-        val onTextChanged: (() -> Unit)? = null
-    ) : TextComponentAccessor<JTextField> {
-
-        override fun getText(component: JTextField): String = component.text
-
-        override fun setText(component: JTextField, text: String) {
-            val file = File(text)
-            val dirName = if (file.isFile) file.parent.orEmpty() else text
-            component.text = dirName
-
-            onTextChanged?.invoke()
-        }
     }
 
     private companion object {

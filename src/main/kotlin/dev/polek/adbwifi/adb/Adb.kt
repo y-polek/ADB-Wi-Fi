@@ -82,30 +82,15 @@ class Adb(
             "-s ${device.id} tcpip ${device.port}".execAndLogAsync(this)
             delay(1000)
         }
-        try {
-            "connect ${device.address?.ip}:${device.port}".execAndLogAsync(this@flow)
-        } catch (e: TimeoutCancellationException) {
-            LOG.debug(e)
-            emit(LogEntry.Output("Timed out"))
-        }
+        "connect ${device.address?.ip}:${device.port}".execAndLogAsyncWithTimeout(this)
     }
 
     fun connect(ip: String, port: Int): Flow<LogEntry> = flow {
-        try {
-            "connect $ip:$port".execAndLogAsync(this@flow)
-        } catch (e: TimeoutCancellationException) {
-            LOG.debug(e)
-            emit(LogEntry.Output("Timed out"))
-        }
+        "connect $ip:$port".execAndLogAsyncWithTimeout(this)
     }
 
     fun disconnect(device: Device): Flow<LogEntry> = flow {
-        try {
-            "disconnect ${device.address?.ip}:${device.port}".execAndLogAsync(this@flow)
-        } catch (e: TimeoutCancellationException) {
-            LOG.debug(e)
-            emit(LogEntry.Output("Timed out"))
-        }
+        "disconnect ${device.address?.ip}:${device.port}".execAndLogAsyncWithTimeout(this)
     }
 
     fun disconnectAllDevices(): Flow<LogEntry> = flow {
@@ -114,6 +99,10 @@ class Adb(
 
     fun killServer(): Flow<LogEntry> = flow {
         "kill-server".execAndLog(this)
+    }
+
+    fun executeCommand(deviceId: String, command: String): Flow<LogEntry> = flow {
+        "-s $deviceId $command".execAndLog(this)
     }
 
     private fun serialNumber(deviceId: String): String {
@@ -145,6 +134,15 @@ class Adb(
                 return@mapNotNull Address(interfaceName = groups[1], ip = groups[2])
             }
             .sortedWith(ADDRESS_COMPARATOR)
+            .toList()
+    }
+
+    fun listPackages(deviceId: String): List<String> {
+        return "-s $deviceId shell pm list packages -3".exec()
+            .mapNotNull { line ->
+                line.removePrefix("package:").takeIf { it.isNotBlank() }
+            }
+            .sorted()
             .toList()
     }
 
@@ -187,6 +185,15 @@ class Adb(
             e.message ?: "Failed to execute command"
         }
         logCollector.emit(LogEntry.Output(output))
+    }
+
+    private suspend fun String.execAndLogAsyncWithTimeout(logCollector: FlowCollector<LogEntry>) {
+        try {
+            execAndLogAsync(logCollector)
+        } catch (e: TimeoutCancellationException) {
+            LOG.debug(e)
+            logCollector.emit(LogEntry.Output("Timed out"))
+        }
     }
 
     companion object {

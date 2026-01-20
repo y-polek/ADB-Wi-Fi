@@ -24,6 +24,7 @@ import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.components.BorderLayoutPanel
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.actions.OpenSettingsNotificationAction
+import dev.polek.adbwifi.model.AdbCommandConfig
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.ui.model.DeviceViewModel
@@ -42,7 +43,7 @@ class AdbWiFiToolWindow(
     private val toolWindow: ToolWindow
 ) : BorderLayoutPanel(), Disposable, ToolWindowView {
 
-    private val presenter = ToolWindowPresenter()
+    private val presenter = ToolWindowPresenter(project)
     private val propertiesService = service<PropertiesService>()
 
     private val devicePanelListener = object : DevicePanel.Listener {
@@ -73,6 +74,22 @@ class AdbWiFiToolWindow(
 
         override fun onCopyDeviceAddressClicked(device: DeviceViewModel) {
             presenter.onCopyDeviceAddressClicked(device)
+        }
+
+        override fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig) {
+            presenter.onAdbCommandClicked(device, command)
+        }
+
+        override fun onPackageSelected(device: DeviceViewModel, packageName: String?) {
+            presenter.setSelectedPackage(device, packageName)
+        }
+
+        override fun getInstalledPackages(device: DeviceViewModel): List<String> {
+            return presenter.getInstalledPackages(device)
+        }
+
+        override fun getSelectedPackage(device: DeviceViewModel): String? {
+            return presenter.getSelectedPackage(device)
         }
     }
 

@@ -1,5 +1,7 @@
 package dev.polek.adbwifi.services
 
+import kotlinx.coroutines.flow.StateFlow
+
 interface PropertiesService {
     var isLogVisible: Boolean
 
@@ -7,17 +9,17 @@ interface PropertiesService {
     var confirmDeviceRemoval: Boolean
 
     var useAdbFromPath: Boolean
-    var adbLocation: String
     val defaultAdbLocation: String
+    var adbLocation: String
     var adbPort: Int
 
-    var scrcpyEnabled: Boolean
     val defaultScrcpyEnabled: Boolean
+    val isScrcpyEnabled: StateFlow<Boolean>
+    fun setScrcpyEnabled(enabled: Boolean)
     var useScrcpyFromPath: Boolean
     var scrcpyLocation: String
     val defaultScrcpyLocation: String
     var scrcpyCmdFlags: String
 
-    var adbLocationListener: ((isValid: Boolean) -> Unit)?
-    var scrcpyEnabledListener: ((isEnabled: Boolean) -> Unit)?
+    val isAdbLocationValid: StateFlow<Boolean>
 }

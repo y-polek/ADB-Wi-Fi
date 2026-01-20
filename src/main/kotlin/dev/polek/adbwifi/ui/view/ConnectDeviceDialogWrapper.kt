@@ -18,13 +18,12 @@ import dev.polek.adbwifi.utils.GridBagLayoutPanel
 import dev.polek.adbwifi.utils.MaxLengthNumberDocument
 import dev.polek.adbwifi.utils.appCoroutineScope
 import dev.polek.adbwifi.utils.makeMonospaced
+import dev.polek.adbwifi.utils.onTextChanged
 import kotlinx.coroutines.*
 import java.awt.GridBagConstraints
 import javax.swing.Action
 import javax.swing.JButton
 import javax.swing.JComponent
-import javax.swing.event.DocumentEvent
-import javax.swing.event.DocumentListener
 
 class ConnectDeviceDialogWrapper : DialogWrapper(true) {
 
@@ -58,11 +57,7 @@ class ConnectDeviceDialogWrapper : DialogWrapper(true) {
 
         ipTextField = JBTextField(25)
         ipTextField.makeMonospaced()
-        ipTextField.document.addDocumentListener(object : DocumentListener {
-            override fun insertUpdate(e: DocumentEvent) = updateConnectButton()
-            override fun removeUpdate(e: DocumentEvent) = updateConnectButton()
-            override fun changedUpdate(e: DocumentEvent) = updateConnectButton()
-        })
+        ipTextField.onTextChanged(::updateConnectButton)
         ipTextField.addActionListener {
             connectDevice()
         }

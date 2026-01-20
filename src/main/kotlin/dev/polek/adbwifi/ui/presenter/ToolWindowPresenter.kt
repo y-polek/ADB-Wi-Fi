@@ -1,30 +1,35 @@
 package dev.polek.adbwifi.ui.presenter
 
-import com.intellij.openapi.application.EDT
 import com.intellij.openapi.components.service
-import dev.polek.adbwifi.model.CommandHistory
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.MessageDialogBuilder
+import com.intellij.openapi.ui.Messages
+import dev.polek.adbwifi.PluginBundle
+import dev.polek.adbwifi.model.AdbCommandConfig
 import dev.polek.adbwifi.model.Device
-import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.model.PinnedDevice
 import dev.polek.adbwifi.services.*
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.Companion.toViewModel
+import dev.polek.adbwifi.ui.view.ParameterInputDialog
 import dev.polek.adbwifi.ui.view.ToolWindowView
 import dev.polek.adbwifi.utils.BasePresenter
 import dev.polek.adbwifi.utils.copyToClipboard
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
+class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWindowView>() {
 
     private val adbService by lazy { service<AdbService>() }
+    private val adbCommandsService by lazy { service<AdbCommandsService>() }
     private val scrcpyService by lazy { service<ScrcpyService>() }
     private val logService by lazy { service<LogService>() }
     private val propertiesService by lazy { service<PropertiesService>() }
     private val pinDeviceService by lazy { service<PinDeviceService>() }
     private val deviceNamesService by lazy { service<DeviceNamesService>() }
+    private val packageService by lazy { project.service<PackageService>() }
 
     private var isViewOpen: Boolean = false
     private var isAdbValid: Boolean = true
@@ -32,6 +37,12 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     private var pinnedDevices: List<DeviceViewModel> = pinDeviceService.pinnedDevices.toViewModel()
 
     private var connectingDevices = mutableSetOf<Pair<String/*Device's unique ID*/, String/*IP address*/>>()
+    private val selectedPackages = mutableMapOf<String, String>()
+    private var deviceCollectionJob: Job? = null
+    private var logVisibilityJob: Job? = null
+    private var logEntriesJob: Job? = null
+    private var adbLocationJob: Job? = null
+    private var scrcpyEnabledJob: Job? = null
 
     override fun attach(view: ToolWindowView) {
         super.attach(view)
@@ -63,29 +74,22 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     }
 
     fun onConnectButtonClicked(device: DeviceViewModel) {
-        connectingDevices.add(device)
-        updateDeviceLists()
-
-        launch(Dispatchers.EDT) {
-            withContext(IO) {
-                adbService.connect(device.device)
-            }
-            onDevicesUpdated(adbService.devices())
-        }.invokeOnCompletion {
-            connectingDevices.remove(device)
-            updateDeviceLists()
-        }
+        executeDeviceAction(device) { adbService.connect(it) }
     }
 
     fun onDisconnectButtonClicked(device: DeviceViewModel) {
+        executeDeviceAction(device) { adbService.disconnect(it) }
+    }
+
+    private fun executeDeviceAction(device: DeviceViewModel, action: suspend (Device) -> Unit) {
         connectingDevices.add(device)
         updateDeviceLists()
 
         launch {
             withContext(IO) {
-                adbService.disconnect(device.device)
+                action(device.device)
             }
-            onDevicesUpdated(adbService.devices())
+            onDevicesUpdated(adbService.devices.value)
         }.invokeOnCompletion {
             connectingDevices.remove(device)
             updateDeviceLists()
@@ -147,6 +151,98 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
         copyToClipboard(address.ip)
     }
 
+    fun getSelectedPackage(device: DeviceViewModel): String? {
+        return selectedPackages[device.id] ?: packageService.getPackageName()
+    }
+
+    fun setSelectedPackage(device: DeviceViewModel, packageName: String?) {
+        if (packageName == null) {
+            selectedPackages.remove(device.id)
+        } else {
+            selectedPackages[device.id] = packageName
+        }
+    }
+
+    fun getInstalledPackages(device: DeviceViewModel): List<String> {
+        return adbService.listPackages(device.id)
+    }
+
+    fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig) {
+        val packageName = if (command.requiresPackage) {
+            getSelectedPackage(device) ?: return
+        } else {
+            ""
+        }
+
+        val parameterValues = if (command.requiresParameters) {
+            val dialog = ParameterInputDialog(command.name, command.parameterPlaceholders)
+            if (!dialog.showAndGet()) return
+            dialog.getParameterValues()
+        } else {
+            emptyMap()
+        }
+
+        if (command.requiresConfirmation) {
+            var commandText = command.command.replace("{package}", packageName)
+            parameterValues.forEach { (placeholder, value) ->
+                commandText = commandText.replace(placeholder, value)
+            }
+            val fullCommand = commandText.lines()
+                .filter { it.isNotBlank() }
+                .joinToString("\n") { "adb -s ${device.id} ${it.trim()}" }
+
+            val result = MessageDialogBuilder.yesNo(
+                PluginBundle.message("adbCommandConfirmationTitle"),
+                PluginBundle.message(
+                    "adbCommandConfirmationMessage",
+                    command.name,
+                    device.titleText,
+                    fullCommand
+                )
+            )
+                .icon(Messages.getQuestionIcon())
+                .doNotAsk(object : com.intellij.openapi.ui.DoNotAskOption {
+                    override fun isToBeShown() = true
+                    override fun setToBeShown(toBeShown: Boolean, exitCode: Int) {
+                        if (!toBeShown && exitCode == Messages.YES) {
+                            disableConfirmationForCommand(command)
+                        }
+                    }
+                    override fun canBeHidden() = true
+                    override fun shouldSaveOptionsOnCancel() = false
+                    override fun getDoNotShowMessage() =
+                        PluginBundle.message("adbCommandConfirmationCheckbox")
+                })
+                .ask(project)
+
+            if (!result) return
+        }
+
+        launch {
+            withContext(IO) {
+                adbService.executeCommand(command, device.id, packageName, parameterValues)
+            }
+        }
+    }
+
+    private fun disableConfirmationForCommand(command: AdbCommandConfig) {
+        val updatedCommands = adbCommandsService.commands.map {
+            if (it.matches(command)) {
+                it.copy(requiresConfirmation = false)
+            } else {
+                it
+            }
+        }
+        adbCommandsService.commands = updatedCommands
+    }
+
+    private fun AdbCommandConfig.matches(other: AdbCommandConfig): Boolean =
+        name == other.name &&
+            command == other.command &&
+            iconId == other.iconId &&
+            isEnabled == other.isEnabled &&
+            order == other.order
+
     private fun onDevicesUpdated(model: List<Device>) {
         devices = model.map {
             it.toViewModel(customName = deviceNamesService.findName(it.serialNumber))
@@ -157,11 +253,14 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     }
 
     private fun updateDeviceLists() {
-        val isScrcpyEnabled = propertiesService.scrcpyEnabled
+        val isScrcpyEnabled = propertiesService.isScrcpyEnabled.value
+        val packageName = packageService.getPackageName()
 
         devices.forEach {
             it.isInProgress = connectingDevices.contains(it)
             it.isShareScreenButtonVisible = isScrcpyEnabled
+            it.isAdbCommandsButtonVisible = true
+            it.packageName = packageName
         }
         pinnedDevices.forEach {
             it.isInProgress = connectingDevices.contains(it)
@@ -178,71 +277,84 @@ class ToolWindowPresenter : BasePresenter<ToolWindowView>() {
     }
 
     private fun subscribeToDeviceList() {
-        if (adbService.deviceListListener != null) {
+        if (deviceCollectionJob != null) {
             // Already subscribed
             return
         }
-        adbService.deviceListListener = ::onDevicesUpdated
+        deviceCollectionJob = launch {
+            adbService.devices.collect { devices ->
+                onDevicesUpdated(devices)
+            }
+        }
     }
 
     private fun unsubscribeFromDeviceList() {
-        if (adbService.deviceListListener == null) {
-            // Already unsubscribed
-            return
-        }
-        adbService.deviceListListener = null
+        deviceCollectionJob?.cancel()
+        deviceCollectionJob = null
     }
 
     private fun subscribeToLogEvents() {
-        logService.logVisibilityListener = ::updateLogVisibility
+        logVisibilityJob = launch {
+            logService.isLogVisible.collect { isVisible ->
+                updateLogVisibility(isVisible)
+            }
+        }
     }
 
     private fun unsubscribeFromLogEvents() {
-        logService.logVisibilityListener = null
+        logVisibilityJob?.cancel()
+        logVisibilityJob = null
     }
 
     private fun subscribeToScrcpyEnabledState() {
-        propertiesService.scrcpyEnabledListener = {
-            updateDeviceLists()
+        scrcpyEnabledJob = launch {
+            propertiesService.isScrcpyEnabled.collect {
+                updateDeviceLists()
+            }
         }
     }
 
     private fun unsubscribeFromScrcpyEnabledState() {
-        propertiesService.scrcpyEnabledListener = null
+        scrcpyEnabledJob?.cancel()
+        scrcpyEnabledJob = null
     }
 
     private fun updateLogVisibility(isLogVisible: Boolean) {
         if (isLogVisible) {
             view?.openLog()
-            logService.commandHistory.listener = object : CommandHistory.Listener {
-                override fun onLogEntriesModified(entries: List<LogEntry>) {
+            logEntriesJob = launch {
+                logService.commandHistory.entries.collect { entries ->
                     view?.setLogEntries(entries)
                 }
             }
         } else {
             view?.closeLog()
-            logService.commandHistory.listener = null
+            logEntriesJob?.cancel()
+            logEntriesJob = null
         }
     }
 
     private fun subscribeToAdbLocationChanges() {
-        propertiesService.adbLocationListener = { isValid ->
-            isAdbValid = isValid
-            if (!isValid) {
-                unsubscribeFromDeviceList()
-                devices = emptyList()
-                view?.showInvalidAdbLocationError()
-            } else {
-                updateDeviceLists()
-                if (isViewOpen) {
-                    subscribeToDeviceList()
+        adbLocationJob = launch {
+            propertiesService.isAdbLocationValid.collect { isValid ->
+                isAdbValid = isValid
+                if (!isValid) {
+                    unsubscribeFromDeviceList()
+                    devices = emptyList()
+                    view?.showInvalidAdbLocationError()
+                } else {
+                    updateDeviceLists()
+                    if (isViewOpen) {
+                        subscribeToDeviceList()
+                    }
                 }
             }
         }
     }
 
     private fun unsubscribeFromAdbLocationChanges() {
-        propertiesService.adbLocationListener = null
+        adbLocationJob?.cancel()
+        adbLocationJob = null
     }
 
     private fun List<PinnedDevice>.toViewModel(): List<DeviceViewModel> {

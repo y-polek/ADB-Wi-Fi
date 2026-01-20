@@ -2,6 +2,9 @@ package dev.polek.adbwifi.model
 
 import com.intellij.openapi.application.EDT
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import java.util.*
 
@@ -9,21 +12,18 @@ class CommandHistory {
 
     private val logEntries = LinkedList<LogEntry>()
 
-    var listener: Listener? = null
-        set(value) {
-            field = value
-            notifyListener()
-        }
+    private val _entries = MutableStateFlow<List<LogEntry>>(emptyList())
+    val entries: StateFlow<List<LogEntry>> = _entries.asStateFlow()
 
     suspend fun add(entry: LogEntry) = withContext(Dispatchers.EDT) {
         logEntries.add(entry)
         ensureCapacity()
-        notifyListener()
+        _entries.value = logEntries.toList()
     }
 
     fun clear() {
         logEntries.clear()
-        notifyListener()
+        _entries.value = emptyList()
     }
 
     private fun ensureCapacity() {
@@ -32,14 +32,6 @@ class CommandHistory {
                 logEntries.removeFirst()
             }
         }
-    }
-
-    private fun notifyListener() {
-        listener?.onLogEntriesModified(logEntries)
-    }
-
-    interface Listener {
-        fun onLogEntriesModified(entries: List<LogEntry>)
     }
 
     private companion object {
