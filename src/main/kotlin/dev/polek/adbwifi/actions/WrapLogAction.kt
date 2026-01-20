@@ -7,14 +7,14 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.DumbAware
 import dev.polek.adbwifi.services.LogService
 
-class ToggleLogAction : ToggleAction(), DumbAware {
+class WrapLogAction : ToggleAction(), DumbAware {
 
     private val service by lazy { ApplicationManager.getApplication().getService(LogService::class.java) }
 
-    override fun isSelected(e: AnActionEvent) = service.isLogVisible.value
+    override fun isSelected(e: AnActionEvent) = service.isLogWrapContent.value
 
     override fun setSelected(e: AnActionEvent, state: Boolean) {
-        service.setLogVisible(state)
+        service.setLogWrapContent(state)
     }
 
     override fun getActionUpdateThread() = ActionUpdateThread.EDT

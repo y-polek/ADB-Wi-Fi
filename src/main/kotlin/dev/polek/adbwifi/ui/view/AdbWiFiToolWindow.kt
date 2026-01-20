@@ -29,10 +29,7 @@ import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.presenter.ToolWindowPresenter
-import dev.polek.adbwifi.utils.GridBagLayoutPanel
-import dev.polek.adbwifi.utils.Icons
-import dev.polek.adbwifi.utils.panel
-import dev.polek.adbwifi.utils.setFontSize
+import dev.polek.adbwifi.utils.*
 import java.awt.GridBagConstraints
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
@@ -66,6 +63,10 @@ class AdbWiFiToolWindow(
 
         override fun onRenameDeviceClicked(device: DeviceViewModel) {
             presenter.onRenameDeviceClicked(device)
+        }
+
+        override fun onEditDeviceClicked(device: DeviceViewModel) {
+            presenter.onEditDeviceClicked(device)
         }
 
         override fun onCopyDeviceIdClicked(device: DeviceViewModel) {
@@ -102,29 +103,30 @@ class AdbWiFiToolWindow(
         isHeaderExpanded = propertiesService.isPreviouslyConnectedDevicesExpanded,
         onHeaderExpandChanged = { isExpanded ->
             propertiesService.isPreviouslyConnectedDevicesExpanded = isExpanded
+        },
+        onClearClicked = {
+            presenter.onClearPreviouslyConnectedClicked()
         }
     )
     private val logPanel = LogPanel()
+    private val collapsedLogHeader = CollapsedLogHeader(
+        onExpandClicked = { presenter.onExpandLogClicked() }
+    )
     private val topPanel = JBScrollPane().apply {
         val panel = JPanel()
+        panel.background = Colors.PANEL_BACKGROUND
         panel.layout = BoxLayout(panel, BoxLayout.PAGE_AXIS)
         panel.add(deviceListPanel)
         panel.add(pinnedDeviceListPanel)
         this.setViewportView(panel)
+        this.horizontalScrollBarPolicy = JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+        this.border = JBUI.Borders.empty()
     }
-    private val bottomPanel: JComponent
-    private val emptyMessageLabel = JBLabel().apply {
-        text = PluginBundle.message("deviceListEmptyMessage")
-        icon = Icons.DEVICE_LINEUP
-        horizontalAlignment = SwingConstants.CENTER
-        horizontalTextPosition = SwingConstants.CENTER
-        verticalTextPosition = SwingConstants.BOTTOM
-        setFontSize(16f)
-        background = JBColor.background()
-        foreground = JBColor.gray
-        isOpaque = true
-        border = BorderFactory.createLineBorder(JBColor.border())
-    }
+    private val emptyStatePanel = EmptyStatePanel(
+        onEnterIpPort = {
+            ConnectDeviceDialogWrapper().show()
+        }
+    )
     private val errorMessagePanel = GridBagLayoutPanel().apply {
         background = JBColor.background()
         border = BorderFactory.createLineBorder(JBColor.border())
@@ -180,15 +182,6 @@ class AdbWiFiToolWindow(
         addToTop(toolbar.component)
         addToCenter(splitter)
 
-        val logToolbarActionGroup = actionManager.getAction("AdbWifi.LogToolbarActions") as DefaultActionGroup
-        val logToolbar = actionManager.createActionToolbar(
-            ActionPlaces.TOOLWINDOW_CONTENT,
-            logToolbarActionGroup,
-            false
-        )
-        logToolbar.targetComponent = this
-        bottomPanel = panel(center = JBScrollPane(logPanel), left = logToolbar.component)
-
         splitter.firstComponent = topPanel
 
         project.messageBus
@@ -224,7 +217,7 @@ class AdbWiFiToolWindow(
     }
 
     override fun showEmptyMessage() {
-        splitter.firstComponent = emptyMessageLabel
+        splitter.firstComponent = emptyStatePanel
     }
 
     override fun showInvalidAdbLocationError() {
@@ -232,15 +225,27 @@ class AdbWiFiToolWindow(
     }
 
     override fun openLog() {
-        splitter.secondComponent = bottomPanel
+        removeFromBottom()
+        splitter.secondComponent = logPanel
     }
 
     override fun closeLog() {
         splitter.secondComponent = null
+        addToBottom(collapsedLogHeader)
+    }
+
+    private fun removeFromBottom() {
+        remove(collapsedLogHeader)
+        revalidate()
+        repaint()
     }
 
     override fun setLogEntries(entries: List<LogEntry>) {
         logPanel.setLogEntries(entries)
+    }
+
+    override fun setLogWrapContent(wrap: Boolean) {
+        logPanel.setWrapContent(wrap)
     }
 
     override fun showInvalidScrcpyLocationError() {
@@ -284,8 +289,26 @@ class AdbWiFiToolWindow(
             .ask(project)
     }
 
+    override fun showClearPreviouslyConnectedConfirmation() {
+        val confirmed = MessageDialogBuilder.yesNo(
+            title = PluginBundle.message("previouslyConnectedTitle"),
+            message = PluginBundle.message("clearPreviouslyConnectedConfirmation")
+        )
+            .yesText(PluginBundle.message("clearPreviouslyConnectedButton"))
+            .noText(PluginBundle.message("cancelButton"))
+            .ask(project)
+
+        if (confirmed) {
+            presenter.onClearPreviouslyConnectedConfirmed()
+        }
+    }
+
     override fun showRenameDeviceDialog(device: DeviceViewModel) {
         RenameDeviceDialogWrapper(device).show()
+    }
+
+    override fun showEditDeviceDialog(device: DeviceViewModel) {
+        EditDeviceDialogWrapper(device).show()
     }
 
     private companion object {

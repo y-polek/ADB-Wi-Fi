@@ -7,7 +7,6 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.ListSeparator
 import com.intellij.openapi.ui.popup.PopupStep
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
-import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.JBUI
@@ -18,211 +17,345 @@ import dev.polek.adbwifi.model.AdbCommandConfig
 import dev.polek.adbwifi.services.AdbCommandsService
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.ButtonType
+import dev.polek.adbwifi.ui.view.buttons.IconButton
+import dev.polek.adbwifi.ui.view.buttons.LoadingPanel
+import dev.polek.adbwifi.ui.view.buttons.StyledButton
+import dev.polek.adbwifi.utils.Colors
 import dev.polek.adbwifi.utils.Icons
-import dev.polek.adbwifi.utils.flowPanel
 import dev.polek.adbwifi.utils.makeBold
-import dev.polek.adbwifi.utils.panel
-import java.awt.Dimension
-import java.awt.GridBagConstraints
-import java.awt.GridBagLayout
+import dev.polek.adbwifi.utils.makeMonospaced
+import java.awt.*
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import javax.swing.Icon
-import javax.swing.JComponent
-import javax.swing.JProgressBar
-import javax.swing.SwingConstants
-import javax.swing.SwingUtilities
+import javax.swing.*
 
-class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout()) {
+class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(BorderLayout()) {
 
     var listener: Listener? = null
 
-    private val hoverListener = object : MouseAdapter() {
-        override fun mouseEntered(e: MouseEvent) {
-            background = HOVER_COLOR
-        }
+    private var isWideLayout = false
 
-        override fun mouseExited(e: MouseEvent) {
-            background = JBColor.background()
-        }
+    override fun paintComponent(g: Graphics) {
+        val g2 = g.create() as Graphics2D
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+
+        // Draw rounded background
+        g2.color = Colors.CARD_BACKGROUND
+        g2.fillRoundRect(0, 0, width, height, CORNER_RADIUS * 2, CORNER_RADIUS * 2)
+
+        // Draw rounded border
+        g2.color = Colors.CARD_BORDER
+        g2.drawRoundRect(0, 0, width - 1, height - 1, CORNER_RADIUS * 2, CORNER_RADIUS * 2)
+
+        g2.dispose()
+        super.paintComponent(g)
     }
 
     init {
-        background = JBColor.background()
+        isOpaque = false // Don't paint default background - we paint rounded rect ourselves
+        border = JBUI.Borders.empty(CARD_PADDING)
 
-        minimumSize = Dimension(0, LIST_ITEM_HEIGHT)
-        maximumSize = Dimension(Int.MAX_VALUE, LIST_ITEM_HEIGHT)
-        preferredSize = Dimension(0, LIST_ITEM_HEIGHT)
+        buildLayout()
 
-        val iconLabel = JBLabel(device.icon)
-        add(
-            iconLabel,
-            GridBagConstraints().apply {
-                gridx = 0
-                gridy = 0
-                gridwidth = 1
-                gridheight = 2
-                fill = GridBagConstraints.VERTICAL
-                weighty = 1.0
-                insets = JBUI.insets(0, 10)
-            }
-        )
-
-        val titleLabel = JBLabel(device.titleText)
-        titleLabel.componentStyle = UIUtil.ComponentStyle.LARGE
-        titleLabel.makeBold()
-        titleLabel.addMouseListener(object : MouseAdapter() {
-            override fun mouseClicked(e: MouseEvent) {
-                if (e.clickCount == 2) {
-                    listener?.onRenameDeviceClicked(device)
+        addComponentListener(object : java.awt.event.ComponentAdapter() {
+            override fun componentResized(e: java.awt.event.ComponentEvent) {
+                val shouldBeWide = width >= WIDE_LAYOUT_THRESHOLD
+                if (shouldBeWide != isWideLayout) {
+                    isWideLayout = shouldBeWide
+                    rebuildLayout()
                 }
             }
         })
-        add(
-            titleLabel,
-            GridBagConstraints().apply {
-                gridx = 1
-                gridy = 0
-                gridwidth = 1
-                fill = GridBagConstraints.BOTH
-                anchor = GridBagConstraints.PAGE_START
-                weightx = 1.0
-                insets = JBUI.insetsTop(5)
-            }
-        )
 
-        if (device.isInProgress) {
-            val progressBar = JProgressBar()
-            progressBar.isIndeterminate = true
-            progressBar.preferredSize = Dimension(100, progressBar.preferredSize.height)
-            progressBar.addMouseListener(hoverListener)
-            val vInset = (BUTTON_CELL_HEIGHT - progressBar.preferredSize.height) / 2
-            add(
-                progressBar,
-                GridBagConstraints().apply {
-                    gridx = 2
-                    gridy = 0
-                    gridwidth = 2
-                    weighty = 1.0
-                    insets = JBUI.insets(vInset, 10, vInset, 10)
+        // For previously connected devices, double-clicking on the panel opens the Edit dialog
+        if (device.isPreviouslyConnected) {
+            addMouseListener(object : MouseAdapter() {
+                override fun mouseClicked(e: MouseEvent) {
+                    if (e.clickCount == 2) {
+                        listener?.onEditDeviceClicked(device)
+                    }
                 }
-            )
+            })
+        }
+    }
+
+    private fun rebuildLayout() {
+        removeAll()
+        buildLayout()
+        // Update maximum size since layout changed
+        maximumSize = Dimension(Int.MAX_VALUE, preferredSize.height)
+        revalidate()
+        repaint()
+        // Also revalidate parent to adjust for new size
+        parent?.revalidate()
+    }
+
+    private fun buildLayout() {
+        isWideLayout = width >= WIDE_LAYOUT_THRESHOLD
+
+        if (isWideLayout) {
+            buildWideLayout()
         } else {
-            val button = when (device.buttonType) {
-                ButtonType.CONNECT -> Button.connectButton()
-                ButtonType.CONNECT_DISABLED -> Button.connectButton(false)
-                ButtonType.DISCONNECT -> Button.disconnectButton()
-            }
-            val vInset = (BUTTON_CELL_HEIGHT - button.preferredSize.height) / 2
-            button.addActionListener {
+            buildNarrowLayout()
+        }
+    }
+
+    private fun buildNarrowLayout() {
+        add(createInfoPanel(), BorderLayout.NORTH)
+
+        // Separator
+        add(createSeparator(), BorderLayout.CENTER)
+
+        // Action buttons panel - use BorderLayout for flex-grow behavior
+        val actionsPanel = JPanel(BorderLayout(0, 0))
+        actionsPanel.isOpaque = false
+        actionsPanel.border = JBUI.Borders.emptyTop(SEPARATOR_MARGIN)
+
+        // Main action button (Connect/Disconnect) - expands to fill width
+        if (device.isInProgress) {
+            actionsPanel.add(LoadingPanel(LoadingPanel.Size.FULL_WIDTH), BorderLayout.CENTER)
+        } else {
+            val mainButton = createMainButton()
+            mainButton.addActionListener {
                 when (device.buttonType) {
                     ButtonType.CONNECT, ButtonType.CONNECT_DISABLED -> listener?.onConnectButtonClicked(device)
                     ButtonType.DISCONNECT -> listener?.onDisconnectButtonClicked(device)
                 }
             }
-            button.addMouseListener(hoverListener)
-            add(
-                button,
-                GridBagConstraints().apply {
-                    gridx = 2
-                    gridy = 0
-                    gridwidth = 2
-                    weighty = 1.0
-                    insets = JBUI.insets(vInset, 10, vInset, 10)
+            actionsPanel.add(mainButton, BorderLayout.CENTER)
+        }
+
+        // Icon buttons panel (fixed width buttons on the right)
+        actionsPanel.add(createIconButtonsPanel(), BorderLayout.EAST)
+        add(actionsPanel, BorderLayout.SOUTH)
+    }
+
+    private fun buildWideLayout() {
+        // Main content panel with device info on left and buttons on right
+        val contentPanel = JPanel(BorderLayout(WIDE_LAYOUT_GAP, 0))
+        contentPanel.isOpaque = false
+
+        contentPanel.add(createInfoPanel(), BorderLayout.CENTER)
+
+        // Right side: main button + divider + icon buttons (all in a single row)
+        val rightPanel = JPanel()
+        rightPanel.layout = BoxLayout(rightPanel, BoxLayout.X_AXIS)
+        rightPanel.isOpaque = false
+
+        // Main action button (Connect/Disconnect)
+        if (device.isInProgress) {
+            val loadingPanel = LoadingPanel(LoadingPanel.Size.FULL_WIDTH)
+            loadingPanel.preferredSize = Dimension(MAIN_BUTTON_WIDTH, loadingPanel.preferredSize.height)
+            loadingPanel.maximumSize = loadingPanel.preferredSize
+            rightPanel.add(loadingPanel)
+        } else {
+            val mainButton = createMainButton()
+            mainButton.preferredSize = Dimension(MAIN_BUTTON_WIDTH, mainButton.preferredSize.height)
+            mainButton.maximumSize = mainButton.preferredSize
+            mainButton.addActionListener {
+                when (device.buttonType) {
+                    ButtonType.CONNECT, ButtonType.CONNECT_DISABLED -> listener?.onConnectButtonClicked(device)
+                    ButtonType.DISCONNECT -> listener?.onDisconnectButtonClicked(device)
                 }
-            )
-        }
-
-        val actionButtons = arrayListOf<JComponent>()
-
-        if (device.isShareScreenButtonVisible) {
-            val shareScreenButton = IconButton(Icons.SHARE_SCREEN, PluginBundle.message("shareScreenTooltip"))
-            shareScreenButton.onClickedListener = {
-                listener?.onShareScreenClicked(device)
-                shareScreenButton.showProgressFor(2000)
             }
-            shareScreenButton.addMouseListener(hoverListener)
-            actionButtons.add(shareScreenButton)
+            rightPanel.add(mainButton)
         }
+
+        // Icon buttons
+        rightPanel.add(createIconButtonsPanel())
+
+        contentPanel.add(rightPanel, BorderLayout.EAST)
+        add(contentPanel, BorderLayout.CENTER)
+    }
+
+    private fun createInfoPanel(): JPanel {
+        val panel = JPanel(BorderLayout(ICON_GAP, 0))
+        panel.isOpaque = false
+
+        // Device icon
+        device.icon?.let { icon ->
+            val iconLabel = JBLabel(icon)
+            iconLabel.verticalAlignment = SwingConstants.CENTER
+            panel.add(iconLabel, BorderLayout.WEST)
+        }
+
+        // Info content
+        val infoPanel = JPanel()
+        infoPanel.layout = BoxLayout(infoPanel, BoxLayout.Y_AXIS)
+        infoPanel.isOpaque = false
+        infoPanel.alignmentX = LEFT_ALIGNMENT
+
+        // Device name
+        val nameLabel = JBLabel(device.titleText)
+        nameLabel.foreground = Colors.PRIMARY_TEXT
+        nameLabel.makeBold()
+        nameLabel.alignmentX = LEFT_ALIGNMENT
+        nameLabel.addMouseListener(object : MouseAdapter() {
+            override fun mouseClicked(e: MouseEvent) {
+                if (e.clickCount == 2) {
+                    if (device.isPreviouslyConnected) {
+                        listener?.onEditDeviceClicked(device)
+                    } else {
+                        listener?.onRenameDeviceClicked(device)
+                    }
+                }
+            }
+        })
+        infoPanel.add(nameLabel)
+        infoPanel.add(Box.createVerticalStrut(4))
+
+        // Android version
+        val versionText = "Android ${device.device.androidVersion} • API ${device.device.apiLevel}"
+        val versionLabel = JBLabel(versionText).apply {
+            foreground = Colors.SECONDARY_TEXT
+            makeMonospaced()
+            componentStyle = UIUtil.ComponentStyle.SMALL
+            alignmentX = LEFT_ALIGNMENT
+        }
+        infoPanel.add(versionLabel)
+
+        //  IP address
+        val addressText = device.address?.let { "$it:${device.device.port}" } ?: ""
+        if (addressText.isNotEmpty()) {
+            infoPanel.add(Box.createVerticalStrut(4))
+            val addressLabel = JBLabel(addressText).apply {
+                foreground = Colors.SECONDARY_TEXT
+                makeMonospaced()
+                componentStyle = UIUtil.ComponentStyle.SMALL
+                alignmentX = LEFT_ALIGNMENT
+            }
+            infoPanel.add(addressLabel)
+        }
+
+        panel.add(infoPanel, BorderLayout.CENTER)
+        return panel
+    }
+
+    private fun createSeparator(): JPanel {
+        val separatorPanel = JPanel(BorderLayout())
+        separatorPanel.isOpaque = false
+        separatorPanel.border = JBUI.Borders.emptyTop(SEPARATOR_MARGIN)
+        val separator = JSeparator()
+        separator.foreground = Colors.SEPARATOR
+        separatorPanel.add(separator, BorderLayout.CENTER)
+        return separatorPanel
+    }
+
+    private fun createIconButtonsPanel(): JPanel {
+        val iconButtonsPanel = JPanel()
+        iconButtonsPanel.layout = BoxLayout(iconButtonsPanel, BoxLayout.X_AXIS)
+        iconButtonsPanel.isOpaque = false
 
         if (device.isAdbCommandsButtonVisible) {
+            iconButtonsPanel.add(Box.createHorizontalStrut(BUTTON_GAP))
             val adbCommandsButton = IconButton(Icons.ADB_COMMANDS, PluginBundle.message("adbCommandsTooltip"))
-            adbCommandsButton.onClickedListener = { event ->
+            adbCommandsButton.addActionListener {
+                val event = MouseEvent(
+                    adbCommandsButton,
+                    MouseEvent.MOUSE_CLICKED,
+                    System.currentTimeMillis(),
+                    0,
+                    0,
+                    0,
+                    1,
+                    false
+                )
                 openAdbCommandsMenu(device, event)
             }
-            adbCommandsButton.addMouseListener(hoverListener)
-            actionButtons.add(adbCommandsButton)
+            iconButtonsPanel.add(adbCommandsButton)
+        }
+
+        if (device.isShareScreenButtonVisible) {
+            iconButtonsPanel.add(Box.createHorizontalStrut(BUTTON_GAP))
+            if (device.isShareScreenInProgress) {
+                iconButtonsPanel.add(LoadingPanel(LoadingPanel.Size.ICON))
+            } else {
+                val shareScreenButton = IconButton(Icons.SHARE_SCREEN, PluginBundle.message("shareScreenTooltip"))
+                shareScreenButton.addActionListener {
+                    listener?.onShareScreenClicked(device)
+                }
+                iconButtonsPanel.add(shareScreenButton)
+            }
         }
 
         if (device.isRemoveButtonVisible) {
+            iconButtonsPanel.add(Box.createHorizontalStrut(BUTTON_GAP))
             val removeButton = IconButton(Icons.DELETE, PluginBundle.message("removeDeviceTooltip"))
-            removeButton.onClickedListener = {
+            removeButton.addActionListener {
                 listener?.onRemoveDeviceClicked(device)
             }
-            removeButton.addMouseListener(hoverListener)
-            actionButtons.add(removeButton)
+            iconButtonsPanel.add(removeButton)
         }
 
-        val menuButton = IconButton(Icons.MENU)
-        menuButton.onClickedListener = { event ->
+        iconButtonsPanel.add(Box.createHorizontalStrut(BUTTON_GAP))
+        val menuButton = IconButton(Icons.MENU, showBorder = false)
+        menuButton.addActionListener {
+            val event = MouseEvent(
+                menuButton,
+                MouseEvent.MOUSE_CLICKED,
+                System.currentTimeMillis(),
+                0,
+                0,
+                0,
+                1,
+                false
+            )
             openDeviceMenu(device, event)
         }
-        menuButton.addMouseListener(hoverListener)
-        actionButtons.add(menuButton)
+        iconButtonsPanel.add(menuButton)
 
-        val actionsPanel = flowPanel(*actionButtons.toTypedArray(), menuButton, hgap = 10)
-        actionsPanel.isOpaque = false
-        actionsPanel.minimumSize = actionsPanel.preferredSize
-        add(
-            actionsPanel,
-            GridBagConstraints().apply {
-                gridx = 3
-                gridy = 1
-                gridwidth = 1
-                gridheight = 1
-                anchor = GridBagConstraints.LINE_END
+        return iconButtonsPanel
+    }
+
+    private fun createMainButton(): JButton {
+        val connectText = PluginBundle.message("connectButton")
+        val disconnectText = PluginBundle.message("disconnectButton")
+
+        return when (device.buttonType) {
+            ButtonType.CONNECT -> {
+                if (device.isPreviouslyConnected) {
+                    StyledButton(connectText, StyledButton.Style.SECONDARY)
+                } else {
+                    StyledButton(connectText, StyledButton.Style.PRIMARY)
+                }
             }
-        )
-
-        val subtitleLabel = JBLabel(device.subtitleText)
-        subtitleLabel.icon = device.subtitleIcon
-        subtitleLabel.horizontalTextPosition = SwingConstants.LEFT
-        subtitleLabel.componentStyle = UIUtil.ComponentStyle.REGULAR
-        subtitleLabel.fontColor = UIUtil.FontColor.BRIGHTER
-        add(
-            panel(top = subtitleLabel),
-            GridBagConstraints().apply {
-                gridx = 1
-                gridy = 1
-                gridwidth = 3
-                fill = GridBagConstraints.BOTH
-                anchor = GridBagConstraints.PAGE_END
-                weightx = 1.0
-                weighty = 1.0
-                insets = JBUI.insetsRight(actionsPanel.preferredSize.width)
+            ButtonType.CONNECT_DISABLED -> {
+                if (device.isPreviouslyConnected) {
+                    StyledButton(connectText, StyledButton.Style.SECONDARY).apply { isEnabled = false }
+                } else {
+                    StyledButton(connectText, StyledButton.Style.PRIMARY).apply { isEnabled = false }
+                }
             }
-        )
-
-        addMouseListener(hoverListener)
-        actionsPanel.addMouseListener(hoverListener)
+            ButtonType.DISCONNECT -> StyledButton(disconnectText, StyledButton.Style.DANGER)
+        }
     }
 
     private fun openDeviceMenu(device: DeviceViewModel, event: MouseEvent) {
-        val items = listOf(
-            DeviceMenuItem.Rename,
-            DeviceMenuItem.CopyId,
-            DeviceMenuItem.CopyAddress(device.hasAddress)
-        )
+        val items = if (device.isPreviouslyConnected) {
+            listOf(
+                DeviceMenuItem.Edit,
+                DeviceMenuItem.CopyId,
+                DeviceMenuItem.CopyAddress(device.hasAddress)
+            )
+        } else {
+            listOf(
+                DeviceMenuItem.Rename,
+                DeviceMenuItem.CopyId,
+                DeviceMenuItem.CopyAddress(device.hasAddress)
+            )
+        }
 
         val step = object : BaseListPopupStep<DeviceMenuItem>(null, items) {
             override fun getTextFor(value: DeviceMenuItem): String = when (value) {
                 is DeviceMenuItem.Rename -> PluginBundle.message("renameDeviceMenuItem")
+                is DeviceMenuItem.Edit -> PluginBundle.message("editDeviceMenuItem")
                 is DeviceMenuItem.CopyId -> PluginBundle.message("copyDeviceIdMenuItem")
                 is DeviceMenuItem.CopyAddress -> PluginBundle.message("copyIpAddressMenuItem")
             }
 
-            override fun getIconFor(value: DeviceMenuItem): Icon? = when (value) {
+            override fun getIconFor(value: DeviceMenuItem): Icon = when (value) {
                 is DeviceMenuItem.Rename -> AllIcons.Actions.Edit
+                is DeviceMenuItem.Edit -> AllIcons.Actions.Edit
                 is DeviceMenuItem.CopyId -> AllIcons.Actions.Copy
                 is DeviceMenuItem.CopyAddress -> AllIcons.Actions.Copy
             }
@@ -236,6 +369,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
                 return doFinalStep {
                     when (selectedValue) {
                         is DeviceMenuItem.Rename -> listener?.onRenameDeviceClicked(device)
+                        is DeviceMenuItem.Edit -> listener?.onEditDeviceClicked(device)
                         is DeviceMenuItem.CopyId -> listener?.onCopyDeviceIdClicked(device)
                         is DeviceMenuItem.CopyAddress -> listener?.onCopyDeviceAddressClicked(device)
                     }
@@ -348,7 +482,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         device: DeviceViewModel,
         projectPackage: String?,
         selectedPackage: String?,
-        menuComponent: java.awt.Component
+        menuComponent: Component
     ): PopupStep<*> {
         val packageItems = mutableListOf<PackageMenuItem>()
 
@@ -427,7 +561,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         }
     }
 
-    private fun reopenAdbCommandsMenu(device: DeviceViewModel, component: java.awt.Component) {
+    private fun reopenAdbCommandsMenu(device: DeviceViewModel, component: Component) {
         val event = MouseEvent(
             component,
             MouseEvent.MOUSE_CLICKED,
@@ -443,6 +577,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
 
     private sealed class DeviceMenuItem {
         data object Rename : DeviceMenuItem()
+        data object Edit : DeviceMenuItem()
         data object CopyId : DeviceMenuItem()
         data class CopyAddress(val isEnabled: Boolean) : DeviceMenuItem()
     }
@@ -465,6 +600,7 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
         fun onShareScreenClicked(device: DeviceViewModel)
         fun onRemoveDeviceClicked(device: DeviceViewModel)
         fun onRenameDeviceClicked(device: DeviceViewModel)
+        fun onEditDeviceClicked(device: DeviceViewModel)
         fun onCopyDeviceIdClicked(device: DeviceViewModel)
         fun onCopyDeviceAddressClicked(device: DeviceViewModel)
         fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig)
@@ -474,11 +610,13 @@ class DevicePanel(device: DeviceViewModel) : JBPanel<DevicePanel>(GridBagLayout(
     }
 
     private companion object {
-        private const val LIST_ITEM_HEIGHT = 71
-        private const val BUTTON_CELL_HEIGHT = 32
-        private val HOVER_COLOR = JBColor.namedColor(
-            "Plugins.lightSelectionBackground",
-            JBColor(0xF5F9FF, 0x36393B)
-        )
+        private const val CORNER_RADIUS = 5
+        private const val CARD_PADDING = 10
+        private const val ICON_GAP = 8
+        private const val SEPARATOR_MARGIN = 12
+        private const val BUTTON_GAP = 8
+        private const val WIDE_LAYOUT_THRESHOLD = 500
+        private const val WIDE_LAYOUT_GAP = 16
+        private const val MAIN_BUTTON_WIDTH = 110
     }
 }

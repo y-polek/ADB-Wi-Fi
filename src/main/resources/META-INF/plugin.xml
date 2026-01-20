@@ -35,11 +35,6 @@
             icon="AllIcons.Actions.Refresh"
             text="Restart ADB" />
         <action
-            id="AdbWifi.ToggleLog"
-            class="dev.polek.adbwifi.actions.ToggleLogAction"
-            icon="AllIcons.Debugger.Console"
-            text="Toggle Log" />
-        <action
             id="AdbWifi.OpenSettings"
             class="dev.polek.adbwifi.actions.OpenSettingsAction"
             icon="AllIcons.General.Settings"
@@ -53,7 +48,6 @@
         <group id="AdbWifi.ToolbarActions">
             <reference ref="AdbWifi.ConnectDevice" />
             <separator />
-            <reference ref="AdbWifi.ToggleLog" />
             <reference ref="AdbWifi.OpenSettings" />
             <separator />
             <reference ref="AdbWifi.Refresh" />
@@ -64,8 +58,28 @@
             class="dev.polek.adbwifi.actions.ClearLogAction"
             icon="/icons/deleteIcon.svg"
             text="Clear Log" />
+        <action
+            id="AdbWifi.WrapLog"
+            class="dev.polek.adbwifi.actions.WrapLogAction"
+            icon="AllIcons.Actions.ToggleSoftWrap"
+            text="Wrap Content" />
+        <action
+            id="AdbWifi.CollapseLog"
+            class="dev.polek.adbwifi.actions.CollapseLogAction"
+            icon="AllIcons.General.ChevronDown"
+            text="Collapse Log" />
+        <action
+            id="AdbWifi.ExpandLog"
+            class="dev.polek.adbwifi.actions.ExpandLogAction"
+            icon="AllIcons.General.ChevronUp"
+            text="Expand Log" />
         <group id="AdbWifi.LogToolbarActions">
             <reference ref="AdbWifi.ClearLog" />
+            <reference ref="AdbWifi.WrapLog" />
+            <reference ref="AdbWifi.CollapseLog" />
+        </group>
+        <group id="AdbWifi.ExpandLogActions">
+            <reference ref="AdbWifi.ExpandLog" />
         </group>
     </actions>
 </idea-plugin>

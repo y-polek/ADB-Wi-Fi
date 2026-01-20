@@ -8,6 +8,7 @@ import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.model.AdbCommandConfig
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.PinnedDevice
+import dev.polek.adbwifi.model.PinnedDevice.Companion.toDevice
 import dev.polek.adbwifi.services.*
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.Companion.toViewModel
@@ -17,6 +18,7 @@ import dev.polek.adbwifi.utils.BasePresenter
 import dev.polek.adbwifi.utils.copyToClipboard
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -37,10 +39,12 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
     private var pinnedDevices: List<DeviceViewModel> = pinDeviceService.pinnedDevices.toViewModel()
 
     private var connectingDevices = mutableSetOf<Pair<String/*Device's unique ID*/, String/*IP address*/>>()
+    private var sharingScreenDevices = mutableSetOf<Pair<String/*Device's unique ID*/, String/*IP address*/>>()
     private val selectedPackages = mutableMapOf<String, String>()
     private var deviceCollectionJob: Job? = null
     private var logVisibilityJob: Job? = null
     private var logEntriesJob: Job? = null
+    private var logWrapContentJob: Job? = null
     private var adbLocationJob: Job? = null
     private var scrcpyEnabledJob: Job? = null
 
@@ -98,11 +102,25 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
 
     fun onShareScreenButtonClicked(device: DeviceViewModel) {
         if (scrcpyService.isScrcpyValid()) {
+            sharingScreenDevices.add(device)
+            updateDeviceLists()
+
+            // Hide progress after 3 seconds max
+            val timeoutJob = launch {
+                delay(SHARE_SCREEN_PROGRESS_DURATION_TIMEOUT_MS)
+                sharingScreenDevices.remove(device)
+                updateDeviceLists()
+            }
+
             launch(IO) {
                 val result = scrcpyService.share(device.device)
                 if (result.isError) {
                     view?.showScrcpyError(result.output)
                 }
+            }.invokeOnCompletion {
+                timeoutJob.cancel()
+                sharingScreenDevices.remove(device)
+                updateDeviceLists()
             }
         } else {
             view?.showInvalidScrcpyLocationError()
@@ -129,14 +147,34 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
         updateDeviceLists()
     }
 
+    fun onClearPreviouslyConnectedClicked() {
+        view?.showClearPreviouslyConnectedConfirmation()
+    }
+
+    fun onClearPreviouslyConnectedConfirmed() {
+        pinDeviceService.clearAllPreviouslyConnectedDevices()
+        pinnedDevices = emptyList()
+        updateDeviceLists()
+    }
+
     fun onRenameDeviceClicked(device: DeviceViewModel) {
         view?.showRenameDeviceDialog(device)
         updateDeviceNames()
     }
 
+    fun onEditDeviceClicked(device: DeviceViewModel) {
+        view?.showEditDeviceDialog(device)
+        // Refresh pinned devices after editing (IP/port may have changed)
+        pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
+        updateDeviceNames()
+        updateDeviceLists()
+    }
+
     private fun updateDeviceNames() {
         devices = devices.map {
-            it.device.toViewModel(customName = deviceNamesService.findName(it.serialNumber))
+            it.device.toViewModel(
+                customName = deviceNamesService.findName(it.serialNumber, it.uniqueId)
+            )
         }
         pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
         updateDeviceLists()
@@ -245,7 +283,7 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
 
     private fun onDevicesUpdated(model: List<Device>) {
         devices = model.map {
-            it.toViewModel(customName = deviceNamesService.findName(it.serialNumber))
+            it.toViewModel(customName = deviceNamesService.findName(it.serialNumber, it.uniqueId))
         }
         pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
 
@@ -259,6 +297,7 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
         devices.forEach {
             it.isInProgress = connectingDevices.contains(it)
             it.isShareScreenButtonVisible = isScrcpyEnabled
+            it.isShareScreenInProgress = sharingScreenDevices.contains(it)
             it.isAdbCommandsButtonVisible = true
             it.packageName = packageName
         }
@@ -299,11 +338,18 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
                 updateLogVisibility(isVisible)
             }
         }
+        logWrapContentJob = launch {
+            logService.isLogWrapContent.collect { wrap ->
+                view?.setLogWrapContent(wrap)
+            }
+        }
     }
 
     private fun unsubscribeFromLogEvents() {
         logVisibilityJob?.cancel()
         logVisibilityJob = null
+        logWrapContentJob?.cancel()
+        logWrapContentJob = null
     }
 
     private fun subscribeToScrcpyEnabledState() {
@@ -332,6 +378,10 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
             logEntriesJob?.cancel()
             logEntriesJob = null
         }
+    }
+
+    fun onExpandLogClicked() {
+        logService.setLogVisible(true)
     }
 
     private fun subscribeToAdbLocationChanges() {
@@ -366,12 +416,17 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
             }
             .sortedBy { it.name }
             .map {
-                it.toViewModel(customName = deviceNamesService.findName(it.serialNumber))
+                val device = it.toDevice()
+                device.toViewModel(
+                    customName = deviceNamesService.findName(device.serialNumber, device.uniqueId),
+                    isPreviouslyConnected = true
+                )
             }
             .toList()
     }
 
     private companion object {
+        private const val SHARE_SCREEN_PROGRESS_DURATION_TIMEOUT_MS = 3000L
 
         private fun MutableSet<Pair<String/*Unique ID*/, String/*IP address*/>>.add(device: DeviceViewModel) {
             this.add(device.uniqueId to device.address.orEmpty())

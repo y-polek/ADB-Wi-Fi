@@ -20,5 +20,13 @@ class LogService {
         properties.isLogVisible = visible
     }
 
+    private val _isLogWrapContent = MutableStateFlow(properties.isLogWrapContent)
+    val isLogWrapContent: StateFlow<Boolean> = _isLogWrapContent.asStateFlow()
+
+    fun setLogWrapContent(wrap: Boolean) {
+        _isLogWrapContent.value = wrap
+        properties.isLogWrapContent = wrap
+    }
+
     val commandHistory = CommandHistory()
 }

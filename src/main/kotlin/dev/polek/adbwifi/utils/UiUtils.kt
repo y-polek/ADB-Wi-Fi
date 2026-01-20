@@ -49,6 +49,11 @@ fun JTextField.makeMonospaced() {
     this.font = JBUI.Fonts.create(Font.MONOSPACED, oldFont.size)
 }
 
+fun JLabel.makeMonospaced() {
+    val oldFont = this.font
+    this.font = JBUI.Fonts.create(Font.MONOSPACED, oldFont.size)
+}
+
 fun JLabel.setFontSize(size: Float) {
     val oldFont = this.font
     this.font = oldFont.deriveFont(size)

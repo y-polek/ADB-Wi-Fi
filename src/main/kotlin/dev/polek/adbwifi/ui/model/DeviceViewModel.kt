@@ -12,14 +12,17 @@ data class DeviceViewModel(
     val titleText: String,
     val subtitleText: String,
     val subtitleIcon: Icon?,
-    val icon: Icon,
+    val icon: Icon?,
     val hasAddress: Boolean,
     val buttonType: ButtonType,
     var isShareScreenButtonVisible: Boolean,
-    val isRemoveButtonVisible: Boolean,
+    val isPreviouslyConnected: Boolean,
     var isInProgress: Boolean = false,
+    var isShareScreenInProgress: Boolean = false,
     var packageName: String? = null,
-    var isAdbCommandsButtonVisible: Boolean = false
+    var isAdbCommandsButtonVisible: Boolean = false,
+    val deviceType: DeviceType = DeviceType.PHYSICAL,
+    val isConnected: Boolean = false
 ) {
     val id: String
         get() = device.id
@@ -33,32 +36,42 @@ data class DeviceViewModel(
     val uniqueId: String
         get() = device.uniqueId
 
+    val isRemoveButtonVisible: Boolean
+        get() = isPreviouslyConnected
+
     enum class ButtonType {
         CONNECT, CONNECT_DISABLED, DISCONNECT
+    }
+
+    enum class DeviceType {
+        EMULATOR, PHYSICAL
     }
 
     companion object {
 
         fun Device.toViewModel(
             customName: String?,
-            isRemoveButtonVisible: Boolean = false
+            isPreviouslyConnected: Boolean = false
         ): DeviceViewModel {
             val device = this
+            val deviceType = device.detectDeviceType()
             return DeviceViewModel(
                 device = device,
                 titleText = customName ?: device.name,
                 subtitleText = device.subtitleText(),
                 subtitleIcon = device.addressIcon(),
-                icon = device.icon(),
+                icon = device.icon(deviceType, isPreviouslyConnected),
                 hasAddress = device.hasAddress(),
-                buttonType = device.buttonType(),
+                buttonType = device.buttonType(deviceType),
                 isShareScreenButtonVisible = false,
-                isRemoveButtonVisible = isRemoveButtonVisible
+                isPreviouslyConnected = isPreviouslyConnected,
+                deviceType = deviceType,
+                isConnected = device.isWifiDevice
             )
         }
 
         fun PinnedDevice.toViewModel(customName: String?): DeviceViewModel {
-            return toDevice().toViewModel(customName, isRemoveButtonVisible = true)
+            return toDevice().toViewModel(customName, isPreviouslyConnected = true)
         }
 
         private fun Device.subtitleText() = buildString {
@@ -71,10 +84,29 @@ data class DeviceViewModel(
             append("</html>")
         }
 
-        private fun Device.icon(): Icon = when (connectionType) {
-            USB -> Icons.USB
-            WIFI -> Icons.WIFI
-            NONE -> Icons.NO_USB
+        private fun Device.detectDeviceType(): DeviceType {
+            return when {
+                id.startsWith("emulator-") -> DeviceType.EMULATOR
+                name.contains("emulator", ignoreCase = true) -> DeviceType.EMULATOR
+                name.contains("sdk", ignoreCase = true) -> DeviceType.EMULATOR
+                serialNumber.contains("emulator", ignoreCase = true) -> DeviceType.EMULATOR
+                else -> DeviceType.PHYSICAL
+            }
+        }
+
+        private fun Device.icon(deviceType: DeviceType, isPreviouslyConnected: Boolean): Icon? {
+            // Previously connected device - no icon
+            if (isPreviouslyConnected) return null
+
+            // Emulator - use phone icon
+            if (deviceType == DeviceType.EMULATOR) return Icons.PHONE
+
+            // Physical device - based on connection type
+            return when (connectionType) {
+                USB -> Icons.USB
+                WIFI -> Icons.WIFI
+                NONE -> null
+            }
         }
 
         private fun Device.addressIcon(): Icon? {
@@ -90,10 +122,11 @@ data class DeviceViewModel(
 
         private fun Device.hasAddress() = this.address != null
 
-        private fun Device.buttonType(): ButtonType {
+        private fun Device.buttonType(deviceType: DeviceType): ButtonType {
             val device = this
             return when {
                 device.isWifiDevice -> ButtonType.DISCONNECT
+                deviceType == DeviceType.EMULATOR -> ButtonType.CONNECT_DISABLED
                 device.address?.ip.isNullOrBlank() -> ButtonType.CONNECT_DISABLED
                 device.isUsbDevice && device.isConnected -> ButtonType.CONNECT_DISABLED
                 else -> ButtonType.CONNECT
