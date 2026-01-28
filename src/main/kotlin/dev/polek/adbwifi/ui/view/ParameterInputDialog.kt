@@ -1,6 +1,7 @@
 package dev.polek.adbwifi.ui.view
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.components.JBLabel
@@ -21,16 +22,22 @@ class ParameterInputDialog(
 
     private val inputFields: Map<String, JTextComponent> = placeholders.associate { placeholder ->
         placeholder.fullMatch to when (placeholder.type) {
-            PlaceholderType.FILE -> createBrowseField(
-                FileChooserDescriptor(true, false, false, false, false, false)
-                    .withTitle(PluginBundle.message("parameterInputSelectFile"))
-            )
+            PlaceholderType.FILE -> createFileBrowseField(placeholder.extension)
             PlaceholderType.DIR -> createBrowseField(
-                FileChooserDescriptor(false, true, false, false, false, false)
+                FileChooserDescriptorFactory.singleDir()
                     .withTitle(PluginBundle.message("parameterInputSelectDirectory"))
             )
             PlaceholderType.PARAM -> JBTextField()
         }
+    }
+
+    private fun createFileBrowseField(extension: String?): JTextComponent {
+        val descriptor = if (extension != null) {
+            FileChooserDescriptorFactory.singleFile().withExtensionFilter(extension.removePrefix("."))
+        } else {
+            FileChooserDescriptorFactory.singleFile()
+        }.withTitle(PluginBundle.message("parameterInputSelectFile"))
+        return createBrowseField(descriptor)
     }
 
     private fun createBrowseField(descriptor: FileChooserDescriptor): JTextComponent {

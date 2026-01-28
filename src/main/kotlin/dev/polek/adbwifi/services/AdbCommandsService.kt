@@ -115,7 +115,7 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
             ),
             AdbCommandConfig(
                 name = "Install APK",
-                command = "install {file APK file}",
+                command = "install {file .apk}",
                 iconId = "download",
                 isEnabled = true,
                 order = 11

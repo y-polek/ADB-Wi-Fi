@@ -11,18 +11,30 @@ data class AdbCommandConfig(
     val requiresPackage: Boolean get() = command.contains("{package}")
 
     val parameterPlaceholders: List<ParameterPlaceholder>
-        get() = PARAMETER_REGEX.findAll(command).map { match ->
-            ParameterPlaceholder(
-                fullMatch = match.value,
-                type = PlaceholderType.fromString(match.groupValues[1]),
-                name = match.groupValues[2].trim().takeIf { it.isNotEmpty() }
-            )
-        }.distinctBy { it.fullMatch }.toList()
+        get() {
+            val filePlaceholders = FILE_REGEX.findAll(command).map { match ->
+                ParameterPlaceholder(
+                    fullMatch = match.value,
+                    type = PlaceholderType.FILE,
+                    extension = match.groupValues[1].trim().takeIf { it.isNotEmpty() },
+                    name = match.groupValues[2].trim().takeIf { it.isNotEmpty() }
+                )
+            }
+            val otherPlaceholders = PARAM_DIR_REGEX.findAll(command).map { match ->
+                ParameterPlaceholder(
+                    fullMatch = match.value,
+                    type = PlaceholderType.fromString(match.groupValues[1]),
+                    name = match.groupValues[2].trim().takeIf { it.isNotEmpty() }
+                )
+            }
+            return (filePlaceholders + otherPlaceholders).distinctBy { it.fullMatch }.toList()
+        }
 
     val requiresParameters: Boolean get() = parameterPlaceholders.isNotEmpty()
 
     private companion object {
-        private val PARAMETER_REGEX = """\{(param|file|dir)(\s+[^}]+)?}""".toRegex()
+        private val FILE_REGEX = """\{file(\s+\.[a-zA-Z0-9]+)?(\s+[^}]+)?}""".toRegex()
+        private val PARAM_DIR_REGEX = """\{(param|dir)(\s+[^}]+)?}""".toRegex()
     }
 }
 
@@ -43,5 +55,6 @@ enum class PlaceholderType {
 data class ParameterPlaceholder(
     val fullMatch: String,
     val type: PlaceholderType = PlaceholderType.PARAM,
+    val extension: String? = null,
     val name: String?
 )

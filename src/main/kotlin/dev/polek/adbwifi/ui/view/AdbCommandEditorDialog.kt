@@ -101,12 +101,21 @@ class AdbCommandEditorDialog(
         val commands = commandArea.text.split("\n").filter { it.isNotBlank() }
         val preview = commands.joinToString("\n") { cmd ->
             var result = cmd.trim().replace("{package}", "<app package>")
-            PLACEHOLDER_REGEX.findAll(result).forEach { match ->
+            FILE_REGEX.findAll(result).forEach { match ->
+                val extension = match.groupValues[1].trim().takeIf { it.isNotEmpty() }
+                val name = match.groupValues[2].trim().takeIf { it.isNotEmpty() }
+                val placeholder = when {
+                    name != null -> "<$name>"
+                    extension != null -> "<$extension file>"
+                    else -> "<file>"
+                }
+                result = result.replace(match.value, placeholder)
+            }
+            PARAM_DIR_REGEX.findAll(result).forEach { match ->
                 val type = match.groupValues[1]
                 val name = match.groupValues[2].trim().takeIf { it.isNotEmpty() }
                 val placeholder = when {
                     name != null -> "<$name>"
-                    type == "file" -> "<file>"
                     type == "dir" -> "<directory>"
                     else -> "<user input>"
                 }
@@ -118,7 +127,8 @@ class AdbCommandEditorDialog(
     }
 
     private companion object {
-        private val PLACEHOLDER_REGEX = """\{(param|file|dir)(\s+[^}]+)?}""".toRegex()
+        private val FILE_REGEX = """\{file(\s+\.[a-zA-Z0-9]+)?(\s+[^}]+)?}""".toRegex()
+        private val PARAM_DIR_REGEX = """\{(param|dir)(\s+[^}]+)?}""".toRegex()
     }
 
     override fun doValidate(): ValidationInfo? {
