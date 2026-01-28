@@ -14,6 +14,7 @@ data class AdbCommandConfig(
         get() = PARAMETER_REGEX.findAll(command).map { match ->
             ParameterPlaceholder(
                 fullMatch = match.value,
+                type = PlaceholderType.fromString(match.groupValues[1]),
                 name = match.groupValues[2].trim().takeIf { it.isNotEmpty() }
             )
         }.distinctBy { it.fullMatch }.toList()
@@ -21,11 +22,26 @@ data class AdbCommandConfig(
     val requiresParameters: Boolean get() = parameterPlaceholders.isNotEmpty()
 
     private companion object {
-        private val PARAMETER_REGEX = """\{(param\d*)(\s+[^}]+)?}""".toRegex()
+        private val PARAMETER_REGEX = """\{(param|file|dir)(\s+[^}]+)?}""".toRegex()
+    }
+}
+
+enum class PlaceholderType {
+    PARAM,
+    FILE,
+    DIR;
+
+    companion object {
+        fun fromString(value: String): PlaceholderType = when (value) {
+            "file" -> FILE
+            "dir" -> DIR
+            else -> PARAM
+        }
     }
 }
 
 data class ParameterPlaceholder(
     val fullMatch: String,
+    val type: PlaceholderType = PlaceholderType.PARAM,
     val name: String?
 )

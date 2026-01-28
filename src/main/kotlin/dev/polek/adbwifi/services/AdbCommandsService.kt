@@ -112,6 +112,13 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 iconId = "hide",
                 isEnabled = true,
                 order = 10
+            ),
+            AdbCommandConfig(
+                name = "Install APK",
+                command = "install {file APK file}",
+                iconId = "download",
+                isEnabled = true,
+                order = 11
             )
         )
     }
