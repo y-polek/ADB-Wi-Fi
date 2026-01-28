@@ -89,10 +89,10 @@ class AdbCommandEditorDialog(
 
         return FormBuilder.createFormBuilder()
             .addLabeledComponent(PluginBundle.message("adbCommandEditorNameLabel"), nameField)
+            .addLabeledComponent(PluginBundle.message("adbCommandEditorIconLabel"), iconButton)
             .addLabeledComponent(PluginBundle.message("adbCommandEditorCommandLabel"), commandScrollPane)
             .addComponentToRightColumn(hintLabel)
             .addLabeledComponent(PluginBundle.message("adbCommandEditorPreviewLabel"), previewScrollPane)
-            .addLabeledComponent(PluginBundle.message("adbCommandEditorIconLabel"), iconButton)
             .addComponent(confirmationCheckbox)
             .panel
     }
