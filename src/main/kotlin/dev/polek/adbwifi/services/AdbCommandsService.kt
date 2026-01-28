@@ -32,14 +32,14 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
             AdbCommandConfig(
                 name = "Kill app",
                 command = "shell am force-stop {package}",
-                iconId = "stop",
+                iconId = "Actions.Suspend",
                 isEnabled = true,
                 order = 0
             ),
             AdbCommandConfig(
                 name = "Start app",
                 command = "shell monkey -p {package} -c android.intent.category.LAUNCHER 1",
-                iconId = "play",
+                iconId = "Actions.Execute",
                 isEnabled = true,
                 order = 1
             ),
@@ -47,14 +47,14 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 name = "Restart app",
                 command = "shell am force-stop {package}\n" +
                     "shell monkey -p {package} -c android.intent.category.LAUNCHER 1",
-                iconId = "restart",
+                iconId = "Actions.Restart",
                 isEnabled = true,
                 order = 2
             ),
             AdbCommandConfig(
                 name = "Clear app data",
                 command = "shell pm clear {package}",
-                iconId = "clear-2",
+                iconId = "Actions.GC",
                 isEnabled = true,
                 order = 3,
                 requiresConfirmation = true
@@ -63,7 +63,7 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 name = "Clear app data and restart",
                 command = "shell pm clear {package}\n" +
                     "shell monkey -p {package} -c android.intent.category.LAUNCHER 1",
-                iconId = "refresh-2",
+                iconId = "Actions.ForceRefresh",
                 isEnabled = true,
                 order = 4,
                 requiresConfirmation = true
@@ -71,7 +71,7 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
             AdbCommandConfig(
                 name = "Uninstall app",
                 command = "shell pm uninstall {package}",
-                iconId = "trash",
+                iconId = "Actions.Uninstall",
                 isEnabled = true,
                 order = 5,
                 requiresConfirmation = true
@@ -79,59 +79,59 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
             AdbCommandConfig(
                 name = "Uninstall app (keep data)",
                 command = "shell pm uninstall -k {package}",
-                iconId = "delete",
+                iconId = "General.Delete",
                 isEnabled = true,
                 order = 6,
                 requiresConfirmation = true
             ),
             AdbCommandConfig(
+                name = "Install APK",
+                command = "install {file .apk}",
+                iconId = "Actions.Install",
+                isEnabled = true,
+                order = 7
+            ),
+            AdbCommandConfig(
                 name = "Reboot device",
                 command = "reboot",
-                iconId = "restart-2",
+                iconId = "Actions.RestartFrame",
                 isEnabled = true,
-                order = 7,
+                order = 8,
                 requiresConfirmation = true
             ),
             AdbCommandConfig(
                 name = "Simulate incoming SMS (emulator only)",
                 command = "emu sms send ADB-Wi-Fi {param Message}",
-                iconId = "console",
+                iconId = "Ide.Notification.InfoEvents",
                 isEnabled = true,
-                order = 8
+                order = 9
             ),
             AdbCommandConfig(
                 name = "Enable TalkBack (emulator only)",
                 command = "shell settings put secure enabled_accessibility_services " +
                     "com.google.android.marvin.talkback/com.google.android.marvin.talkback.TalkBackService",
-                iconId = "eye",
-                isEnabled = true,
-                order = 9
-            ),
-            AdbCommandConfig(
-                name = "Disable TalkBack",
-                command = "shell settings put secure enabled_accessibility_services \"\"",
-                iconId = "hide",
+                iconId = "General.User",
                 isEnabled = true,
                 order = 10
             ),
             AdbCommandConfig(
-                name = "Install APK",
-                command = "install {file .apk}",
-                iconId = "download",
+                name = "Disable TalkBack",
+                command = "shell settings put secure enabled_accessibility_services \"\"",
+                iconId = "Actions.ToggleVisibility",
                 isEnabled = true,
                 order = 11
             ),
             AdbCommandConfig(
                 name = "Show touches",
                 command = "shell settings put system show_touches 1",
-                iconId = "check",
+                iconId = "General.Mouse",
                 isEnabled = true,
                 order = 12
             ),
             AdbCommandConfig(
                 name = "Hide touches",
                 command = "shell settings put system show_touches 0",
-                iconId = "close",
+                iconId = "Actions.Cancel",
                 isEnabled = true,
                 order = 13
             )
