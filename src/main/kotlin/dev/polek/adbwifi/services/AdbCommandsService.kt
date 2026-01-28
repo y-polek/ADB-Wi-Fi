@@ -97,6 +97,21 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 iconId = "console",
                 isEnabled = true,
                 order = 8
+            ),
+            AdbCommandConfig(
+                name = "Enable TalkBack (emulator only)",
+                command = "shell settings put secure enabled_accessibility_services " +
+                    "com.google.android.marvin.talkback/com.google.android.marvin.talkback.TalkBackService",
+                iconId = "eye",
+                isEnabled = true,
+                order = 9
+            ),
+            AdbCommandConfig(
+                name = "Disable TalkBack",
+                command = "shell settings put secure enabled_accessibility_services \"\"",
+                iconId = "hide",
+                isEnabled = true,
+                order = 10
             )
         )
     }
