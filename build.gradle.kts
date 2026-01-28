@@ -47,7 +47,8 @@ dependencies {
     testImplementation(libs.assertj)
 
     intellijPlatform {
-        intellijIdea("2025.3")
+        androidStudio("2025.2.3.9")
+        bundledPlugin("org.jetbrains.android")
 
         testFramework(TestFrameworkType.Platform)
     }
@@ -177,5 +178,10 @@ tasks {
     val runAndroidStudio by intellijPlatformTesting.runIde.registering {
         type = IntelliJPlatformType.AndroidStudio
         version = "2025.2.2.7"
+    }
+
+    val runIntellijIdea by intellijPlatformTesting.runIde.registering {
+        type = IntelliJPlatformType.IntellijIdea
+        version = "2025.3.2"
     }
 }

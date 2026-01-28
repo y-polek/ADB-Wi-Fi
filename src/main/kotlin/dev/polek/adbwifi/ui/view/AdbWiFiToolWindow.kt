@@ -89,8 +89,20 @@ class AdbWiFiToolWindow(
             return presenter.getInstalledPackages(device)
         }
 
+        override fun hasInstalledPackagesCache(device: DeviceViewModel): Boolean {
+            return presenter.hasInstalledPackagesCache(device)
+        }
+
         override fun getSelectedPackage(device: DeviceViewModel): String? {
             return presenter.getSelectedPackage(device)
+        }
+
+        override fun getProjectPackageNames(): List<String> {
+            return presenter.getProjectPackageNames()
+        }
+
+        override fun refreshInstalledPackages(device: DeviceViewModel) {
+            presenter.refreshInstalledPackagesForDevice(device)
         }
     }
 

@@ -19,7 +19,6 @@ data class DeviceViewModel(
     val isPreviouslyConnected: Boolean,
     var isInProgress: Boolean = false,
     var isShareScreenInProgress: Boolean = false,
-    var packageName: String? = null,
     var isAdbCommandsButtonVisible: Boolean = false,
     val deviceType: DeviceType = DeviceType.PHYSICAL,
     val isConnected: Boolean = false

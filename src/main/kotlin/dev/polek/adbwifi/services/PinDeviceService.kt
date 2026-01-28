@@ -23,6 +23,7 @@ class PinDeviceService : PersistentStateComponent<PinDeviceService> {
         for (device in devices) {
             if (device.connectionType != WIFI) continue
             if (device.address?.ip.isNullOrBlank()) continue
+            if (device.apiLevel.isBlank()) continue
             if (pinnedDevices.contains(device)) continue
             pinnedDevices = pinnedDevices.add(device)
         }

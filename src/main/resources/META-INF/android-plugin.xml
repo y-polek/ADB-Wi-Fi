@@ -1,0 +1,3 @@
+<idea-plugin>
+    <!-- Extensions loaded only when org.jetbrains.android plugin is available -->
+</idea-plugin>

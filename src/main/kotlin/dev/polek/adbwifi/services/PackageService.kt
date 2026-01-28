@@ -9,8 +9,44 @@ import com.intellij.psi.xml.XmlFile
 @Service(Service.Level.PROJECT)
 class PackageService(private val project: Project) {
 
-    fun getPackageName(): String? {
-        return parseApplicationIdFromGradle() ?: parseNamespaceFromGradle() ?: parsePackageFromManifest()
+    /**
+     * Returns all application IDs found in the project.
+     * Tries Android Studio's AndroidModel API first, then falls back to file parsing.
+     */
+    fun getProjectPackageNames(): List<String> {
+        val packages = mutableListOf<String>()
+
+        // Try Android Model API first (most accurate, handles build variants)
+        packages.addAll(getApplicationIdsFromAndroidModel())
+
+        // Fallback to file parsing if Android API returned nothing
+        if (packages.isEmpty()) {
+            parseApplicationIdFromGradle()?.let { packages.add(it) }
+        }
+        if (packages.isEmpty()) {
+            parseNamespaceFromGradle()?.let { packages.add(it) }
+        }
+        if (packages.isEmpty()) {
+            parsePackageFromManifest()?.let { packages.add(it) }
+        }
+
+        return packages.distinct()
+    }
+
+    /**
+     * Attempts to get application IDs using Android Studio's AndroidModel API.
+     * Returns empty list if the Android plugin is not available or no Android modules are found.
+     */
+    private fun getApplicationIdsFromAndroidModel(): List<String> {
+        return try {
+            AndroidModelPackageProvider.getApplicationIds(project)
+        } catch (_: NoClassDefFoundError) {
+            // Android plugin is not installed
+            emptyList()
+        } catch (_: Exception) {
+            // Any other error accessing Android model
+            emptyList()
+        }
     }
 
     private fun parseApplicationIdFromGradle(): String? {

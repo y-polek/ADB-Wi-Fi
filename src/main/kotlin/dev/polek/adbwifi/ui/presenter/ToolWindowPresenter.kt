@@ -22,6 +22,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@Suppress("TooManyFunctions")
 class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWindowView>() {
 
     private val adbService by lazy { service<AdbService>() }
@@ -41,6 +42,7 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
     private var connectingDevices = mutableSetOf<Pair<String/*Device's unique ID*/, String/*IP address*/>>()
     private var sharingScreenDevices = mutableSetOf<Pair<String/*Device's unique ID*/, String/*IP address*/>>()
     private val selectedPackages = mutableMapOf<String, String>()
+    private val installedPackagesCache = mutableMapOf<String, Set<String>>() // Device ID -> installed packages
     private var deviceCollectionJob: Job? = null
     private var logVisibilityJob: Job? = null
     private var logEntriesJob: Job? = null
@@ -190,7 +192,16 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
     }
 
     fun getSelectedPackage(device: DeviceViewModel): String? {
-        return selectedPackages[device.id] ?: packageService.getPackageName()
+        // Return explicitly selected package if one exists
+        selectedPackages[device.id]?.let { return it }
+
+        // Otherwise, prefer an installed project package
+        val projectPackages = packageService.getProjectPackageNames()
+        if (projectPackages.isEmpty()) return null
+
+        val installedPackages = installedPackagesCache[device.id] ?: emptySet()
+        return projectPackages.firstOrNull { it in installedPackages }
+            ?: projectPackages.first()
     }
 
     fun setSelectedPackage(device: DeviceViewModel, packageName: String?) {
@@ -202,7 +213,15 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
     }
 
     fun getInstalledPackages(device: DeviceViewModel): List<String> {
-        return adbService.listPackages(device.id)
+        return installedPackagesCache[device.id]?.sorted() ?: emptyList()
+    }
+
+    fun hasInstalledPackagesCache(device: DeviceViewModel): Boolean {
+        return device.id in installedPackagesCache
+    }
+
+    fun getProjectPackageNames(): List<String> {
+        return packageService.getProjectPackageNames()
     }
 
     fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig) {
@@ -287,19 +306,38 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
         }
         pinnedDevices = pinDeviceService.pinnedDevices.toViewModel()
 
+        // Remove stale cache entries for disconnected devices
+        val currentDeviceIds = devices.map { it.id }.toSet()
+        installedPackagesCache.keys.removeAll { it !in currentDeviceIds }
+
         updateDeviceLists()
+    }
+
+    /**
+     * Refreshes installed packages cache for a specific device in background.
+     * Called when user opens ADB commands menu.
+     */
+    fun refreshInstalledPackagesForDevice(device: DeviceViewModel) {
+        launch {
+            withContext(IO) {
+                try {
+                    val packages = adbService.listPackages(device.id).toSet()
+                    installedPackagesCache[device.id] = packages
+                } catch (_: Exception) {
+                    // Ignore errors, keep stale cache if available
+                }
+            }
+        }
     }
 
     private fun updateDeviceLists() {
         val isScrcpyEnabled = propertiesService.isScrcpyEnabled.value
-        val packageName = packageService.getPackageName()
 
         devices.forEach {
             it.isInProgress = connectingDevices.contains(it)
             it.isShareScreenButtonVisible = isScrcpyEnabled
             it.isShareScreenInProgress = sharingScreenDevices.contains(it)
             it.isAdbCommandsButtonVisible = true
-            it.packageName = packageName
         }
         pinnedDevices.forEach {
             it.isInProgress = connectingDevices.contains(it)

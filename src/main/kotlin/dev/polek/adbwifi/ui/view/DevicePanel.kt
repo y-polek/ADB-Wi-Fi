@@ -7,6 +7,7 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.ListSeparator
 import com.intellij.openapi.ui.popup.PopupStep
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
+import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.JBUI
@@ -389,16 +390,31 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
     }
 
     private fun openAdbCommandsMenu(device: DeviceViewModel, event: MouseEvent) {
+        // Trigger background refresh of installed packages for next time
+        listener?.refreshInstalledPackages(device)
+
         val commandsService = service<AdbCommandsService>()
         val selectedPackage = listener?.getSelectedPackage(device)
-        val projectPackage = device.packageName
+        val projectPackageNames = listener?.getProjectPackageNames() ?: emptyList()
+        val installedPackages = listener?.getInstalledPackages(device)?.toSet() ?: emptySet()
         val commands = commandsService.getEnabledCommands()
 
         // Build list of menu items
         val items = mutableListOf<AdbCommandMenuItem>()
 
-        // Add package selector
-        val packageText = selectedPackage ?: PluginBundle.message("adbCommandNoPackage")
+        // Add package selector with "Not installed" indicator if needed
+        // Only show "Not installed" if we have cache data and the package is definitely not in it
+        val hasCache = listener?.hasInstalledPackagesCache(device) ?: false
+        val packageText = when {
+            selectedPackage == null -> PluginBundle.message("adbCommandNoPackage")
+            selectedPackage in installedPackages -> selectedPackage
+            !hasCache -> selectedPackage // No cache yet, don't show status
+            else -> {
+                val notInstalled = PluginBundle.message("adbCommandPackageNotInstalled")
+                val color = if (JBColor.isBright()) "CC0000" else "FF6B6B"
+                "<html>$selectedPackage <font color='#$color'>($notInstalled)</font></html>"
+            }
+        }
         items.add(AdbCommandMenuItem.PackageSelector(packageText))
 
         // Add command items
@@ -448,7 +464,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
             override fun onChosen(selectedValue: AdbCommandMenuItem, finalChoice: Boolean): PopupStep<*>? {
                 return when (selectedValue) {
                     is AdbCommandMenuItem.PackageSelector -> {
-                        createPackageSelectionStep(device, projectPackage, selectedPackage, event.component)
+                        createPackageSelectionStep(device, projectPackageNames, selectedPackage, event.component)
                     }
                     is AdbCommandMenuItem.Command -> doFinalStep {
                         listener?.onAdbCommandClicked(device, selectedValue.config)
@@ -463,10 +479,11 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
             }
         }
 
-        // Calculate width based on longest text
+        // Calculate width based on longest text (strip HTML tags for measurement)
         val fontMetrics = event.component.getFontMetrics(UIUtil.getLabelFont())
+        val htmlTagRegex = "<[^>]*>".toRegex()
         val maxTextWidth = items.maxOfOrNull { item ->
-            val text = step.getTextFor(item)
+            val text = step.getTextFor(item).replace(htmlTagRegex, "")
             val hasIcon = step.getIconFor(item) != null
             val iconWidth = if (hasIcon) JBUI.scale(16 + 8) else 0 // icon + gap
             fontMetrics.stringWidth(text) + iconWidth
@@ -480,41 +497,60 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
 
     private fun createPackageSelectionStep(
         device: DeviceViewModel,
-        projectPackage: String?,
+        projectPackageNames: List<String>,
         selectedPackage: String?,
         menuComponent: Component
     ): PopupStep<*> {
         val packageItems = mutableListOf<PackageMenuItem>()
 
-        // Add project package option if available
-        if (projectPackage != null) {
+        // Get installed packages to check installation status
+        val installedPackages = listener?.getInstalledPackages(device)?.toSet() ?: emptySet()
+        val hasCache = listener?.hasInstalledPackagesCache(device) ?: false
+
+        // Add project packages with installation status
+        projectPackageNames.forEach { packageName ->
+            // isInstalled: null = unknown (no cache), true = installed, false = not installed
+            val isInstalled = if (hasCache) packageName in installedPackages else null
+            val isSelected = selectedPackage == packageName ||
+                (selectedPackage == null && packageName == projectPackageNames.firstOrNull())
             packageItems.add(
                 PackageMenuItem.ProjectPackage(
-                    projectPackage,
-                    isSelected = selectedPackage == projectPackage || selectedPackage == null
+                    packageName = packageName,
+                    isInstalled = isInstalled,
+                    isSelected = isSelected
                 )
             )
         }
 
-        // Add installed packages
-        val installedPackages = listener?.getInstalledPackages(device) ?: emptyList()
-        if (installedPackages.isEmpty() && projectPackage == null) {
+        // Add all installed packages (including project packages)
+        if (installedPackages.isEmpty() && projectPackageNames.isEmpty()) {
             packageItems.add(PackageMenuItem.NoPackages)
         } else {
             installedPackages.forEach { pkg ->
-                if (pkg != projectPackage) {
-                    packageItems.add(PackageMenuItem.InstalledPackage(pkg, isSelected = pkg == selectedPackage))
-                }
+                packageItems.add(PackageMenuItem.InstalledPackage(pkg, isSelected = pkg == selectedPackage))
             }
         }
+
+        val firstInstalledIndex = packageItems.indexOfFirst { it is PackageMenuItem.InstalledPackage }
+
+        // Red color for "Not installed" text - different shades for light/dark themes
+        val notInstalledColor = if (JBColor.isBright()) "CC0000" else "FF6B6B"
 
         return object : BaseListPopupStep<PackageMenuItem>(
             PluginBundle.message("adbCommandSelectPackage"),
             packageItems
         ) {
             override fun getTextFor(value: PackageMenuItem): String = when (value) {
-                is PackageMenuItem.ProjectPackage ->
-                    PluginBundle.message("adbCommandPackageFromProject", value.packageName)
+                is PackageMenuItem.ProjectPackage -> {
+                    when (value.isInstalled) {
+                        true -> value.packageName // Installed, no suffix needed
+                        null -> value.packageName // Unknown (no cache), don't show status
+                        false -> {
+                            val notInstalled = PluginBundle.message("adbCommandPackageNotInstalled")
+                            "<html>${value.packageName} <font color='#$notInstalledColor'>($notInstalled)</font></html>"
+                        }
+                    }
+                }
                 is PackageMenuItem.InstalledPackage -> value.packageName
                 is PackageMenuItem.NoPackages -> PluginBundle.message("adbCommandNoPackagesInstalled")
             }
@@ -532,18 +568,24 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 else -> true
             }
 
-            override fun getSeparatorAbove(value: PackageMenuItem): ListSeparator? = when {
-                value is PackageMenuItem.InstalledPackage &&
-                    packageItems.indexOf(value) == 1 &&
-                    packageItems.firstOrNull() is PackageMenuItem.ProjectPackage -> ListSeparator()
-                else -> null
+            override fun getSeparatorAbove(value: PackageMenuItem): ListSeparator? {
+                val index = packageItems.indexOf(value)
+                return when {
+                    // "Project" header above first project package
+                    value is PackageMenuItem.ProjectPackage && index == 0 ->
+                        ListSeparator(PluginBundle.message("adbCommandSectionProject"))
+                    // "Installed Apps" header above first installed package
+                    value is PackageMenuItem.InstalledPackage && index == firstInstalledIndex ->
+                        ListSeparator(PluginBundle.message("adbCommandSectionInstalledApps"))
+                    else -> null
+                }
             }
 
             override fun onChosen(selectedValue: PackageMenuItem, finalChoice: Boolean): PopupStep<*>? {
                 return doFinalStep {
                     when (selectedValue) {
                         is PackageMenuItem.ProjectPackage -> {
-                            listener?.onPackageSelected(device, null) // null means use project package
+                            listener?.onPackageSelected(device, selectedValue.packageName)
                         }
                         is PackageMenuItem.InstalledPackage -> {
                             listener?.onPackageSelected(device, selectedValue.packageName)
@@ -589,7 +631,11 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
     }
 
     private sealed class PackageMenuItem {
-        data class ProjectPackage(val packageName: String, val isSelected: Boolean) : PackageMenuItem()
+        data class ProjectPackage(
+            val packageName: String,
+            val isInstalled: Boolean?, // null = unknown (no cache), true = installed, false = not installed
+            val isSelected: Boolean
+        ) : PackageMenuItem()
         data class InstalledPackage(val packageName: String, val isSelected: Boolean) : PackageMenuItem()
         data object NoPackages : PackageMenuItem()
     }
@@ -606,7 +652,10 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig)
         fun onPackageSelected(device: DeviceViewModel, packageName: String?)
         fun getInstalledPackages(device: DeviceViewModel): List<String>
+        fun hasInstalledPackagesCache(device: DeviceViewModel): Boolean
         fun getSelectedPackage(device: DeviceViewModel): String?
+        fun getProjectPackageNames(): List<String>
+        fun refreshInstalledPackages(device: DeviceViewModel)
     }
 
     private companion object {
