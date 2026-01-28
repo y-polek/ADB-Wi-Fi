@@ -27,6 +27,7 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
     }
 
     companion object {
+        @Suppress("LongMethod")
         fun defaultCommands(): List<AdbCommandConfig> = listOf(
             AdbCommandConfig(
                 name = "Kill app",
@@ -119,6 +120,20 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 iconId = "download",
                 isEnabled = true,
                 order = 11
+            ),
+            AdbCommandConfig(
+                name = "Show touches",
+                command = "shell settings put system show_touches 1",
+                iconId = "check",
+                isEnabled = true,
+                order = 12
+            ),
+            AdbCommandConfig(
+                name = "Hide touches",
+                command = "shell settings put system show_touches 0",
+                iconId = "close",
+                isEnabled = true,
+                order = 13
             )
         )
     }
