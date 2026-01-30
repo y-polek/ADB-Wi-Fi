@@ -73,7 +73,7 @@ class AdbCommandEditorDialog(
         })
 
         val commandScrollPane = JBScrollPane(commandArea)
-        commandScrollPane.preferredSize = Dimension(400, 100)
+        commandScrollPane.preferredSize = Dimension(600, 150)
 
         val hintLabel = JBLabel(PluginBundle.message("adbCommandEditorCommandHint"))
         hintLabel.foreground = JBUI.CurrentTheme.ContextHelp.FOREGROUND
@@ -85,7 +85,7 @@ class AdbCommandEditorDialog(
         previewArea.foreground = JBUI.CurrentTheme.ContextHelp.FOREGROUND
         previewArea.font = JBUI.Fonts.smallFont()
         val previewScrollPane = JBScrollPane(previewArea)
-        previewScrollPane.preferredSize = Dimension(400, 60)
+        previewScrollPane.preferredSize = Dimension(600, 100)
 
         return FormBuilder.createFormBuilder()
             .addLabeledComponent(PluginBundle.message("adbCommandEditorNameLabel"), nameField)
