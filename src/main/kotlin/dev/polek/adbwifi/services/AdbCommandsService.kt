@@ -134,6 +134,24 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 iconId = "Actions.Cancel",
                 isEnabled = true,
                 order = 13
+            ),
+            AdbCommandConfig(
+                name = "Grant all permissions",
+                command = "shell dumpsys package {package} | grep \"android.permission\" | " +
+                    "grep \"granted=false\" | cut -d: -f1 | tr -d ' ' | " +
+                    "while read perm; do pm grant {package} \"\$perm\"; done",
+                iconId = "Diff.GutterCheckBoxSelected",
+                isEnabled = true,
+                order = 14
+            ),
+            AdbCommandConfig(
+                name = "Revoke all permissions",
+                command = "shell dumpsys package {package} | grep \"android.permission\" | " +
+                    "grep \"granted=true\" | cut -d: -f1 | tr -d ' ' | " +
+                    "while read perm; do pm revoke {package} \"\$perm\"; done",
+                iconId = "Diff.GutterCheckBoxIndeterminate",
+                isEnabled = true,
+                order = 15
             )
         )
     }
