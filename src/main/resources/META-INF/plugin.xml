@@ -21,7 +21,18 @@
             secondary="true"
             icon="/icons/toolWindowIcon.svg"
             factoryClass="dev.polek.adbwifi.ui.view.WindowFactory" />
-        <applicationConfigurable instance="dev.polek.adbwifi.settings.AdbWifiConfigurable" displayName="ADB Wi-Fi"/>
+        <applicationConfigurable
+            id="dev.polek.adbwifi.settings"
+            instance="dev.polek.adbwifi.settings.AdbWifiConfigurable"
+            displayName="ADB Wi-Fi"/>
+        <applicationConfigurable
+            parentId="dev.polek.adbwifi.settings"
+            instance="dev.polek.adbwifi.settings.ScrcpyConfigurable"
+            displayName="Screen Mirroring"/>
+        <applicationConfigurable
+            parentId="dev.polek.adbwifi.settings"
+            instance="dev.polek.adbwifi.settings.AdbCommandsConfigurable"
+            displayName="ADB Commands"/>
         <errorHandler implementation="dev.polek.adbwifi.report.ReportSubmitter" />
         <notificationGroup
                 id="adb_wifi_notification_group"

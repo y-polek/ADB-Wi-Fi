@@ -16,6 +16,7 @@ import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.model.ActionIconsProvider
 import dev.polek.adbwifi.model.AdbCommandConfig
 import dev.polek.adbwifi.services.AdbCommandsService
+import dev.polek.adbwifi.settings.AdbCommandsConfigurable
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.model.DeviceViewModel.ButtonType
 import dev.polek.adbwifi.ui.view.buttons.IconButton
@@ -472,7 +473,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                     is AdbCommandMenuItem.Customize -> doFinalStep {
                         ShowSettingsUtil.getInstance().showSettingsDialog(
                             null,
-                            PluginBundle.message("settingsPageName")
+                            AdbCommandsConfigurable::class.java
                         )
                     }
                 }
