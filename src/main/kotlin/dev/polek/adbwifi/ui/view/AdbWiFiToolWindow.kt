@@ -262,22 +262,26 @@ class AdbWiFiToolWindow(
 
     override fun showInvalidScrcpyLocationError() {
         @Suppress("DialogTitleCapitalization")
-        val notification = NOTIFICATION_GROUP.createNotification(
-            PluginBundle.message("name"),
-            PluginBundle.message("scrcpyPathVerificationErrorMessage"),
-            NotificationType.ERROR
-        )
+        val notification = NotificationGroupManager.getInstance()
+            .getNotificationGroup("adb_wifi_notification_group")
+            .createNotification(
+                PluginBundle.message("name"),
+                PluginBundle.message("scrcpyPathVerificationErrorMessage"),
+                NotificationType.ERROR
+            )
         notification.addAction(OpenSettingsNotificationAction())
         notification.notify(project)
     }
 
     override fun showScrcpyError(error: String) {
         @Suppress("DialogTitleCapitalization")
-        val notification = NOTIFICATION_GROUP.createNotification(
-            PluginBundle.message("name"),
-            error,
-            NotificationType.ERROR
-        )
+        val notification = NotificationGroupManager.getInstance()
+            .getNotificationGroup("adb_wifi_notification_group")
+            .createNotification(
+                PluginBundle.message("name"),
+                error,
+                NotificationType.ERROR
+            )
         notification.addAction(OpenSettingsNotificationAction())
         notification.notify(project)
     }
@@ -325,7 +329,5 @@ class AdbWiFiToolWindow(
 
     private companion object {
         private const val DEFAULT_PANEL_PROPORTION = 0.6f
-        private val NOTIFICATION_GROUP = NotificationGroupManager.getInstance()
-            .getNotificationGroup("adb_wifi_notification_group")
     }
 }

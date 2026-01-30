@@ -3,14 +3,22 @@ package dev.polek.adbwifi.settings
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.intellij.icons.AllIcons
+import com.intellij.ide.actions.RevealFileAction
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationAction
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileChooser.FileChooserFactory
 import com.intellij.openapi.fileChooser.FileSaverDescriptor
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.PopupStep
@@ -310,6 +318,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
     }
 
     private fun showExportPopup(e: AnActionEvent) {
+        val project = e.project
         val items = listOf(ExportMenuItem.ExportAll, ExportMenuItem.ExportEnabled)
 
         val step = object : BaseListPopupStep<ExportMenuItem>(null, items) {
@@ -318,8 +327,8 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
             override fun onChosen(selectedValue: ExportMenuItem, finalChoice: Boolean): PopupStep<*>? {
                 return doFinalStep {
                     when (selectedValue) {
-                        ExportMenuItem.ExportAll -> exportCommands(exportEnabledOnly = false)
-                        ExportMenuItem.ExportEnabled -> exportCommands(exportEnabledOnly = true)
+                        ExportMenuItem.ExportAll -> exportCommands(project, exportEnabledOnly = false)
+                        ExportMenuItem.ExportEnabled -> exportCommands(project, exportEnabledOnly = true)
                     }
                 }
             }
@@ -330,7 +339,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
             ?: popup.showInFocusCenter()
     }
 
-    private fun exportCommands(exportEnabledOnly: Boolean) {
+    private fun exportCommands(project: Project?, exportEnabledOnly: Boolean) {
         syncCheckboxStatesToCommands()
 
         val commandsToExport = if (exportEnabledOnly) {
@@ -358,13 +367,31 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
             "json"
         )
 
-        val saveFileDialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, null as Project?)
+        val saveFileDialog = FileChooserFactory.getInstance().createSaveFileDialog(descriptor, project)
         val wrapper = saveFileDialog.save(null as VirtualFile?, "adb-commands.json")
 
         if (wrapper != null) {
             val gson = GsonBuilder().setPrettyPrinting().create()
             val json = gson.toJson(exportData)
-            wrapper.file.writeText(json)
+            val exportedFile = wrapper.file
+            exportedFile.writeText(json)
+
+            ApplicationManager.getApplication().invokeLater {
+                val openProject = ProjectManager.getInstance().openProjects.firstOrNull()
+                val notification = NotificationGroupManager.getInstance()
+                    .getNotificationGroup("adb_wifi_notification_group")
+                    .createNotification(
+                        PluginBundle.message("adbCommandExportTitle"),
+                        PluginBundle.message("adbCommandExportSuccess"),
+                        NotificationType.INFORMATION
+                    )
+                notification.addAction(object : NotificationAction(PluginBundle.message("adbCommandExportOpenFile")) {
+                    override fun actionPerformed(e: AnActionEvent, notification: Notification) {
+                        RevealFileAction.openFile(exportedFile)
+                    }
+                })
+                Notifications.Bus.notify(notification, openProject)
+            }
         }
     }
 
