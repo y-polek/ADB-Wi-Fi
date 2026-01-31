@@ -5,6 +5,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.kotlin.gradle.internal.ensureParentDirsCreated
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import kotlin.time.Duration.Companion.seconds
 
 plugins {
     id("java")
@@ -31,10 +32,6 @@ kotlin {
 
 repositories {
     mavenCentral()
-
-    // JetBrains Maven repository for Remote Robot UI testing
-    //maven { url = uri("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies") }
-
     // IntelliJ Platform Gradle Plugin Repositories Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html
     intellijPlatform {
         defaultRepositories()
@@ -208,6 +205,91 @@ tasks {
                     "-Didea.ProcessCanceledException=disabled"
                 )
             }
+            // Open test project automatically
+            argumentProviders += CommandLineArgumentProvider {
+                listOf(layout.projectDirectory.dir("testData/testProject").asFile.absolutePath)
+            }
+        }
+    }
+
+}
+
+// Run UI tests with IDE (starts IDE, runs tests, stops IDE)
+tasks.register("runUiTests") {
+    group = "verification"
+    description = "Runs UI tests with Robot Server (starts IDE, runs tests, stops IDE)"
+
+    // Capture values for configuration cache compatibility
+    val projectPath = layout.projectDirectory.asFile.absolutePath
+
+    doLast {
+        fun isRobotServerRunning(): Boolean {
+            val process = ProcessBuilder("curl", "-s", "-o", "/dev/null", "-w", "%{http_code}", "http://127.0.0.1:8082")
+                .redirectErrorStream(true)
+                .start()
+            val result = process.inputStream.bufferedReader().readText().trim()
+            process.waitFor()
+            return result == "200"
+        }
+
+        val workDir = File(projectPath)
+
+        try {
+            // Start IDE in background
+            logger.lifecycle("Starting IDE with Robot Server...")
+            ProcessBuilder("bash", "-c", "./gradlew runIdeForUiTests &")
+                .directory(workDir)
+                .redirectErrorStream(true)
+                .start()
+
+            // Wait for Robot Server to be available
+            logger.lifecycle("Waiting for Robot Server to be available on port 8082...")
+            val maxWaitTime = 60.seconds.inWholeMilliseconds
+            val startTime = System.currentTimeMillis()
+            var serverReady = false
+
+            while (System.currentTimeMillis() - startTime < maxWaitTime) {
+                if (isRobotServerRunning()) {
+                    serverReady = true
+                    break
+                }
+                Thread.sleep(5000)
+            }
+
+            if (!serverReady) {
+                throw GradleException("Robot Server did not start within ${maxWaitTime / 1000} seconds")
+            }
+
+            logger.lifecycle("Robot Server is ready. Running UI tests...")
+
+            // Run UI tests with explicit test class patterns
+            val testProcess = ProcessBuilder(
+                "./gradlew", "test",
+                "--tests", "dev.polek.adbwifi.uitest.*",
+                "--no-configuration-cache",
+                "--rerun",
+                "--console=plain"
+            )
+                .directory(workDir)
+                .inheritIO()
+                .start()
+            val exitCode = testProcess.waitFor()
+
+            val reportFile = File(workDir, "build/reports/tests/test/index.html")
+            if (exitCode != 0) {
+                logger.error("UI tests failed. See report at: file://${reportFile.absolutePath}")
+                throw GradleException("UI tests failed with exit code $exitCode")
+            }
+
+            logger.lifecycle("UI tests completed successfully")
+            logger.lifecycle("Test report: file://${reportFile.absolutePath}")
+        } finally {
+            // Stop the IDE
+            logger.lifecycle("Stopping IDE...")
+            ProcessBuilder("pkill", "-f", "robot-server.port=8082")
+                .directory(workDir)
+                .start()
+                .waitFor()
         }
     }
 }
