@@ -26,15 +26,6 @@ class SettingsDialogFixture(
         searchField.text = "ADB Wi-Fi"
     }
 
-    /**
-     * Gets the ADB port field.
-     */
-    fun getAdbPortField(): JTextFieldFixture {
-        return find(
-            byXpath("//div[@accessiblename='adb port:' and @class='JBTextField']"),
-        )
-    }
-
     fun getConfirmDeviceRemovalCheckbox(): JCheckboxFixture {
         return findCheckbox("Show confirmation dialog when removing a previously connected device")
     }
@@ -49,35 +40,10 @@ class SettingsDialogFixture(
     }
 
     /**
-     * Clicks OK to apply and close settings.
-     */
-    fun clickOk() {
-        find<JButtonFixture>(
-            byXpath("//div[@text='OK']"),
-        ).click()
-    }
-
-    /**
      * Clicks Cancel to close settings without applying.
      */
     fun clickCancel() {
         find<JButtonFixture>(byXpath("//div[@text='Cancel']")).click()
-    }
-
-    /**
-     * Clicks Apply to save settings without closing.
-     */
-    fun clickApply() {
-        find<JButtonFixture>(byXpath("//div[@text='Apply']")).click()
-    }
-
-    /**
-     * Checks if a settings element is visible.
-     */
-    fun isElementVisible(xpath: String): Boolean {
-        return runCatching {
-            find<ComponentFixture>(byXpath(xpath))
-        }.isSuccess
     }
 }
 

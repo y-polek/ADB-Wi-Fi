@@ -7,7 +7,6 @@ import com.intellij.remoterobot.fixtures.ComponentFixture
 import com.intellij.remoterobot.fixtures.FixtureName
 import com.intellij.remoterobot.fixtures.JButtonFixture
 import com.intellij.remoterobot.search.locators.byXpath
-import java.time.Duration
 
 /**
  * Fixture for the ADB Wi-Fi tool window.
@@ -22,30 +21,14 @@ class AdbWifiToolWindowFixture(
      * Clicks the "Connect Device" action button in the toolbar.
      */
     fun clickConnectDevice() {
-        find<JButtonFixture>(
-            byXpath("//div[@tooltiptext='Connect Device']"),
-            Duration.ofSeconds(5)
-        ).click()
+        find<JButtonFixture>(byXpath("//div[@tooltiptext='Connect Device']")).click()
     }
 
     /**
      * Clicks the "Open Settings" action button in the toolbar.
      */
     fun clickOpenSettings() {
-        find<JButtonFixture>(
-            byXpath("//div[@tooltiptext='Open Settings']"),
-            Duration.ofSeconds(5)
-        ).click()
-    }
-
-    /**
-     * Clicks the "Restart ADB" action button in the toolbar.
-     */
-    fun clickRestartAdb() {
-        find<JButtonFixture>(
-            byXpath("//div[@tooltiptext='Restart ADB']"),
-            Duration.ofSeconds(5)
-        ).click()
+        find<JButtonFixture>(byXpath("//div[@tooltiptext='Open Settings']")).click()
     }
 
     /**
@@ -53,10 +36,7 @@ class AdbWifiToolWindowFixture(
      */
     fun isEmptyStateVisible(): Boolean {
         return runCatching {
-            find<ComponentFixture>(
-                byXpath("//div[@class='EmptyStatePanel']"),
-                Duration.ofSeconds(2)
-            )
+            find<ComponentFixture>(byXpath("//div[@class='EmptyStatePanel']"))
         }.isSuccess
     }
 
@@ -65,19 +45,7 @@ class AdbWifiToolWindowFixture(
      */
     fun isDeviceListVisible(): Boolean {
         return runCatching {
-            find<ComponentFixture>(
-                byXpath("//div[@class='DeviceListPanel']"),
-                Duration.ofSeconds(2)
-            )
+            find<ComponentFixture>(byXpath("//div[@class='DeviceListPanel']"))
         }.isSuccess
-    }
-
-    /**
-     * Gets count of visible device panels.
-     */
-    fun getDevicePanelCount(): Int {
-        return findAll<ComponentFixture>(
-            byXpath("//div[@class='DevicePanel']")
-        ).size
     }
 }

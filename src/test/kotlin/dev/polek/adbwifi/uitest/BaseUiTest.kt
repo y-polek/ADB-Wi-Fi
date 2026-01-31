@@ -2,7 +2,6 @@ package dev.polek.adbwifi.uitest
 
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.fixtures.CommonContainerFixture
-import com.intellij.remoterobot.fixtures.JButtonFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.stepsProcessing.StepLogger
 import com.intellij.remoterobot.stepsProcessing.StepWorker
@@ -11,7 +10,7 @@ import org.junit.After
 import org.junit.Assume
 import org.junit.Before
 import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
 import java.time.Duration
 
 /**
@@ -28,17 +27,16 @@ abstract class BaseUiTest {
     companion object {
         const val ROBOT_PORT = 8082
         const val ROBOT_URL = "http://127.0.0.1:$ROBOT_PORT"
-        val DEFAULT_TIMEOUT: Duration = Duration.ofSeconds(20)
 
         private fun isRobotServerRunning(): Boolean {
             return try {
-                val url = URL(ROBOT_URL)
+                val url = URI.create(ROBOT_URL).toURL()
                 val connection = url.openConnection() as HttpURLConnection
                 connection.connectTimeout = 1000
                 connection.readTimeout = 1000
                 connection.requestMethod = "GET"
                 connection.responseCode == 200
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 false
             }
         }
@@ -62,7 +60,7 @@ abstract class BaseUiTest {
             try {
                 robot.callJs<Boolean>("true")
                 true
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 false
             }
         }
@@ -85,7 +83,7 @@ abstract class BaseUiTest {
                 // Press Escape to close dialogs (works for dialogs without Cancel button)
                 robot.runJs("robot.pressAndReleaseKey(java.awt.event.KeyEvent.VK_ESCAPE)")
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // No dialogs to close
         }
     }

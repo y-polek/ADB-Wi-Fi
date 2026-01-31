@@ -23,42 +23,14 @@ class IdeFrameFixture(
      * Opens the ADB Wi-Fi tool window if not already open, or returns the existing one.
      */
     fun openAdbWifiToolWindow(): AdbWifiToolWindowFixture {
-        // First, check if tool window is already open
         try {
-            return find(byXpath(toolWindowXPath), Duration.ofSeconds(2))
-        } catch (e: Exception) {
+            // First, check if tool window is already open
+            return find(byXpath(toolWindowXPath))
+        } catch (_: Exception) {
             // Tool window not open, need to click the button
+            find<ComponentFixture>(byXpath("//div[contains(@tooltiptext, 'ADB Wi-Fi')]")).click()
         }
-
-        // Try different XPath patterns for the tool window button
-        val toolWindowButtonXPaths = listOf(
-            "//div[contains(@accessiblename, 'ADB Wi-Fi') and contains(@class, 'StripeButton')]",
-            "//div[contains(@text, 'ADB Wi-Fi') and contains(@class, 'StripeButton')]",
-            "//div[@accessiblename='ADB Wi-Fi' and @class='StripeButton']",
-            "//div[contains(@tooltiptext, 'ADB Wi-Fi')]",
-            "//div[@text='ADB Wi-Fi']"
-        )
-
-        var clicked = false
-        for (xpath in toolWindowButtonXPaths) {
-            try {
-                find<ComponentFixture>(byXpath(xpath), Duration.ofSeconds(2)).click()
-                clicked = true
-                break
-            } catch (e: Exception) {
-                // Try next pattern
-            }
-        }
-
-        if (!clicked) {
-            throw AssertionError(
-                "Could not find ADB Wi-Fi tool window button. " +
-                    "Use http://127.0.0.1:8082/ to explore the UI hierarchy and find the correct XPath."
-            )
-        }
-
-        // Wait for and return the tool window fixture
-        return find(byXpath(toolWindowXPath), Duration.ofSeconds(10))
+        return find(byXpath(toolWindowXPath))
     }
 }
 

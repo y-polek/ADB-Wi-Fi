@@ -22,19 +22,19 @@ class ConnectDeviceDialogFixture(
      * The IP address text field.
      */
     val ipTextField: JTextFieldFixture
-        get() = find(byXpath("//div[@class='JBTextField'][1]"), Duration.ofSeconds(5))
+        get() = find(byXpath("//div[@class='JBTextField'][1]"))
 
     /**
      * The port text field.
      */
     val portTextField: JTextFieldFixture
-        get() = find(byXpath("//div[@class='JBTextField'][2]"), Duration.ofSeconds(5))
+        get() = find(byXpath("//div[@class='JBTextField'][2]"))
 
     /**
      * The Connect button.
      */
     val connectButton: JButtonFixture
-        get() = find(byXpath("//div[@text='Connect']"), Duration.ofSeconds(5))
+        get() = find(byXpath("//div[@text='Connect']"))
 
 
     /**
@@ -49,13 +49,6 @@ class ConnectDeviceDialogFixture(
      */
     fun enterPort(port: String) {
         portTextField.text = port
-    }
-
-    /**
-     * Clicks the Connect button.
-     */
-    fun clickConnect() {
-        connectButton.click()
     }
 
     /**
@@ -90,8 +83,8 @@ fun RemoteRobot.connectDeviceDialog(
 
     for (xpath in dialogXPaths) {
         try {
-            return find<ConnectDeviceDialogFixture>(byXpath(xpath), Duration.ofSeconds(3)).apply(function)
-        } catch (e: Exception) {
+            return find<ConnectDeviceDialogFixture>(byXpath(xpath)).apply(function)
+        } catch (_: Exception) {
             // Try next pattern
         }
     }
