@@ -32,6 +32,9 @@ kotlin {
 repositories {
     mavenCentral()
 
+    // JetBrains Maven repository for Remote Robot UI testing
+    //maven { url = uri("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies") }
+
     // IntelliJ Platform Gradle Plugin Repositories Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html
     intellijPlatform {
         defaultRepositories()
@@ -45,6 +48,10 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.opentest4j)
     testImplementation(libs.assertj)
+
+    // Remote Robot UI testing
+    testImplementation(libs.remote.robot)
+    testImplementation(libs.remote.fixtures)
 
     intellijPlatform {
         androidStudio("2025.2.3.9")
@@ -183,5 +190,24 @@ tasks {
     val runIntellijIdea by intellijPlatformTesting.runIde.registering {
         type = IntelliJPlatformType.IntellijIdea
         version = "2025.3.2"
+    }
+
+    // Run IDE with Robot Server for UI testing
+    val runIdeForUiTests by intellijPlatformTesting.runIde.registering {
+        plugins {
+            robotServerPlugin()
+        }
+        task {
+            jvmArgumentProviders += CommandLineArgumentProvider {
+                listOf(
+                    "-Drobot-server.port=8082",
+                    "-Djb.privacy.policy.text=<!--999.999-->",
+                    "-Djb.consents.confirmation.enabled=false",
+                    "-Dide.trust.all.projects=true",
+                    "-Dide.show.tips.on.startup.default.value=false",
+                    "-Didea.ProcessCanceledException=disabled"
+                )
+            }
+        }
     }
 }

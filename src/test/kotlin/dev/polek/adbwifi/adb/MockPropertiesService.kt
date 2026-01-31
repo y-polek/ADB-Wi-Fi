@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 @SuppressWarnings("LongParameterList")
 class MockPropertiesService(
     override var isLogVisible: Boolean = false,
+    override var isLogWrapContent: Boolean = false,
     override var isPreviouslyConnectedDevicesExpanded: Boolean = true,
     override var confirmDeviceRemoval: Boolean = false,
     override var useAdbFromPath: Boolean = false,
