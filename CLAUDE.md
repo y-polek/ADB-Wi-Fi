@@ -94,6 +94,87 @@ Presenters subscribe to these flows using `launch { flow.collect { ... } }` and 
 
 Tests use mock command executors to simulate ADB output. See `MockCommandExecutor` for the pattern - it intercepts command strings and returns predefined output.
 
+## UI Testing
+
+UI tests use [IntelliJ Remote Robot](https://github.com/JetBrains/intellij-ui-test-robot) library.
+
+### Running UI Tests
+
+```bash
+# Start IDE with Robot Server (in one terminal)
+./gradlew runIdeForUiTests
+
+# Run UI tests (in another terminal, after IDE is fully loaded)
+./gradlew test --tests "*UiTest*"
+```
+
+Access http://127.0.0.1:8082/ to view component hierarchy and XPath locators.
+
+### Fixture Pattern
+
+UI tests use fixture classes in `src/test/kotlin/dev/polek/adbwifi/uitest/fixtures/`:
+
+- `IdeFrameFixture`: Main IDE window
+- `AdbWifiToolWindowFixture`: Plugin tool window
+- `SettingsDialogFixture`: Settings dialog
+- `AdbCommandsSettingsFixture`: ADB Commands settings panel
+- `AdbCommandEditorDialogFixture`: Add/Edit command dialog
+- `ConfirmationDialogFixture`: Yes/No confirmation dialogs
+
+Each fixture has a companion object with a factory function:
+```kotlin
+adbCommandsSettingsFixture(robot) {
+    clickCommand("Kill app")
+    clickRemove()
+}
+```
+
+### Important Patterns
+
+**Finding elements**: Use `byXpath()` with `@tooltiptext`, `@text`, `@class`, or `@accessiblename` attributes:
+```kotlin
+find<JButtonFixture>(byXpath("//div[@tooltiptext='Add']")).click()
+```
+
+**Waiting for fixtures**: Use `waitForFixture<T>()` helper in `FixtureUtils.kt`.
+
+**Assertions**: Use Google Truth (`assertThat`) for assertions in fixtures.
+
+### Known Issues and Workarounds
+
+**JList text truncation**: `JListFixture.collectItems()` returns truncated text. Use `findAllText()` or access the model via JS:
+```kotlin
+val names: List<String> = listFixture.callJs("""
+    var model = component.getModel();
+    var result = new java.util.ArrayList();
+    for (var i = 0; i < model.getSize(); i++) {
+        result.add(model.getElementAt(i).getText());
+    }
+    result;
+""")
+```
+
+**CheckBoxList states**: No built-in API to get checkbox states. Use JS to access the model:
+```kotlin
+val selected: Boolean = listFixture.callJs("""
+    component.getModel().getElementAt(0).isSelected()
+""")
+```
+
+**JS variable scoping**: Remote Robot uses Mozilla Rhino. Use `var` instead of `const`/`let`, and avoid storing values in intermediate variables inside loops.
+
+**Text fields with special characters**: `JTextFieldFixture.text` setter uses JS internally. Avoid single quotes in values or they will break the JS string.
+
+**Double-click on list items**: `JListFixture` has no double-click method. Use click + Edit button instead:
+```kotlin
+fun editCommand(name: String) {
+    clickCommand(name)
+    clickEdit()
+}
+```
+
+**Clicking on CheckBoxList checkbox**: Click near the left edge of the item (x + 10) to toggle the checkbox.
+
 ## Configuration
 
 - `gradle.properties`: Plugin version, build compatibility settings
