@@ -45,6 +45,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.opentest4j)
     testImplementation(libs.assertj)
+    testImplementation(libs.truth)
 
     // Remote Robot UI testing
     testImplementation(libs.remote.robot)

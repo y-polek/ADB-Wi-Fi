@@ -5,6 +5,7 @@ opentest4j = "1.3.0"
 sentry = "4.6.0"
 assertj = "3.27.3"
 remoteRobot = "0.11.23"
+truth = "1.4.5"
 
 # plugins
 changelog = "2.3.0"
@@ -20,6 +21,7 @@ assertj = { group = "org.assertj", name = "assertj-core", version.ref = "assertj
 detekt = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }
 remote-robot = { group = "com.intellij.remoterobot", name = "remote-robot", version.ref = "remoteRobot" }
 remote-fixtures = { group = "com.intellij.remoterobot", name = "remote-fixtures", version.ref = "remoteRobot" }
+truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 
 [plugins]
 changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }

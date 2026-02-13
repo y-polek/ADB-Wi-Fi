@@ -63,6 +63,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
         }
     }.apply {
         setCellRenderer(CommandCellRenderer())
+        accessibleContext?.accessibleName = "ADB Commands List"
     }
 
     init {
