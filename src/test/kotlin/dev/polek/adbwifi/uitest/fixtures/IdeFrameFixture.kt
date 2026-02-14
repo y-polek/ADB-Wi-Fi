@@ -16,7 +16,8 @@ class IdeFrameFixture(
     remoteComponent: RemoteComponent
 ) : CommonContainerFixture(remoteRobot, remoteComponent) {
 
-    private val toolWindowXPath = "//div[contains(@accessiblename, 'ADB Wi-Fi') and contains(@class, 'InternalDecoratorImpl')]"
+    private val toolWindowXPath =
+        "//div[contains(@accessiblename, 'ADB Wi-Fi') and contains(@class, 'InternalDecoratorImpl')]"
 
     /**
      * Opens the ADB Wi-Fi tool window if not already open.

@@ -29,9 +29,10 @@ import com.intellij.ui.ToolbarDecorator
 import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.JBUI
 import dev.polek.adbwifi.PluginBundle
-import dev.polek.adbwifi.model.ActionIconsProvider
 import dev.polek.adbwifi.model.AdbCommandConfig
 import dev.polek.adbwifi.model.AdbCommandsExportFile
+import dev.polek.adbwifi.model.CommandIconsProvider
+import dev.polek.adbwifi.model.IconColor
 import dev.polek.adbwifi.services.AdbCommandsService
 import dev.polek.adbwifi.ui.view.AdbCommandEditorDialog
 import java.awt.*
@@ -172,6 +173,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
             if (config.name != original.name) return true
             if (config.command != original.command) return true
             if (config.iconId != original.iconId) return true
+            if (config.iconColor != original.iconColor) return true
             if (config.requiresConfirmation != original.requiresConfirmation) return true
         }
         return false
@@ -202,6 +204,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
                 name = dialog.commandName,
                 command = dialog.command,
                 iconId = dialog.iconId,
+                iconColor = dialog.iconColor,
                 isEnabled = true,
                 order = maxOrder + 1,
                 requiresConfirmation = dialog.requiresConfirmation
@@ -223,6 +226,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
                 name = dialog.commandName,
                 command = dialog.command,
                 iconId = dialog.iconId,
+                iconColor = dialog.iconColor,
                 requiresConfirmation = dialog.requiresConfirmation
             )
             refreshList()
@@ -244,6 +248,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
                 name = dialog.commandName,
                 command = dialog.command,
                 iconId = dialog.iconId,
+                iconColor = dialog.iconColor,
                 isEnabled = true,
                 order = maxOrder + 1,
                 requiresConfirmation = dialog.requiresConfirmation
@@ -500,7 +505,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
 
             if (index >= 0 && index < commands.size) {
                 val config = commands[index]
-                iconLabel.icon = ActionIconsProvider.getIconById(config.iconId)?.icon
+                iconLabel.icon = CommandIconsProvider.getIcon(config.iconId, IconColor.fromString(config.iconColor))
             }
 
             return panel

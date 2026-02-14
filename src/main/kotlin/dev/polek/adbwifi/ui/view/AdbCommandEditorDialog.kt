@@ -11,9 +11,10 @@ import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.JBUI
 import dev.polek.adbwifi.PluginBundle
-import dev.polek.adbwifi.model.ActionIcon
-import dev.polek.adbwifi.model.ActionIconsProvider
 import dev.polek.adbwifi.model.AdbCommandConfig
+import dev.polek.adbwifi.model.CommandIcon
+import dev.polek.adbwifi.model.CommandIconsProvider
+import dev.polek.adbwifi.model.IconColor
 import java.awt.BorderLayout
 import java.awt.Cursor
 import java.awt.Dimension
@@ -31,7 +32,8 @@ class AdbCommandEditorDialog(
 
     private val nameField = JBTextField()
     private val commandArea = JBTextArea(4, 40)
-    private var selectedIcon: ActionIcon? = null
+    private var selectedIcon: CommandIcon? = null
+    private var selectedColor: IconColor = IconColor.PRIMARY
     private val iconButton = createIconButton()
     private val confirmationCheckbox = JBCheckBox(PluginBundle.message("adbCommandEditorConfirmationLabel"))
     private val previewArea = JBTextArea(3, 40)
@@ -39,6 +41,7 @@ class AdbCommandEditorDialog(
     val commandName: String get() = nameField.text.trim()
     val command: String get() = commandArea.text.trim()
     val iconId: String get() = selectedIcon?.id ?: ""
+    val iconColor: String get() = selectedColor.colorName
     val requiresConfirmation: Boolean get() = confirmationCheckbox.isSelected
 
     init {
@@ -54,7 +57,8 @@ class AdbCommandEditorDialog(
             commandArea.text = config.command
             confirmationCheckbox.isSelected = config.requiresConfirmation
             if (config.iconId.isNotEmpty()) {
-                selectedIcon = ActionIconsProvider.getIconById(config.iconId)
+                selectedIcon = CommandIconsProvider.getIconById(config.iconId)
+                selectedColor = IconColor.fromString(config.iconColor)
                 updateIconButton()
             }
         }
@@ -156,6 +160,7 @@ class AdbCommandEditorDialog(
             JBUI.Borders.empty(4, 8)
         )
         panel.cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+        panel.preferredSize = Dimension(0, JBUI.scale(28))
 
         panel.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
@@ -186,17 +191,62 @@ class AdbCommandEditorDialog(
     private fun addIconContent(panel: JPanel) {
         val icon = selectedIcon
         if (icon != null) {
-            panel.add(JBLabel(icon.icon), BorderLayout.WEST)
+            val coloredIcon = CommandIconsProvider.getIcon(icon.id, selectedColor)
+            if (coloredIcon != null) {
+                panel.add(JBLabel(coloredIcon), BorderLayout.WEST)
+            }
             panel.add(JBLabel(icon.displayName), BorderLayout.CENTER)
+
+            val clearButton = object : JBLabel(com.intellij.icons.AllIcons.Actions.Close) {
+                private var hovered = false
+                private var pressed = false
+
+                init {
+                    toolTipText = PluginBundle.message("iconPickerClearIcon")
+                    cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+                    isOpaque = false
+                    border = JBUI.Borders.empty(2)
+                    addMouseListener(object : MouseAdapter() {
+                        override fun mouseClicked(e: MouseEvent) {
+                            e.consume()
+                            selectedIcon = null
+                            updateIconButton()
+                        }
+                        override fun mouseEntered(e: MouseEvent) { hovered = true; repaint() }
+                        override fun mouseExited(e: MouseEvent) { hovered = false; pressed = false; repaint() }
+                        override fun mousePressed(e: MouseEvent) { pressed = true; repaint() }
+                        override fun mouseReleased(e: MouseEvent) { pressed = false; repaint() }
+                    })
+                }
+
+                override fun paintComponent(g: java.awt.Graphics) {
+                    if (hovered || pressed) {
+                        val g2 = g as java.awt.Graphics2D
+                        g2.setRenderingHint(
+                            java.awt.RenderingHints.KEY_ANTIALIASING,
+                            java.awt.RenderingHints.VALUE_ANTIALIAS_ON
+                        )
+                        g2.color = if (pressed) {
+                            JBUI.CurrentTheme.ActionButton.pressedBackground()
+                        } else {
+                            JBUI.CurrentTheme.ActionButton.hoverBackground()
+                        }
+                        g2.fillRoundRect(0, 0, width, height, JBUI.scale(6), JBUI.scale(6))
+                    }
+                    super.paintComponent(g)
+                }
+            }
+            panel.add(clearButton, BorderLayout.EAST)
         } else {
             panel.add(JBLabel(PluginBundle.message("iconPickerNoIcon")), BorderLayout.CENTER)
         }
     }
 
     private fun openIconPicker() {
-        val dialog = IconPickerDialog(selectedIcon?.id)
+        val dialog = IconPickerDialog(selectedIcon?.id, selectedColor)
         if (dialog.showAndGet()) {
             selectedIcon = dialog.selectedIcon
+            selectedColor = dialog.selectedColor
             updateIconButton()
         }
     }

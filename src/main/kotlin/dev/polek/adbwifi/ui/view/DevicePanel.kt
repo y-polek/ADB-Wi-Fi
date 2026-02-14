@@ -13,8 +13,9 @@ import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
-import dev.polek.adbwifi.model.ActionIconsProvider
 import dev.polek.adbwifi.model.AdbCommandConfig
+import dev.polek.adbwifi.model.CommandIconsProvider
+import dev.polek.adbwifi.model.IconColor
 import dev.polek.adbwifi.services.AdbCommandsService
 import dev.polek.adbwifi.settings.AdbCommandsConfigurable
 import dev.polek.adbwifi.ui.model.DeviceViewModel
@@ -438,7 +439,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                 is AdbCommandMenuItem.PackageSelector -> null
                 is AdbCommandMenuItem.Command ->
                     if (value.config.iconId.isNotEmpty()) {
-                        ActionIconsProvider.getIconById(value.config.iconId)?.icon
+                        CommandIconsProvider.getIcon(value.config.iconId, IconColor.fromString(value.config.iconColor))
                     } else {
                         null
                     }

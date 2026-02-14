@@ -19,6 +19,7 @@ class AdbCommandsSettingsUiTest : BaseUiTest() {
         private const val RENAMED_RESTART_APP_COMMAND = "Restart"
     }
 
+    @Suppress("LongMethod")
     @Test
     fun `changes are persisted on apply`() {
         // Step 1: Open "ADB Wi-Fi" tool window

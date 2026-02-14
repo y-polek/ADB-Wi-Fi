@@ -32,14 +32,14 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
             AdbCommandConfig(
                 name = "Kill app",
                 command = "shell am force-stop {package}",
-                iconId = "Actions.Suspend",
+                iconId = "square",
                 isEnabled = true,
                 order = 0
             ),
             AdbCommandConfig(
                 name = "Start app",
                 command = "shell monkey -p {package} -c android.intent.category.LAUNCHER 1",
-                iconId = "Actions.Execute",
+                iconId = "play",
                 isEnabled = true,
                 order = 1
             ),
@@ -47,14 +47,14 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 name = "Restart app",
                 command = "shell am force-stop {package}\n" +
                     "shell monkey -p {package} -c android.intent.category.LAUNCHER 1",
-                iconId = "Actions.Restart",
+                iconId = "rotate-ccw",
                 isEnabled = true,
                 order = 2
             ),
             AdbCommandConfig(
                 name = "Clear app data",
                 command = "shell pm clear {package}",
-                iconId = "Actions.GC",
+                iconId = "trash",
                 isEnabled = true,
                 order = 3,
                 requiresConfirmation = true
@@ -63,7 +63,7 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 name = "Clear app data and restart",
                 command = "shell pm clear {package}\n" +
                     "shell monkey -p {package} -c android.intent.category.LAUNCHER 1",
-                iconId = "Actions.ForceRefresh",
+                iconId = "refresh-cw",
                 isEnabled = true,
                 order = 4,
                 requiresConfirmation = true
@@ -71,7 +71,8 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
             AdbCommandConfig(
                 name = "Uninstall app",
                 command = "shell pm uninstall {package}",
-                iconId = "Actions.Uninstall",
+                iconId = "trash",
+                iconColor = "red",
                 isEnabled = true,
                 order = 5,
                 requiresConfirmation = true
@@ -79,7 +80,7 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
             AdbCommandConfig(
                 name = "Uninstall app (keep data)",
                 command = "shell pm uninstall -k {package}",
-                iconId = "General.Delete",
+                iconId = "trash",
                 isEnabled = true,
                 order = 6,
                 requiresConfirmation = true
@@ -87,14 +88,15 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
             AdbCommandConfig(
                 name = "Install APK",
                 command = "install {file .apk}",
-                iconId = "Actions.Install",
+                iconId = "download",
                 isEnabled = true,
                 order = 7
             ),
             AdbCommandConfig(
                 name = "Reboot device",
                 command = "reboot",
-                iconId = "Actions.RestartFrame",
+                iconId = "power",
+                iconColor = "orange",
                 isEnabled = true,
                 order = 8,
                 requiresConfirmation = true
@@ -102,7 +104,7 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
             AdbCommandConfig(
                 name = "Simulate incoming SMS (emulator only)",
                 command = "emu sms send ADB-Wi-Fi {param Message}",
-                iconId = "Ide.Notification.InfoEvents",
+                iconId = "message-circle",
                 isEnabled = true,
                 order = 9
             ),
@@ -110,28 +112,28 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 name = "Enable TalkBack (emulator only)",
                 command = "shell settings put secure enabled_accessibility_services " +
                     "com.google.android.marvin.talkback/com.google.android.marvin.talkback.TalkBackService",
-                iconId = "General.User",
+                iconId = "eye",
                 isEnabled = true,
                 order = 10
             ),
             AdbCommandConfig(
                 name = "Disable TalkBack",
                 command = "shell settings put secure enabled_accessibility_services \"\"",
-                iconId = "Actions.ToggleVisibility",
+                iconId = "eye-off",
                 isEnabled = true,
                 order = 11
             ),
             AdbCommandConfig(
                 name = "Show touches",
                 command = "shell settings put system show_touches 1",
-                iconId = "General.Mouse",
+                iconId = "mouse-pointer-click",
                 isEnabled = true,
                 order = 12
             ),
             AdbCommandConfig(
                 name = "Hide touches",
                 command = "shell settings put system show_touches 0",
-                iconId = "Actions.Cancel",
+                iconId = "mouse-pointer-click",
                 isEnabled = true,
                 order = 13
             ),
@@ -140,7 +142,7 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 command = "shell dumpsys package {package} | grep \"android.permission\" | " +
                     "grep \"granted=false\" | cut -d: -f1 | tr -d ' ' | " +
                     "while read perm; do pm grant {package} \"\$perm\"; done",
-                iconId = "Diff.GutterCheckBoxSelected",
+                iconId = "shield",
                 isEnabled = true,
                 order = 14
             ),
@@ -149,7 +151,7 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 command = "shell dumpsys package {package} | grep \"android.permission\" | " +
                     "grep \"granted=true\" | cut -d: -f1 | tr -d ' ' | " +
                     "while read perm; do pm revoke {package} \"\$perm\"; done",
-                iconId = "Diff.GutterCheckBoxIndeterminate",
+                iconId = "shield-off",
                 isEnabled = true,
                 order = 15
             )

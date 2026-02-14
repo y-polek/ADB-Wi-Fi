@@ -4,6 +4,7 @@ data class AdbCommandConfig(
     val name: String,
     val command: String,
     val iconId: String = "",
+    val iconColor: String = "primary",
     val isEnabled: Boolean,
     val order: Int,
     val requiresConfirmation: Boolean = false
