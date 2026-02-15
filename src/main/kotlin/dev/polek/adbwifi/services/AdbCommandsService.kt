@@ -109,9 +109,10 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 order = 9
             ),
             AdbCommandConfig(
-                name = "Enable TalkBack (emulator only)",
+                name = "Enable TalkBack",
                 command = "shell settings put secure enabled_accessibility_services " +
-                    "com.google.android.marvin.talkback/com.google.android.marvin.talkback.TalkBackService",
+                    "com.google.android.marvin.talkback/com.google.android.marvin.talkback.TalkBackService" +
+                    ":com.samsung.android.accessibility.talkback/com.samsung.android.marvin.talkback.TalkBackService",
                 iconId = "eye",
                 isEnabled = true,
                 order = 10
