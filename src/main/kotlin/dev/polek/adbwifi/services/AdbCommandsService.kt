@@ -154,6 +154,27 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 iconId = "shield-off",
                 isEnabled = true,
                 order = 15
+            ),
+            AdbCommandConfig(
+                name = "Light theme",
+                command = "shell cmd uimode night no",
+                iconId = "sun",
+                isEnabled = true,
+                order = 16
+            ),
+            AdbCommandConfig(
+                name = "Dark theme",
+                command = "shell cmd uimode night yes",
+                iconId = "moon",
+                isEnabled = true,
+                order = 17
+            ),
+            AdbCommandConfig(
+                name = "System theme",
+                command = "shell cmd uimode night auto",
+                iconId = "sun-moon",
+                isEnabled = true,
+                order = 18
             )
         )
     }
