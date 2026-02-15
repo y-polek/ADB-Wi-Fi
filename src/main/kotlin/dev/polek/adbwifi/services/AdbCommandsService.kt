@@ -175,6 +175,14 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 iconId = "sun-moon",
                 isEnabled = true,
                 order = 18
+            ),
+            AdbCommandConfig(
+                name = "Open LeakCanary",
+                command = "shell am start -n {package}/leakcanary.internal.activity.LeakActivity",
+                iconId = "bird",
+                iconColor = "orange",
+                isEnabled = true,
+                order = 19
             )
         )
     }
