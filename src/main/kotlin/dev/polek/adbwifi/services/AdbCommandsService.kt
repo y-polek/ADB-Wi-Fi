@@ -184,6 +184,54 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 iconColor = "orange",
                 isEnabled = true,
                 order = 19
+            ),
+            AdbCommandConfig(
+                name = "Show layout bounds",
+                command = "shell setprop debug.layout true\n" +
+                    "shell service call activity 1599295570",
+                iconId = "scan",
+                isEnabled = true,
+                order = 20
+            ),
+            AdbCommandConfig(
+                name = "Hide layout bounds",
+                command = "shell setprop debug.layout false\n" +
+                    "shell service call activity 1599295570",
+                iconId = "scan",
+                isEnabled = true,
+                order = 21
+            ),
+            AdbCommandConfig(
+                name = "Show GPU overdraw",
+                command = "shell setprop debug.hwui.overdraw show\n" +
+                    "shell service call activity 1599295570",
+                iconId = "send-to-back",
+                isEnabled = true,
+                order = 22
+            ),
+            AdbCommandConfig(
+                name = "Hide GPU overdraw",
+                command = "shell setprop debug.hwui.overdraw false\n" +
+                    "shell service call activity 1599295570",
+                iconId = "send-to-back",
+                isEnabled = true,
+                order = 23
+            ),
+            AdbCommandConfig(
+                name = "Show GPU rendering bars",
+                command = "shell setprop debug.hwui.profile visual_bars\n" +
+                    "shell service call activity 1599295570",
+                iconId = "activity",
+                isEnabled = true,
+                order = 24
+            ),
+            AdbCommandConfig(
+                name = "Hide GPU rendering bars",
+                command = "shell setprop debug.hwui.profile false\n" +
+                    "shell service call activity 1599295570",
+                iconId = "activity",
+                isEnabled = true,
+                order = 25
             )
         )
     }
