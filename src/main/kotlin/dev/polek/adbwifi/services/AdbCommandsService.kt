@@ -232,6 +232,34 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
                 iconId = "activity",
                 isEnabled = true,
                 order = 25
+            ),
+            AdbCommandConfig(
+                name = "Font scale: small",
+                command = "shell settings put system font_scale 0.85",
+                iconId = "type",
+                isEnabled = true,
+                order = 26
+            ),
+            AdbCommandConfig(
+                name = "Font scale: default",
+                command = "shell settings put system font_scale 1.0",
+                iconId = "type",
+                isEnabled = true,
+                order = 27
+            ),
+            AdbCommandConfig(
+                name = "Font scale: large",
+                command = "shell settings put system font_scale 1.15",
+                iconId = "type",
+                isEnabled = true,
+                order = 28
+            ),
+            AdbCommandConfig(
+                name = "Font scale: largest",
+                command = "shell settings put system font_scale 1.30",
+                iconId = "type",
+                isEnabled = true,
+                order = 29
             )
         )
     }
