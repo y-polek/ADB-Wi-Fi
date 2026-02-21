@@ -1,19 +1,17 @@
 package dev.polek.adbwifi.ui.view
 
+import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.ui.JBColor
-import com.intellij.ui.components.JBCheckBox
-import com.intellij.ui.components.JBLabel
-import com.intellij.ui.components.JBScrollPane
-import com.intellij.ui.components.JBTextArea
-import com.intellij.ui.components.JBTextField
+import com.intellij.ui.components.*
 import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.JBUI
 import dev.polek.adbwifi.PluginBundle
-import dev.polek.adbwifi.model.AdbCommandConfig
 import dev.polek.adbwifi.model.CommandIcon
 import dev.polek.adbwifi.model.CommandIconsProvider
+import dev.polek.adbwifi.model.CommandListItem.AdbCommand
+import dev.polek.adbwifi.model.CommandListItem.AdbCommandGroup
 import dev.polek.adbwifi.model.IconColor
 import java.awt.BorderLayout
 import java.awt.Cursor
@@ -27,10 +25,13 @@ import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
 class AdbCommandEditorDialog(
-    existingCommand: AdbCommandConfig? = null
+    existingCommand: AdbCommand? = null,
+    availableGroups: List<AdbCommandGroup> = emptyList(),
+    existingGroup: AdbCommandGroup? = null
 ) : DialogWrapper(true) {
 
     private val nameField = JBTextField()
+    private val groupComboBox = ComboBox<GroupItem>()
     private val commandArea = JBTextArea(4, 40)
     private var selectedIcon: CommandIcon? = null
     private var selectedColor: IconColor = IconColor.PRIMARY
@@ -43,6 +44,12 @@ class AdbCommandEditorDialog(
     val iconId: String get() = selectedIcon?.id ?: ""
     val iconColor: String get() = selectedColor.colorName
     val requiresConfirmation: Boolean get() = confirmationCheckbox.isSelected
+    val selectedGroup: AdbCommandGroup?
+        get() = (groupComboBox.selectedItem as? GroupItem)?.group
+
+    private data class GroupItem(val group: AdbCommandGroup?, val displayName: String) {
+        override fun toString() = displayName
+    }
 
     init {
         title = if (existingCommand != null) {
@@ -50,6 +57,13 @@ class AdbCommandEditorDialog(
         } else {
             PluginBundle.message("adbCommandEditorTitleAdd")
         }
+
+        // Populate group combo box
+        groupComboBox.addItem(GroupItem(null, PluginBundle.message("adbCommandEditorGroupNone")))
+        availableGroups.sortedBy { it.name }.forEach { group ->
+            groupComboBox.addItem(GroupItem(group, group.name))
+        }
+
         init()
 
         existingCommand?.let { config ->
@@ -60,6 +74,15 @@ class AdbCommandEditorDialog(
                 selectedIcon = CommandIconsProvider.getIconById(config.iconId)
                 selectedColor = IconColor.fromString(config.iconColor)
                 updateIconButton()
+            }
+            // Pre-select existing group
+            existingGroup?.let { g ->
+                for (i in 0 until groupComboBox.itemCount) {
+                    if (groupComboBox.getItemAt(i).group === g) {
+                        groupComboBox.selectedIndex = i
+                        break
+                    }
+                }
             }
         }
 
@@ -93,6 +116,7 @@ class AdbCommandEditorDialog(
 
         return FormBuilder.createFormBuilder()
             .addLabeledComponent(PluginBundle.message("adbCommandEditorNameLabel"), nameField)
+            .addLabeledComponent(PluginBundle.message("adbCommandEditorGroupLabel"), groupComboBox)
             .addLabeledComponent(PluginBundle.message("adbCommandEditorIconLabel"), iconButton)
             .addLabeledComponent(PluginBundle.message("adbCommandEditorCommandLabel"), commandScrollPane)
             .addComponentToRightColumn(hintLabel)

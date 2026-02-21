@@ -5,7 +5,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.MessageDialogBuilder
 import com.intellij.openapi.ui.Messages
 import dev.polek.adbwifi.PluginBundle
-import dev.polek.adbwifi.model.AdbCommandConfig
+import dev.polek.adbwifi.model.CommandListItem.AdbCommand
+import dev.polek.adbwifi.model.CommandListItem.AdbCommandGroup
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.model.PinnedDevice
 import dev.polek.adbwifi.model.PinnedDevice.Companion.toDevice
@@ -224,7 +225,7 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
         return packageService.getProjectPackageNames()
     }
 
-    fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig) {
+    fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommand) {
         val packageName = if (command.requiresPackage) {
             getSelectedPackage(device) ?: return
         } else {
@@ -282,23 +283,27 @@ class ToolWindowPresenter(private val project: Project) : BasePresenter<ToolWind
         }
     }
 
-    private fun disableConfirmationForCommand(command: AdbCommandConfig) {
-        val updatedCommands = adbCommandsService.commands.map {
-            if (it.matches(command)) {
-                it.copy(requiresConfirmation = false)
-            } else {
-                it
+    private fun disableConfirmationForCommand(command: AdbCommand) {
+        adbCommandsService.items = adbCommandsService.items.map { item ->
+            when (item) {
+                is AdbCommand -> {
+                    if (item.matches(command)) item.copy(requiresConfirmation = false) else item
+                }
+                is AdbCommandGroup -> {
+                    val updatedCommands = item.commands.map { cmd ->
+                        if (cmd.matches(command)) cmd.copy(requiresConfirmation = false) else cmd
+                    }
+                    item.copy(commands = updatedCommands)
+                }
             }
         }
-        adbCommandsService.commands = updatedCommands
     }
 
-    private fun AdbCommandConfig.matches(other: AdbCommandConfig): Boolean =
+    private fun AdbCommand.matches(other: AdbCommand): Boolean =
         name == other.name &&
             command == other.command &&
             iconId == other.iconId &&
-            isEnabled == other.isEnabled &&
-            order == other.order
+            isEnabled == other.isEnabled
 
     private fun onDevicesUpdated(model: List<Device>) {
         devices = model.map {

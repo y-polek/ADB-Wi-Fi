@@ -1,0 +1,307 @@
+{
+  "version": 1,
+  "commands": [
+    {
+      "type": "command",
+      "name": "Kill app",
+      "command": "shell am force-stop {package}",
+      "iconId": "square",
+      "iconColor": "primary",
+      "isEnabled": true,
+      "requiresConfirmation": false
+    },
+    {
+      "type": "command",
+      "name": "Start app",
+      "command": "shell monkey -p {package} -c android.intent.category.LAUNCHER 1",
+      "iconId": "play",
+      "iconColor": "primary",
+      "isEnabled": true,
+      "requiresConfirmation": false
+    },
+    {
+      "type": "command",
+      "name": "Restart app",
+      "command": "shell am force-stop {package}\nshell monkey -p {package} -c android.intent.category.LAUNCHER 1",
+      "iconId": "rotate-ccw",
+      "iconColor": "primary",
+      "isEnabled": true,
+      "requiresConfirmation": false
+    },
+    {
+      "type": "command",
+      "name": "Clear app data",
+      "command": "shell pm clear {package}",
+      "iconId": "trash",
+      "iconColor": "primary",
+      "isEnabled": true,
+      "requiresConfirmation": true
+    },
+    {
+      "type": "command",
+      "name": "Clear app data and restart",
+      "command": "shell pm clear {package}\nshell monkey -p {package} -c android.intent.category.LAUNCHER 1",
+      "iconId": "refresh-cw",
+      "iconColor": "primary",
+      "isEnabled": true,
+      "requiresConfirmation": true
+    },
+    {
+      "type": "command",
+      "name": "Uninstall app",
+      "command": "shell pm uninstall {package}",
+      "iconId": "trash",
+      "iconColor": "red",
+      "isEnabled": true,
+      "requiresConfirmation": true
+    },
+    {
+      "type": "command",
+      "name": "Uninstall app (keep data)",
+      "command": "shell pm uninstall -k {package}",
+      "iconId": "trash",
+      "iconColor": "primary",
+      "isEnabled": true,
+      "requiresConfirmation": true
+    },
+    {
+      "type": "command",
+      "name": "Install APK",
+      "command": "install {file .apk}",
+      "iconId": "download",
+      "iconColor": "primary",
+      "isEnabled": true,
+      "requiresConfirmation": false
+    },
+    {
+      "type": "command",
+      "name": "Reboot device",
+      "command": "reboot",
+      "iconId": "power",
+      "iconColor": "orange",
+      "isEnabled": true,
+      "requiresConfirmation": true
+    },
+    {
+      "type": "command",
+      "name": "Simulate incoming SMS (emulator only)",
+      "command": "emu sms send ADB-Wi-Fi {param Message}",
+      "iconId": "message-circle",
+      "iconColor": "primary",
+      "isEnabled": true,
+      "requiresConfirmation": false
+    },
+    {
+      "type": "command",
+      "name": "Enable TalkBack",
+      "command": "shell settings put secure enabled_accessibility_services com.google.android.marvin.talkback/com.google.android.marvin.talkback.TalkBackService:com.samsung.android.accessibility.talkback/com.samsung.android.marvin.talkback.TalkBackService",
+      "iconId": "eye",
+      "iconColor": "primary",
+      "isEnabled": true,
+      "requiresConfirmation": false
+    },
+    {
+      "type": "command",
+      "name": "Disable TalkBack",
+      "command": "shell settings put secure enabled_accessibility_services \"\"",
+      "iconId": "eye-off",
+      "iconColor": "primary",
+      "isEnabled": true,
+      "requiresConfirmation": false
+    },
+    {
+      "type": "command",
+      "name": "Show touches",
+      "command": "shell settings put system show_touches 1",
+      "iconId": "mouse-pointer-click",
+      "iconColor": "primary",
+      "isEnabled": true,
+      "requiresConfirmation": false
+    },
+    {
+      "type": "command",
+      "name": "Hide touches",
+      "command": "shell settings put system show_touches 0",
+      "iconId": "mouse-pointer-click",
+      "iconColor": "primary",
+      "isEnabled": true,
+      "requiresConfirmation": false
+    },
+    {
+      "type": "command",
+      "name": "Grant all permissions",
+      "command": "shell dumpsys package {package} | grep \"android.permission\" | grep \"granted=false\" | cut -d: -f1 | tr -d ' ' | while read perm; do pm grant {package} \"$perm\"; done",
+      "iconId": "shield",
+      "iconColor": "primary",
+      "isEnabled": true,
+      "requiresConfirmation": false
+    },
+    {
+      "type": "command",
+      "name": "Revoke all permissions",
+      "command": "shell dumpsys package {package} | grep \"android.permission\" | grep \"granted=true\" | cut -d: -f1 | tr -d ' ' | while read perm; do pm revoke {package} \"$perm\"; done",
+      "iconId": "shield-off",
+      "iconColor": "primary",
+      "isEnabled": true,
+      "requiresConfirmation": false
+    },
+    {
+      "type": "group",
+      "name": "Theme",
+      "iconId": "sun-moon",
+      "iconColor": "primary",
+      "commands": [
+        {
+          "type": "command",
+          "name": "Light theme",
+          "command": "shell cmd uimode night no",
+          "iconId": "sun",
+          "iconColor": "primary",
+          "isEnabled": true,
+          "requiresConfirmation": false
+        },
+        {
+          "type": "command",
+          "name": "Dark theme",
+          "command": "shell cmd uimode night yes",
+          "iconId": "moon",
+          "iconColor": "primary",
+          "isEnabled": true,
+          "requiresConfirmation": false
+        },
+        {
+          "type": "command",
+          "name": "System theme",
+          "command": "shell cmd uimode night auto",
+          "iconId": "sun-moon",
+          "iconColor": "primary",
+          "isEnabled": true,
+          "requiresConfirmation": false
+        }
+      ]
+    },
+    {
+      "type": "command",
+      "name": "Open LeakCanary",
+      "command": "shell am start -n {package}/leakcanary.internal.activity.LeakActivity",
+      "iconId": "bird",
+      "iconColor": "orange",
+      "isEnabled": true,
+      "requiresConfirmation": false
+    },
+    {
+      "type": "group",
+      "name": "Layout debugging",
+      "iconId": "scan",
+      "iconColor": "primary",
+      "commands": [
+        {
+          "type": "command",
+          "name": "Show layout bounds",
+          "command": "shell setprop debug.layout true\nshell service call activity 1599295570",
+          "iconId": "scan",
+          "iconColor": "primary",
+          "isEnabled": true,
+          "requiresConfirmation": false
+        },
+        {
+          "type": "command",
+          "name": "Hide layout bounds",
+          "command": "shell setprop debug.layout false\nshell service call activity 1599295570",
+          "iconId": "scan",
+          "iconColor": "primary",
+          "isEnabled": true,
+          "requiresConfirmation": false
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "GPU debugging",
+      "iconId": "activity",
+      "iconColor": "primary",
+      "commands": [
+        {
+          "type": "command",
+          "name": "Show GPU overdraw",
+          "command": "shell setprop debug.hwui.overdraw show\nshell service call activity 1599295570",
+          "iconId": "send-to-back",
+          "iconColor": "primary",
+          "isEnabled": true,
+          "requiresConfirmation": false
+        },
+        {
+          "type": "command",
+          "name": "Hide GPU overdraw",
+          "command": "shell setprop debug.hwui.overdraw false\nshell service call activity 1599295570",
+          "iconId": "send-to-back",
+          "iconColor": "primary",
+          "isEnabled": true,
+          "requiresConfirmation": false
+        },
+        {
+          "type": "command",
+          "name": "Show GPU rendering bars",
+          "command": "shell setprop debug.hwui.profile visual_bars\nshell service call activity 1599295570",
+          "iconId": "activity",
+          "iconColor": "primary",
+          "isEnabled": true,
+          "requiresConfirmation": false
+        },
+        {
+          "type": "command",
+          "name": "Hide GPU rendering bars",
+          "command": "shell setprop debug.hwui.profile false\nshell service call activity 1599295570",
+          "iconId": "activity",
+          "iconColor": "primary",
+          "isEnabled": true,
+          "requiresConfirmation": false
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "name": "Font scale",
+      "iconId": "type",
+      "iconColor": "primary",
+      "commands": [
+        {
+          "type": "command",
+          "name": "Font scale: small",
+          "command": "shell settings put system font_scale 0.85",
+          "iconId": "type",
+          "iconColor": "primary",
+          "isEnabled": true,
+          "requiresConfirmation": false
+        },
+        {
+          "type": "command",
+          "name": "Font scale: default",
+          "command": "shell settings put system font_scale 1.0",
+          "iconId": "type",
+          "iconColor": "primary",
+          "isEnabled": true,
+          "requiresConfirmation": false
+        },
+        {
+          "type": "command",
+          "name": "Font scale: large",
+          "command": "shell settings put system font_scale 1.15",
+          "iconId": "type",
+          "iconColor": "primary",
+          "isEnabled": true,
+          "requiresConfirmation": false
+        },
+        {
+          "type": "command",
+          "name": "Font scale: largest",
+          "command": "shell settings put system font_scale 1.30",
+          "iconId": "type",
+          "iconColor": "primary",
+          "isEnabled": true,
+          "requiresConfirmation": false
+        }
+      ]
+    }
+  ]
+}

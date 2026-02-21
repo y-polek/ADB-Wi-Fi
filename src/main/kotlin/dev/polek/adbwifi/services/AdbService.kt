@@ -5,7 +5,7 @@ import com.intellij.openapi.components.service
 import dev.polek.adbwifi.adb.ADB_DISPATCHER
 import dev.polek.adbwifi.adb.Adb
 import dev.polek.adbwifi.commandexecutor.RuntimeCommandExecutor
-import dev.polek.adbwifi.model.AdbCommandConfig
+import dev.polek.adbwifi.model.CommandListItem.AdbCommand
 import dev.polek.adbwifi.model.Device
 import dev.polek.adbwifi.utils.appCoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -71,7 +71,7 @@ class AdbService {
     }
 
     suspend fun executeCommand(
-        config: AdbCommandConfig,
+        config: AdbCommand,
         deviceId: String,
         packageName: String,
         parameterValues: Map<String, String> = emptyMap()

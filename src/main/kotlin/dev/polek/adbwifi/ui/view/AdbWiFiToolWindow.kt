@@ -24,16 +24,22 @@ import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.components.BorderLayoutPanel
 import dev.polek.adbwifi.PluginBundle
 import dev.polek.adbwifi.actions.OpenSettingsNotificationAction
-import dev.polek.adbwifi.model.AdbCommandConfig
+import dev.polek.adbwifi.model.CommandListItem.AdbCommand
 import dev.polek.adbwifi.model.LogEntry
 import dev.polek.adbwifi.services.PropertiesService
 import dev.polek.adbwifi.ui.model.DeviceViewModel
 import dev.polek.adbwifi.ui.presenter.ToolWindowPresenter
-import dev.polek.adbwifi.utils.*
+import dev.polek.adbwifi.utils.Colors
+import dev.polek.adbwifi.utils.GridBagLayoutPanel
+import dev.polek.adbwifi.utils.Icons
+import dev.polek.adbwifi.utils.setFontSize
 import java.awt.GridBagConstraints
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import javax.swing.*
+import javax.swing.BorderFactory
+import javax.swing.BoxLayout
+import javax.swing.JPanel
+import javax.swing.SwingConstants
 
 class AdbWiFiToolWindow(
     private val project: Project,
@@ -77,7 +83,7 @@ class AdbWiFiToolWindow(
             presenter.onCopyDeviceAddressClicked(device)
         }
 
-        override fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig) {
+        override fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommand) {
             presenter.onAdbCommandClicked(device, command)
         }
 

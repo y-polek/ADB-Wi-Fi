@@ -13,8 +13,9 @@ import com.intellij.ui.components.JBPanel
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import dev.polek.adbwifi.PluginBundle
-import dev.polek.adbwifi.model.AdbCommandConfig
 import dev.polek.adbwifi.model.CommandIconsProvider
+import dev.polek.adbwifi.model.CommandListItem.AdbCommand
+import dev.polek.adbwifi.model.CommandListItem.AdbCommandGroup
 import dev.polek.adbwifi.model.IconColor
 import dev.polek.adbwifi.services.AdbCommandsService
 import dev.polek.adbwifi.settings.AdbCommandsConfigurable
@@ -399,7 +400,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         val selectedPackage = listener?.getSelectedPackage(device)
         val projectPackageNames = listener?.getProjectPackageNames() ?: emptyList()
         val installedPackages = listener?.getInstalledPackages(device)?.toSet() ?: emptySet()
-        val commands = commandsService.getEnabledCommands()
+        val enabledItems = commandsService.getEnabledItems()
 
         // Build list of menu items
         val items = mutableListOf<AdbCommandMenuItem>()
@@ -419,10 +420,17 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         }
         items.add(AdbCommandMenuItem.PackageSelector(packageText))
 
-        // Add command items
-        commands.forEach { config ->
-            val isEnabled = !config.requiresPackage || selectedPackage != null
-            items.add(AdbCommandMenuItem.Command(config, isEnabled))
+        // Add enabled items directly — list order is the display order
+        enabledItems.forEach { item ->
+            when (item) {
+                is AdbCommand -> {
+                    val isEnabled = !item.requiresPackage || selectedPackage != null
+                    items.add(AdbCommandMenuItem.Command(item, isEnabled))
+                }
+                is AdbCommandGroup -> {
+                    items.add(AdbCommandMenuItem.Group(item, item.commands))
+                }
+            }
         }
 
         // Add customize item
@@ -432,6 +440,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
             override fun getTextFor(value: AdbCommandMenuItem): String = when (value) {
                 is AdbCommandMenuItem.PackageSelector -> value.text
                 is AdbCommandMenuItem.Command -> value.config.name
+                is AdbCommandMenuItem.Group -> value.group.name
                 is AdbCommandMenuItem.Customize -> PluginBundle.message("adbCommandsCustomize")
             }
 
@@ -443,24 +452,30 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                     } else {
                         null
                     }
+                is AdbCommandMenuItem.Group ->
+                    if (value.group.iconId.isNotEmpty()) {
+                        CommandIconsProvider.getIcon(value.group.iconId, IconColor.fromString(value.group.iconColor))
+                    } else {
+                        null
+                    }
                 is AdbCommandMenuItem.Customize -> AllIcons.General.Settings
             }
 
             override fun isSelectable(value: AdbCommandMenuItem): Boolean = when (value) {
                 is AdbCommandMenuItem.PackageSelector -> true
                 is AdbCommandMenuItem.Command -> value.isEnabled
+                is AdbCommandMenuItem.Group -> true
                 is AdbCommandMenuItem.Customize -> true
             }
 
             override fun hasSubstep(selectedValue: AdbCommandMenuItem?): Boolean {
-                return selectedValue is AdbCommandMenuItem.PackageSelector
+                return selectedValue is AdbCommandMenuItem.PackageSelector ||
+                    selectedValue is AdbCommandMenuItem.Group
             }
 
             override fun getSeparatorAbove(value: AdbCommandMenuItem): ListSeparator? = when (value) {
                 is AdbCommandMenuItem.Customize -> ListSeparator()
-                is AdbCommandMenuItem.Command ->
-                    if (items.indexOf(value) == 1) ListSeparator() else null
-                else -> null
+                else -> if (items.indexOf(value) == 1) ListSeparator() else null
             }
 
             override fun onChosen(selectedValue: AdbCommandMenuItem, finalChoice: Boolean): PopupStep<*>? {
@@ -470,6 +485,9 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
                     }
                     is AdbCommandMenuItem.Command -> doFinalStep {
                         listener?.onAdbCommandClicked(device, selectedValue.config)
+                    }
+                    is AdbCommandMenuItem.Group -> {
+                        createGroupCommandsStep(selectedValue.group, selectedValue.commands, selectedPackage, device)
                     }
                     is AdbCommandMenuItem.Customize -> doFinalStep {
                         ShowSettingsUtil.getInstance().showSettingsDialog(
@@ -495,6 +513,36 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         val popup = JBPopupFactory.getInstance().createListPopup(step)
         popup.setMinimumSize(Dimension(popupWidth, 0))
         popup.showUnderneathOf(event.component)
+    }
+
+    private fun createGroupCommandsStep(
+        group: AdbCommandGroup,
+        commands: List<AdbCommand>,
+        selectedPackage: String?,
+        device: DeviceViewModel
+    ): PopupStep<*> {
+        val commandItems = commands.map { config ->
+            val isEnabled = !config.requiresPackage || selectedPackage != null
+            AdbCommandMenuItem.Command(config, isEnabled)
+        }
+        return object : BaseListPopupStep<AdbCommandMenuItem.Command>(group.name, commandItems) {
+            override fun getTextFor(value: AdbCommandMenuItem.Command) = value.config.name
+
+            override fun getIconFor(value: AdbCommandMenuItem.Command): Icon? =
+                if (value.config.iconId.isNotEmpty()) {
+                    CommandIconsProvider.getIcon(value.config.iconId, IconColor.fromString(value.config.iconColor))
+                } else {
+                    null
+                }
+
+            override fun isSelectable(value: AdbCommandMenuItem.Command) = value.isEnabled
+
+            override fun onChosen(selectedValue: AdbCommandMenuItem.Command, finalChoice: Boolean): PopupStep<*>? {
+                return doFinalStep {
+                    listener?.onAdbCommandClicked(device, selectedValue.config)
+                }
+            }
+        }
     }
 
     private fun createPackageSelectionStep(
@@ -628,7 +676,11 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
 
     private sealed class AdbCommandMenuItem {
         data class PackageSelector(val text: String) : AdbCommandMenuItem()
-        data class Command(val config: AdbCommandConfig, val isEnabled: Boolean) : AdbCommandMenuItem()
+        data class Command(val config: AdbCommand, val isEnabled: Boolean) : AdbCommandMenuItem()
+        data class Group(
+            val group: AdbCommandGroup,
+            val commands: List<AdbCommand>
+        ) : AdbCommandMenuItem()
         data object Customize : AdbCommandMenuItem()
     }
 
@@ -651,7 +703,7 @@ class DevicePanel(private val device: DeviceViewModel) : JBPanel<DevicePanel>(Bo
         fun onEditDeviceClicked(device: DeviceViewModel)
         fun onCopyDeviceIdClicked(device: DeviceViewModel)
         fun onCopyDeviceAddressClicked(device: DeviceViewModel)
-        fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommandConfig)
+        fun onAdbCommandClicked(device: DeviceViewModel, command: AdbCommand)
         fun onPackageSelected(device: DeviceViewModel, packageName: String?)
         fun getInstalledPackages(device: DeviceViewModel): List<String>
         fun hasInstalledPackagesCache(device: DeviceViewModel): Boolean

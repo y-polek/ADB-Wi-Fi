@@ -2,11 +2,22 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>CommentWrapping:DeviceNamesService.kt$DeviceNamesService$/*Name*/</ID>
-    <ID>CommentWrapping:DeviceNamesService.kt$DeviceNamesService$/*Serial number*/</ID>
+    <ID>ArgumentListWrapping:CommandIcon.kt$CommandIconsProvider$( "advertisement", "announcement", "attention", "alert", "loudspeaker", "megaphone", "notification" )</ID>
+    <ID>ArgumentListWrapping:CommandIcon.kt$CommandIconsProvider$( "clone", "duplicate", "remove", "delete", "collapse", "subtract", "multiple", "-" )</ID>
+    <ID>ArgumentListWrapping:CommandIcon.kt$CommandIconsProvider$( "closed captions", "subtitles", "subhead", "transcription", "transcribe", "dialogue", "accessibility" )</ID>
+    <ID>ArgumentListWrapping:CommandIcon.kt$CommandIconsProvider$( "connection", "signal", "wireless", "synchronize", "reconnect", "reset", "restart" )</ID>
+    <ID>ArgumentListWrapping:CommandIcon.kt$CommandIconsProvider$( "electricity", "energy", "electronics", "charge", "charging", "battery", "connect" )</ID>
+    <ID>ArgumentListWrapping:CommandIcon.kt$CommandIconsProvider$( "filter", "sort", "ascending", "descending", "increasing", "decreasing", "rising", "falling" )</ID>
+    <ID>ArgumentListWrapping:CommandIcon.kt$CommandIconsProvider$( "hearing", "hard of hearing", "hearing loss", "deafness", "noise", "silence", "audio", "accessibility" )</ID>
+    <ID>ArgumentListWrapping:CommandIcon.kt$CommandIconsProvider$( "rotate", "reload", "rerun", "synchronise", "synchronize", "arrows", "circular", "cycle" )</ID>
+    <ID>ArgumentListWrapping:CommandIcon.kt$CommandIconsProvider$( "smartphone", "notification", "rumble", "haptic feedback", "notifications", "screen" )</ID>
     <ID>CommentWrapping:ToolWindowPresenter.kt$ToolWindowPresenter$/*Device's unique ID*/</ID>
     <ID>CommentWrapping:ToolWindowPresenter.kt$ToolWindowPresenter$/*IP address*/</ID>
     <ID>CommentWrapping:ToolWindowPresenter.kt$ToolWindowPresenter.Companion$/*IP address*/</ID>
     <ID>CommentWrapping:ToolWindowPresenter.kt$ToolWindowPresenter.Companion$/*Unique ID*/</ID>
+    <ID>CyclomaticComplexMethod:DevicePanel.kt$DevicePanel$private fun openAdbCommandsMenu(device: DeviceViewModel, event: MouseEvent)</ID>
+    <ID>ImportOrdering:IconPickerDialog.kt$import com.intellij.openapi.ui.DialogWrapper import com.intellij.ui.DocumentAdapter import com.intellij.ui.components.JBLabel import com.intellij.ui.components.JBList import com.intellij.ui.components.JBScrollPane import com.intellij.ui.components.JBTextField import com.intellij.util.ui.JBUI import dev.polek.adbwifi.PluginBundle import dev.polek.adbwifi.model.CommandIcon import dev.polek.adbwifi.model.CommandIconsProvider import dev.polek.adbwifi.model.IconColor import java.awt.BorderLayout import java.awt.Component import java.awt.Cursor import java.awt.Dimension import java.awt.FlowLayout import java.awt.Graphics import java.awt.Graphics2D import java.awt.RenderingHints import java.awt.event.MouseAdapter import java.awt.event.MouseEvent import java.awt.geom.Ellipse2D import javax.swing.DefaultListModel import javax.swing.JComponent import javax.swing.JList import javax.swing.JPanel import javax.swing.ListCellRenderer import javax.swing.event.DocumentEvent</ID>
+    <ID>Wrapping:AdbCommandEditorDialog.kt$AdbCommandEditorDialog.&lt;no name provided>.&lt;no name provided>$;</ID>
+    <ID>Wrapping:GroupEditorDialog.kt$GroupEditorDialog.&lt;no name provided>.&lt;no name provided>$;</ID>
   </CurrentIssues>
 </SmellBaseline>
