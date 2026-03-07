@@ -71,6 +71,7 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
         // Handle double-click to edit, checkbox toggling, and right-click context menu
         itemList.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
+                if (!SwingUtilities.isLeftMouseButton(e)) return
                 val index = itemList.locationToIndex(e.point)
                 if (index < 0) return
                 val cellBounds = itemList.getCellBounds(index, index) ?: return
