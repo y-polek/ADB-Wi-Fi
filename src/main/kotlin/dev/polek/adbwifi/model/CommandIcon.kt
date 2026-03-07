@@ -23,11 +23,6 @@ object CommandIconsProvider {
     @Suppress("LongMethod")
     private fun iconDefinitions(): List<IconDefinition> = listOf(
         IconDefinition(
-            "accessibility",
-            "Accessibility",
-            listOf("disability", "disabled", "dda", "wheelchair")
-        ),
-        IconDefinition(
             "activity",
             "Activity",
             listOf(
@@ -36,79 +31,6 @@ object CommandIconsProvider {
                 "intensive care", "hospital", "defibrillator", "earthquake", "siesmic",
                 "magnitude", "richter scale", "aftershock", "tremor", "shockwave", "audio",
                 "waveform", "synthesizer", "synthesiser", "music"
-            )
-        ),
-        IconDefinition("alarm-clock", "Alarm Clock", listOf("morning")),
-        IconDefinition("alarm-clock-off", "Alarm Clock Off", listOf("morning", "turn-off")),
-        IconDefinition("angry", "Angry", listOf("emoji", "anger", "face", "emotion")),
-        IconDefinition("annoyed", "Annoyed", listOf("emoji", "nuisance", "face", "emotion")),
-        IconDefinition(
-            "app-window-mac",
-            "App Window Mac",
-            listOf("application", "menu bar", "pane", "preferences", "macos", "osx", "executable")
-        ),
-        IconDefinition(
-            "arrow-down",
-            "Arrow Down",
-            listOf("backwards", "reverse", "direction", "south")
-        ),
-        IconDefinition(
-            "arrow-down-a-z",
-            "Arrow Down A-Z",
-            listOf(
-                "filter", "sort", "ascending", "descending", "increasing", "decreasing", "rising",
-                "falling", "alphabetical"
-            )
-        ),
-        IconDefinition(
-            "arrow-down-up",
-            "Arrow Down Up",
-            listOf(
-                "bidirectional", "two-way", "2-way", "swap", "switch", "network", "traffic",
-                "flow", "mobile data", "internet", "sort", "reorder", "move"
-            )
-        ),
-        IconDefinition(
-            "arrow-down-wide-narrow",
-            "Arrow Down Wide Narrow",
-            listOf(
-                "filter", "sort", "ascending", "descending", "increasing", "decreasing", "rising",
-                "falling"
-            )
-        ),
-        IconDefinition(
-            "arrow-down-z-a",
-            "Arrow Down Z-A",
-            listOf(
-                "filter", "sort", "ascending", "descending", "increasing", "decreasing", "rising",
-                "falling", "alphabetical", "reverse"
-            )
-        ),
-        IconDefinition(
-            "arrow-left",
-            "Arrow Left",
-            listOf("previous", "back", "direction", "west", "<-")
-        ),
-        IconDefinition(
-            "arrow-right",
-            "Arrow Right",
-            listOf("forward", "next", "direction", "east", "->")
-        ),
-        IconDefinition(
-            "arrow-right-left",
-            "Arrow Right Left",
-            listOf(
-                "bidirectional", "two-way", "2-way", "swap", "switch", "transaction", "reorder",
-                "move", "<-", "->"
-            )
-        ),
-        IconDefinition("arrow-up", "Arrow Up", listOf("forward", "direction", "north")),
-        IconDefinition(
-            "arrow-up-narrow-wide",
-            "Arrow Up Narrow Wide",
-            listOf(
-                "filter", "sort", "ascending", "descending", "increasing", "decreasing", "rising",
-                "falling"
             )
         ),
         IconDefinition("at-sign", "At Sign", listOf("mention", "at", "email", "message", "@")),
@@ -177,16 +99,6 @@ object CommandIconsProvider {
             "Bell Ring",
             listOf("alarm", "notification", "sound", "reminder")
         ),
-        IconDefinition(
-            "binary",
-            "Binary",
-            listOf("code", "digits", "computer", "zero", "one", "boolean")
-        ),
-        IconDefinition(
-            "biohazard",
-            "Biohazard",
-            listOf("fallout", "waste", "biology", "chemistry", "chemical", "element")
-        ),
         IconDefinition("bird", "Bird", listOf("peace", "freedom", "wing", "avian", "tweet")),
         IconDefinition("bluetooth", "Bluetooth", listOf("wireless")),
         IconDefinition("bluetooth-off", "Bluetooth Off", listOf("lost")),
@@ -198,20 +110,8 @@ object CommandIconsProvider {
                 "clip", "marker", "tag"
             )
         ),
-        IconDefinition(
-            "bookmark-check",
-            "Bookmark Check",
-            listOf("read", "finished", "complete", "clip", "marker", "tag", "task", "todo")
-        ),
         IconDefinition("bookmark-minus", "Bookmark Minus", listOf("delete", "remove")),
         IconDefinition("bookmark-plus", "Bookmark Plus", listOf("add")),
-        IconDefinition(
-            "bookmark-x",
-            "Bookmark X",
-            listOf("read", "clip", "marker", "tag", "cancel", "close", "delete", "remove", "clear")
-        ),
-        IconDefinition("bot", "Bot", listOf("robot", "ai", "chat", "assistant")),
-        IconDefinition("bot-off", "Bot Off", listOf("robot", "ai", "chat", "assistant")),
         IconDefinition(
             "bug",
             "Bug",
@@ -229,11 +129,6 @@ object CommandIconsProvider {
             )
         ),
         IconDefinition(
-            "bug-play",
-            "Bug Play",
-            listOf("issue", "testing", "debug", "reproduce", "code", "insect")
-        ),
-        IconDefinition(
             "cable",
             "Cable",
             listOf(
@@ -241,25 +136,6 @@ object CommandIconsProvider {
                 "equipment", "electricity", "energy", "electronics", "recharging", "charger",
                 "power", "supply", "disconnected", "unplugged", "plugs", "interface", "input",
                 "output", "audio video", "av", "rca", "scart", "tv", "television", "optical"
-            )
-        ),
-        IconDefinition("calculator", "Calculator", listOf("count", "calculating machine")),
-        IconDefinition(
-            "calendar",
-            "Calendar",
-            listOf("date", "month", "year", "event", "birthday", "birthdate")
-        ),
-        IconDefinition(
-            "calendar-off",
-            "Calendar Off",
-            listOf("date", "day", "month", "year", "event", "delete", "remove")
-        ),
-        IconDefinition(
-            "calendar-sync",
-            "Calendar Sync",
-            listOf(
-                "repeat", "refresh", "reconnect", "transfer", "backup", "date", "month", "year",
-                "event", "subscribe", "recurring", "schedule", "reminder", "automatic", "auto"
             )
         ),
         IconDefinition(
@@ -272,22 +148,6 @@ object CommandIconsProvider {
         ),
         IconDefinition("camera-off", "Camera Off", listOf("photo", "webcam", "video")),
         IconDefinition(
-            "captions",
-            "Captions",
-            listOf(
-                "closed captions", "subtitles", "subhead", "transcription", "transcribe",
-                "dialogue", "accessibility"
-            )
-        ),
-        IconDefinition(
-            "captions-off",
-            "Captions Off",
-            listOf(
-                "closed captions", "subtitles", "subhead", "transcription", "transcribe",
-                "dialogue", "accessibility"
-            )
-        ),
-        IconDefinition(
             "card-sim",
             "SIM Card",
             listOf(
@@ -295,16 +155,6 @@ object CommandIconsProvider {
                 "signal", "coverage", "disk", "data", "format", "storage", "flash", "digital",
                 "contacts", "phone book", "contractual", "circuit board", "chip"
             )
-        ),
-        IconDefinition(
-            "case-lower",
-            "Lowercase",
-            listOf("text", "letters", "characters", "font", "typography")
-        ),
-        IconDefinition(
-            "case-upper",
-            "Uppercase",
-            listOf("text", "letters", "characters", "font", "typography")
         ),
         IconDefinition("check", "Check", listOf("done", "todo", "tick", "complete", "task")),
         IconDefinition(
@@ -364,11 +214,6 @@ object CommandIconsProvider {
                 "join", "concatenate", "code", "coding", "+"
             )
         ),
-        IconDefinition(
-            "circle-small",
-            "Circle Small",
-            listOf("shape", "bullet", "gender", "genderless")
-        ),
         IconDefinition("circle-stop", "Circle Stop", listOf("media", "music")),
         IconDefinition("clipboard", "Clipboard", listOf("copy", "paste")),
         IconDefinition("clipboard-copy", "Clipboard Copy", listOf("copy", "paste")),
@@ -385,8 +230,6 @@ object CommandIconsProvider {
         IconDefinition("cloud-download", "Cloud Download", listOf("import")),
         IconDefinition("cloud-off", "Cloud Off", listOf("disconnect")),
         IconDefinition("cloud-upload", "Cloud Upload", listOf("file")),
-        IconDefinition("code", "Code", listOf("source", "programming", "html", "xml")),
-        IconDefinition("code-xml", "Code XML", listOf("source", "programming", "html", "xml")),
         IconDefinition("command", "Command", listOf("keyboard", "key", "mac", "cmd", "button")),
         IconDefinition(
             "compass",
@@ -394,7 +237,6 @@ object CommandIconsProvider {
             listOf("direction", "north", "east", "south", "west", "safari", "browser")
         ),
         IconDefinition("copy", "Copy", listOf("clone", "duplicate", "multiple")),
-        IconDefinition("copy-check", "Copy Check", listOf("clone", "duplicate", "done", "multiple")),
         IconDefinition(
             "copy-minus",
             "Copy Minus",
@@ -406,14 +248,6 @@ object CommandIconsProvider {
             "copy-plus",
             "Copy Plus",
             listOf("clone", "duplicate", "add", "multiple", "expand", "+")
-        ),
-        IconDefinition(
-            "copy-x",
-            "Copy X",
-            listOf(
-                "cancel", "close", "delete", "remove", "clear", "multiple", "multiply",
-                "multiplication", "times"
-            )
         ),
         IconDefinition(
             "cpu",
@@ -449,33 +283,11 @@ object CommandIconsProvider {
             "Diff",
             listOf("patch", "difference", "compare", "plus", "minus", "plus-minus", "math")
         ),
-        IconDefinition(
-            "dot",
-            "Dot",
-            listOf(
-                "interpunct", "interpoint", "middot", "step", "punctuation", "period", "full stop",
-                "end", "finish", "final", "characters", "font", "typography", "type", "center", "."
-            )
-        ),
         IconDefinition("download", "Download", listOf("import", "export", "save")),
-        IconDefinition("ear", "Ear", listOf("hearing", "noise", "audio", "accessibility")),
-        IconDefinition(
-            "ear-off",
-            "Ear Off",
-            listOf(
-                "hearing", "hard of hearing", "hearing loss", "deafness", "noise", "silence",
-                "audio", "accessibility"
-            )
-        ),
         IconDefinition(
             "eraser",
             "Eraser",
             listOf("pencil", "drawing", "undo", "delete", "clear", "trash", "remove")
-        ),
-        IconDefinition(
-            "expand",
-            "Expand",
-            listOf("scale", "fullscreen", "maximize", "minimize", "contract")
         ),
         IconDefinition(
             "eye",
@@ -494,17 +306,8 @@ object CommandIconsProvider {
         ),
         IconDefinition("fast-forward", "Fast Forward", listOf("music")),
         IconDefinition("file", "File", listOf("document")),
-        IconDefinition("file-input", "File Input", listOf("document")),
-        IconDefinition("file-lock", "File Lock", listOf("lock", "password", "security")),
         IconDefinition("file-minus", "File Minus", listOf("delete", "remove", "erase", "document")),
-        IconDefinition("file-output", "File Output", listOf("document")),
         IconDefinition("file-plus", "File Plus", listOf("add", "create", "new", "document")),
-        IconDefinition(
-            "file-search",
-            "File Search",
-            listOf("lost", "document", "find", "browser", "lens")
-        ),
-        IconDefinition("file-x", "File X", listOf("lost", "delete", "remove", "document")),
         IconDefinition("files", "Files", listOf("multiple", "copy", "documents")),
         IconDefinition(
             "fingerprint-pattern",
@@ -538,15 +341,7 @@ object CommandIconsProvider {
             listOf("torch", "light", "beam", "emergency", "safety", "tool", "bright")
         ),
         IconDefinition("folder", "Folder", listOf("directory")),
-        IconDefinition("folder-input", "Folder Input", listOf("directory", "import", "export")),
-        IconDefinition("folder-output", "Folder Output", listOf("directory", "import", "export")),
         IconDefinition("folders", "Folders", listOf("multiple", "copy", "directories")),
-        IconDefinition(
-            "footprints",
-            "Footprints",
-            listOf("steps", "walking", "foot", "feet", "trail", "shoe")
-        ),
-        IconDefinition("frown", "Frown", listOf("emoji", "face", "bad", "sad", "emotion")),
         IconDefinition(
             "fullscreen",
             "Fullscreen",
@@ -594,7 +389,6 @@ object CommandIconsProvider {
         ),
         IconDefinition("import", "Import", listOf("save")),
         IconDefinition("inbox", "Inbox", listOf("email")),
-        IconDefinition("infinity", "Infinity", listOf("unlimited", "forever", "loop", "math")),
         IconDefinition("info", "Info", listOf("help")),
         IconDefinition(
             "key-round",
@@ -608,7 +402,6 @@ object CommandIconsProvider {
             listOf("unkeys", "layout", "spell", "settings", "mouse")
         ),
         IconDefinition("languages", "Languages", listOf("translate")),
-        IconDefinition("laugh", "Laugh", listOf("emoji", "face", "happy", "good", "emotion")),
         IconDefinition("link-2", "Link", listOf("chain", "url")),
         IconDefinition("link-2-off", "Link Off", listOf("unchain", "chain")),
         IconDefinition("lock", "Lock", listOf("security", "password", "secure", "admin")),
@@ -662,7 +455,6 @@ object CommandIconsProvider {
                 "notification", "disable", "silent"
             )
         ),
-        IconDefinition("meh", "Meh", listOf("emoji", "face", "neutral", "emotion")),
         IconDefinition(
             "message-circle",
             "Message Circle",
@@ -788,17 +580,6 @@ object CommandIconsProvider {
             )
         ),
         IconDefinition("power-off", "Power Off", listOf("on", "off", "device", "switch")),
-        IconDefinition("printer", "Printer", listOf("fax", "office", "device")),
-        IconDefinition(
-            "printer-check",
-            "Printer Check",
-            listOf("fax", "office", "device", "success", "printed")
-        ),
-        IconDefinition(
-            "printer-x",
-            "Printer X",
-            listOf("fax", "office", "device", "cross", "cancel", "remove", "error")
-        ),
         IconDefinition(
             "qr-code",
             "QR Code",
@@ -810,11 +591,6 @@ object CommandIconsProvider {
             listOf(
                 "bill", "voucher", "slip", "check", "counterfoil", "currency", "dollar", "usd", "$"
             )
-        ),
-        IconDefinition(
-            "receipt-euro",
-            "Receipt Euro",
-            listOf("bill", "voucher", "slip", "check", "counterfoil", "currency", "€")
         ),
         IconDefinition(
             "receipt-text",
@@ -860,28 +636,6 @@ object CommandIconsProvider {
         IconDefinition("save-all", "Save All", listOf("floppy disks", "copy")),
         IconDefinition("save-off", "Save Off", listOf("floppy disk", "unsalvageable")),
         IconDefinition(
-            "scan",
-            "Scan",
-            listOf(
-                "qr-code", "barcode", "checkout", "augmented reality", "ar", "target",
-                "surveillance", "camera", "lens", "focus", "frame", "select", "box", "boundary",
-                "bounds", "area", "square", "dashed"
-            )
-        ),
-        IconDefinition(
-            "scan-barcode",
-            "Scan Barcode",
-            listOf(
-                "checkout", "till", "cart", "transaction", "purchase", "buy", "product",
-                "packaging", "retail", "consumer"
-            )
-        ),
-        IconDefinition(
-            "scan-text",
-            "Scan Text",
-            listOf("recognition", "read", "translate", "copy", "lines")
-        ),
-        IconDefinition(
             "scissors",
             "Scissors",
             listOf("cut", "snip", "chop", "stationery", "crafts")
@@ -898,40 +652,9 @@ object CommandIconsProvider {
             listOf("find", "scan", "magnifier", "magnifying glass", "lens")
         ),
         IconDefinition(
-            "search-alert",
-            "Search Alert",
-            listOf(
-                "find", "scan", "magnifier", "magnifying glass", "stop", "warning", "alert",
-                "error", "anomaly", "lens"
-            )
-        ),
-        IconDefinition(
-            "search-check",
-            "Search Check",
-            listOf(
-                "find", "scan", "magnifier", "magnifying glass", "found", "correct", "complete",
-                "tick", "lens"
-            )
-        ),
-        IconDefinition(
-            "search-x",
-            "Search X",
-            listOf(
-                "find", "scan", "magnifier", "magnifying glass", "stop", "clear", "cancel",
-                "abort", "lens"
-            )
-        ),
-        IconDefinition(
             "send",
             "Send",
             listOf("email", "message", "mail", "paper airplane", "paper aeroplane", "submit")
-        ),
-        IconDefinition(
-            "send-to-back",
-            "Send To Back",
-            listOf(
-                "bring", "send", "move", "under", "back", "backwards", "overlap", "layer", "order"
-            )
         ),
         IconDefinition("settings", "Settings", listOf("cog", "edit", "gear", "preferences")),
         IconDefinition(
@@ -999,24 +722,6 @@ object CommandIconsProvider {
         ),
         IconDefinition("skip-back", "Skip Back", listOf("arrow", "previous", "music")),
         IconDefinition("skip-forward", "Skip Forward", listOf("arrow", "skip", "next", "music")),
-        IconDefinition("skull", "Skull", listOf("death", "danger", "bone")),
-        IconDefinition("smile", "Smile", listOf("emoji", "face", "happy", "good", "emotion")),
-        IconDefinition(
-            "spell-check",
-            "Spell Check",
-            listOf(
-                "spelling", "error", "mistake", "oversight", "typo", "correction", "code",
-                "linter", "a"
-            )
-        ),
-        IconDefinition(
-            "spell-check-2",
-            "Spell Check Alt",
-            listOf(
-                "spelling", "error", "mistake", "oversight", "typo", "correction", "code",
-                "linter", "a"
-            )
-        ),
         IconDefinition(
             "square",
             "Square",
@@ -1028,7 +733,6 @@ object CommandIconsProvider {
         IconDefinition("star", "Star", listOf("bookmark", "favorite", "like", "review", "rating")),
         IconDefinition("star-off", "Star Off", listOf("dislike", "unlike", "remove", "unrate")),
         IconDefinition("sun", "Sun", listOf("brightness", "weather", "light", "summer")),
-        IconDefinition("sun-medium", "Sun Medium", listOf("brightness", "medium")),
         IconDefinition(
             "sun-moon",
             "Sun Moon",
@@ -1046,55 +750,6 @@ object CommandIconsProvider {
         ),
         IconDefinition("terminal", "Terminal", listOf("code", "command line", "prompt", "shell")),
         IconDefinition("text-cursor-input", "Text Cursor", listOf("select")),
-        IconDefinition("thumbs-down", "Thumbs Down", listOf("dislike", "bad", "emotion")),
-        IconDefinition("thumbs-up", "Thumbs Up", listOf("like", "good", "emotion")),
-        IconDefinition(
-            "ticket",
-            "Ticket",
-            listOf("entry", "pass", "voucher", "event", "concert", "show", "perforated", "dashed")
-        ),
-        IconDefinition(
-            "ticket-check",
-            "Ticket Check",
-            listOf(
-                "entry", "pass", "voucher", "event", "concert", "show", "booked", "purchased",
-                "receipt", "redeemed", "validated", "verified", "certified", "checked", "used"
-            )
-        ),
-        IconDefinition(
-            "ticket-minus",
-            "Ticket Minus",
-            listOf(
-                "entry", "pass", "voucher", "event", "concert", "show", "remove", "cancel",
-                "unbook", "subtract", "decrease", "-"
-            )
-        ),
-        IconDefinition(
-            "ticket-percent",
-            "Ticket Percent",
-            listOf(
-                "discount", "reduced", "offer", "voucher", "entry", "pass", "event", "concert",
-                "show", "book", "purchase", "%"
-            )
-        ),
-        IconDefinition(
-            "ticket-plus",
-            "Ticket Plus",
-            listOf(
-                "entry", "pass", "voucher", "event", "concert", "show", "book", "purchase", "add",
-                "+"
-            )
-        ),
-        IconDefinition(
-            "ticket-x",
-            "Ticket X",
-            listOf(
-                "entry", "pass", "voucher", "event", "concert", "show", "cancelled",
-                "cancellation", "refunded", "used", "void", "invalidated", "spoiled", "denied",
-                "refused", "banned", "barred", "forbidden", "prohibited", "delete", "remove",
-                "clear", "error", "x"
-            )
-        ),
         IconDefinition("timer", "Timer", listOf("time", "timer", "stopwatch")),
         IconDefinition("timer-off", "Timer Off", listOf("time", "timer", "stopwatch")),
         IconDefinition("timer-reset", "Timer Reset", listOf("time", "timer", "stopwatch")),
@@ -1132,17 +787,7 @@ object CommandIconsProvider {
             listOf("universal", "serial", "bus", "controller", "connector", "interface")
         ),
         IconDefinition("user", "User", listOf("person", "account", "contact")),
-        IconDefinition(
-            "user-check",
-            "User Check",
-            listOf("followed", "subscribed", "done", "todo", "tick", "complete", "task")
-        ),
         IconDefinition("user-cog", "User Cog", listOf("settings", "edit", "cog", "gear")),
-        IconDefinition(
-            "user-lock",
-            "User Lock",
-            listOf("person", "lock", "locked", "account", "secure")
-        ),
         IconDefinition("users", "Users", listOf("group", "people")),
         IconDefinition(
             "vibrate",
@@ -1179,7 +824,6 @@ object CommandIconsProvider {
         IconDefinition("wifi-high", "Wi-Fi High", listOf("connection", "signal", "wireless")),
         IconDefinition("wifi-low", "Wi-Fi Low", listOf("connection", "signal", "wireless")),
         IconDefinition("wifi-off", "Wi-Fi Off", listOf("disabled")),
-        IconDefinition("wifi-pen", "Wi-Fi Edit", listOf("edit", "wifi", "pen", "change", "network")),
         IconDefinition(
             "wifi-sync",
             "Wi-Fi Sync",
@@ -1216,7 +860,7 @@ object CommandIconsProvider {
     )
 
     private val icons: List<CommandIcon> by lazy {
-        iconDefinitions().mapNotNull { def ->
+        iconDefinitions().map { def ->
             val icon = IconLoader.getIcon(
                 "/icons/commands/${def.id}.svg",
                 CommandIconsProvider::class.java
@@ -1228,8 +872,6 @@ object CommandIconsProvider {
     private val iconsByIdMap: Map<String, CommandIcon> by lazy {
         icons.associateBy { it.id }
     }
-
-    fun allIcons(): List<CommandIcon> = icons
 
     fun getIconById(id: String): CommandIcon? = iconsByIdMap[id]
 
