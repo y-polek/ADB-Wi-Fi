@@ -148,7 +148,7 @@ class IconPickerDialog(
     private data class IconListItem(val icon: CommandIcon?)
 
     private inner class IconListCellRenderer : ListCellRenderer<IconListItem> {
-        private val panel = JPanel(FlowLayout(FlowLayout.LEFT, JBUI.scale(8), 0)).apply {
+        private val panel = JPanel(BorderLayout(JBUI.scale(8), 0)).apply {
             isOpaque = true
             border = JBUI.Borders.empty(2, 4)
         }
@@ -156,8 +156,8 @@ class IconPickerDialog(
         private val nameLabel = JBLabel()
 
         init {
-            panel.add(iconLabel)
-            panel.add(nameLabel)
+            panel.add(iconLabel, BorderLayout.WEST)
+            panel.add(nameLabel, BorderLayout.CENTER)
         }
 
         override fun getListCellRendererComponent(
