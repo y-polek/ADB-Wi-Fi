@@ -16,6 +16,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.intellij.openapi.ui.popup.ListSeparator
 import com.intellij.openapi.ui.popup.PopupStep
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
 import com.intellij.openapi.vfs.VirtualFile
@@ -58,8 +59,16 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
         ) : SettingsListItem()
     }
 
+    private sealed class ContextMenuItem {
+        data object Edit : ContextMenuItem()
+        data object Duplicate : ContextMenuItem()
+        data object Remove : ContextMenuItem()
+        data class MoveToGroup(val groups: List<AdbCommandGroup>) : ContextMenuItem()
+        data object RemoveFromGroup : ContextMenuItem()
+    }
+
     init {
-        // Handle double-click to edit and checkbox toggling
+        // Handle double-click to edit, checkbox toggling, and right-click context menu
         itemList.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
                 val index = itemList.locationToIndex(e.point)
@@ -82,6 +91,24 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
                     if (relativeX >= indent && relativeX < indent + JBUI.scale(CHECKBOX_WIDTH)) {
                         toggleCommandEnabled(item.config, item.group)
                     }
+                }
+            }
+
+            override fun mousePressed(e: MouseEvent) = handlePopupTrigger(e)
+            override fun mouseReleased(e: MouseEvent) = handlePopupTrigger(e)
+
+            private fun handlePopupTrigger(e: MouseEvent) {
+                if (!e.isPopupTrigger) return
+                val index = itemList.locationToIndex(e.point)
+                if (index < 0) return
+                val cellBounds = itemList.getCellBounds(index, index) ?: return
+                if (!cellBounds.contains(e.point)) return
+
+                itemList.selectedIndex = index
+                val item = listModel.getElementAt(index)
+                when (item) {
+                    is SettingsListItem.CommandItem -> showCommandContextMenu(item, e.point)
+                    is SettingsListItem.GroupHeader -> showGroupContextMenu(item, e.point)
                 }
             }
         })
@@ -306,11 +333,22 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
             requiresConfirmation = dialog.requiresConfirmation
         )
 
-        // Remove from old location
-        removeCommandFromLocation(config, currentGroup)
-
-        // Add to new location
-        addCommandToLocation(updatedConfig, dialog.selectedGroup)
+        val targetGroup = dialog.selectedGroup
+        val sameLocation = currentGroup === targetGroup ||
+            currentGroup?.name == targetGroup?.name
+        if (sameLocation) {
+            // Same location — replace in place
+            if (currentGroup != null) {
+                replaceCommandInGroup(currentGroup, config, updatedConfig)
+            } else {
+                val idx = items.indexOf(config)
+                if (idx >= 0) items[idx] = updatedConfig
+            }
+        } else {
+            // Moving between locations — remove then add
+            removeCommandFromLocation(config, currentGroup)
+            addCommandToLocation(updatedConfig, targetGroup)
+        }
 
         refreshList()
         itemList.selectedIndex = selectedIndex.coerceAtMost(listModel.size() - 1)
@@ -378,25 +416,31 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
         val groups = items.filterIsInstance<AdbCommandGroup>()
         val duplicatedConfig = config.copy(name = "${config.name} (copy)")
         val dialog = AdbCommandEditorDialog(duplicatedConfig, groups, currentGroup)
-        if (dialog.showAndGet()) {
-            val newCommand = AdbCommand(
-                name = dialog.commandName,
-                command = dialog.command,
-                iconId = dialog.iconId,
-                iconColor = dialog.iconColor,
-                isEnabled = true,
-                requiresConfirmation = dialog.requiresConfirmation
-            )
-            val targetGroup = dialog.selectedGroup
-            if (targetGroup != null) {
-                val groupIdx = items.indexOf(targetGroup)
-                if (groupIdx >= 0) {
-                    items[groupIdx] = targetGroup.copy(commands = targetGroup.commands + newCommand)
-                }
-            } else {
-                items.add(newCommand)
-            }
-            refreshList()
+        if (!dialog.showAndGet()) return
+
+        val newCommand = AdbCommand(
+            name = dialog.commandName,
+            command = dialog.command,
+            iconId = dialog.iconId,
+            iconColor = dialog.iconColor,
+            isEnabled = true,
+            requiresConfirmation = dialog.requiresConfirmation
+        )
+        addCommandAfter(newCommand, config, dialog.selectedGroup)
+        refreshList()
+    }
+
+    private fun addCommandAfter(newCommand: AdbCommand, after: AdbCommand, group: AdbCommandGroup?) {
+        if (group != null) {
+            val groupIdx = items.indexOf(group)
+            if (groupIdx < 0) return
+            val cmdIdx = group.commands.indexOf(after)
+            val insertIdx = if (cmdIdx >= 0) cmdIdx + 1 else group.commands.size
+            val newCommands = group.commands.toMutableList().apply { add(insertIdx, newCommand) }
+            items[groupIdx] = group.copy(commands = newCommands)
+        } else {
+            val idx = items.indexOf(after)
+            if (idx >= 0) items.add(idx + 1, newCommand) else items.add(newCommand)
         }
     }
 
@@ -406,8 +450,9 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
         val item = listModel.getElementAt(selectedIndex) as? SettingsListItem.GroupHeader ?: return
 
         val group = item.group
+        val idx = items.indexOf(group)
         val newGroup = group.copy(name = "${group.name} (copy)")
-        items.add(newGroup)
+        if (idx >= 0) items.add(idx + 1, newGroup) else items.add(newGroup)
         refreshList()
     }
 
@@ -426,12 +471,14 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
     }
 
     private fun removeCommand(config: AdbCommand, group: AdbCommandGroup?) {
-        val result = Messages.showYesNoDialog(
-            PluginBundle.message("adbCommandDeleteConfirmation", config.name),
-            PluginBundle.message("adbCommandDeleteTitle"),
+        val result = Messages.showOkCancelDialog(
+            "",
+            PluginBundle.message("adbCommandDeleteTitle", config.name),
+            Messages.getOkButton(),
+            Messages.getCancelButton(),
             Messages.getQuestionIcon()
         )
-        if (result == Messages.YES) {
+        if (result == Messages.OK) {
             if (group != null) {
                 val groupIdx = items.indexOf(group)
                 if (groupIdx >= 0) {
@@ -445,21 +492,32 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
     }
 
     private fun removeGroup(group: AdbCommandGroup) {
-        val result = Messages.showYesNoDialog(
-            PluginBundle.message("adbCommandGroupDeleteConfirmation", group.name),
-            PluginBundle.message("adbCommandGroupDeleteTitle"),
+        val options = arrayOf(
+            PluginBundle.message("cancelButton"),
+            PluginBundle.message("adbCommandGroupDeleteUngroup"),
+            PluginBundle.message("adbCommandGroupDeleteAll")
+        )
+        val result = Messages.showDialog(
+            "",
+            PluginBundle.message("adbCommandGroupDeleteTitle", group.name),
+            options,
+            0,
             Messages.getQuestionIcon()
         )
-        if (result == Messages.YES) {
-            val groupIdx = items.indexOf(group)
-            if (groupIdx >= 0) {
-                // Replace group with its ungrouped commands
+        val groupIdx = items.indexOf(group)
+        if (groupIdx < 0) return
+        when (result) {
+            1 -> {
                 items.removeAt(groupIdx)
                 group.commands.reversed().forEach { cmd ->
                     items.add(groupIdx, cmd)
                 }
+                refreshList()
             }
-            refreshList()
+            2 -> {
+                items.removeAt(groupIdx)
+                refreshList()
+            }
         }
     }
 
@@ -712,6 +770,180 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
                 refreshList()
             }
         }
+    }
+
+    // endregion
+
+    // region Context Menu
+
+    private fun showCommandContextMenu(item: SettingsListItem.CommandItem, point: java.awt.Point) {
+        val allGroups = items.filterIsInstance<AdbCommandGroup>()
+        val menuItems = mutableListOf<ContextMenuItem>()
+
+        // "Move to Group" — lists existing groups (excluding current) plus "New Group..."
+        val availableGroups = allGroups.filter { it !== item.group }
+        menuItems.add(ContextMenuItem.MoveToGroup(availableGroups))
+
+        // "Remove from Group" — only if command belongs to a group
+        if (item.group != null) {
+            menuItems.add(ContextMenuItem.RemoveFromGroup)
+        }
+
+        menuItems.add(ContextMenuItem.Edit)
+        menuItems.add(ContextMenuItem.Duplicate)
+        menuItems.add(ContextMenuItem.Remove)
+
+        val config = item.config
+        val group = item.group
+
+        val step = object : BaseListPopupStep<ContextMenuItem>(null, menuItems) {
+            override fun getTextFor(value: ContextMenuItem): String = when (value) {
+                is ContextMenuItem.MoveToGroup -> PluginBundle.message("adbCommandContextMenuMoveToGroup")
+                is ContextMenuItem.RemoveFromGroup -> PluginBundle.message("adbCommandContextMenuRemoveFromGroup")
+                is ContextMenuItem.Edit -> PluginBundle.message("adbCommandContextMenuEdit")
+                is ContextMenuItem.Duplicate -> PluginBundle.message("adbCommandContextMenuDuplicate")
+                is ContextMenuItem.Remove -> PluginBundle.message("adbCommandContextMenuRemove")
+            }
+
+            override fun hasSubstep(selectedValue: ContextMenuItem?): Boolean {
+                return selectedValue is ContextMenuItem.MoveToGroup
+            }
+
+            override fun onChosen(selectedValue: ContextMenuItem, finalChoice: Boolean): PopupStep<*>? {
+                return when (selectedValue) {
+                    is ContextMenuItem.MoveToGroup -> createMoveToGroupStep(config, group, selectedValue.groups)
+                    is ContextMenuItem.RemoveFromGroup -> doFinalStep {
+                        removeCommandFromGroup(config, group!!)
+                    }
+                    is ContextMenuItem.Edit -> doFinalStep { editCommand() }
+                    is ContextMenuItem.Duplicate -> doFinalStep { duplicateCommand() }
+                    is ContextMenuItem.Remove -> doFinalStep { removeCommand(config, group) }
+                }
+            }
+        }
+
+        JBPopupFactory.getInstance().createListPopup(step)
+            .show(com.intellij.ui.awt.RelativePoint(itemList, point))
+    }
+
+    private fun showGroupContextMenu(item: SettingsListItem.GroupHeader, point: java.awt.Point) {
+        val menuItems = listOf(
+            ContextMenuItem.Edit,
+            ContextMenuItem.Duplicate,
+            ContextMenuItem.Remove
+        )
+
+        val group = item.group
+
+        val step = object : BaseListPopupStep<ContextMenuItem>(null, menuItems) {
+            override fun getTextFor(value: ContextMenuItem): String = when (value) {
+                is ContextMenuItem.Edit -> PluginBundle.message("adbCommandContextMenuEdit")
+                is ContextMenuItem.Duplicate -> PluginBundle.message("adbCommandContextMenuDuplicate")
+                is ContextMenuItem.Remove -> PluginBundle.message("adbCommandContextMenuRemove")
+                else -> ""
+            }
+
+            override fun onChosen(selectedValue: ContextMenuItem, finalChoice: Boolean): PopupStep<*>? {
+                return when (selectedValue) {
+                    is ContextMenuItem.Edit -> doFinalStep { editGroup() }
+                    is ContextMenuItem.Duplicate -> doFinalStep { duplicateGroup() }
+                    is ContextMenuItem.Remove -> doFinalStep { removeGroup(group) }
+                    else -> FINAL_CHOICE
+                }
+            }
+        }
+
+        JBPopupFactory.getInstance().createListPopup(step)
+            .show(com.intellij.ui.awt.RelativePoint(itemList, point))
+    }
+
+    private sealed class MoveToGroupItem {
+        data class ExistingGroup(val group: AdbCommandGroup) : MoveToGroupItem()
+        data object NewGroup : MoveToGroupItem()
+    }
+
+    private fun createMoveToGroupStep(
+        config: AdbCommand,
+        fromGroup: AdbCommandGroup?,
+        groups: List<AdbCommandGroup>
+    ): PopupStep<*> {
+        val stepItems = groups.map { MoveToGroupItem.ExistingGroup(it) } + MoveToGroupItem.NewGroup
+
+        return object : BaseListPopupStep<MoveToGroupItem>(
+            PluginBundle.message("adbCommandContextMenuMoveToGroup"),
+            stepItems
+        ) {
+            override fun getTextFor(value: MoveToGroupItem): String = when (value) {
+                is MoveToGroupItem.ExistingGroup -> value.group.name
+                is MoveToGroupItem.NewGroup -> PluginBundle.message("adbCommandContextMenuNewGroup")
+            }
+
+            override fun getIconFor(value: MoveToGroupItem): Icon? = when (value) {
+                is MoveToGroupItem.ExistingGroup -> {
+                    if (value.group.iconId.isNotEmpty()) {
+                        CommandIconsProvider.getIcon(value.group.iconId, IconColor.fromString(value.group.iconColor))
+                    } else {
+                        null
+                    }
+                }
+                is MoveToGroupItem.NewGroup -> AllIcons.General.Add
+            }
+
+            override fun getSeparatorAbove(value: MoveToGroupItem): ListSeparator? {
+                return if (value is MoveToGroupItem.NewGroup && groups.isNotEmpty()) ListSeparator() else null
+            }
+
+            override fun onChosen(selectedValue: MoveToGroupItem, finalChoice: Boolean): PopupStep<*>? {
+                return doFinalStep {
+                    when (selectedValue) {
+                        is MoveToGroupItem.ExistingGroup -> {
+                            moveCommandToGroup(config, fromGroup, selectedValue.group)
+                        }
+                        is MoveToGroupItem.NewGroup -> {
+                            createGroupAndMoveCommand(config, fromGroup)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun moveCommandToGroup(config: AdbCommand, fromGroup: AdbCommandGroup?, toGroup: AdbCommandGroup) {
+        removeCommandFromLocation(config, fromGroup)
+        addCommandToLocation(config, toGroup)
+        refreshList()
+    }
+
+    private fun createGroupAndMoveCommand(config: AdbCommand, fromGroup: AdbCommandGroup?) {
+        // Determine the position of the command before removing it
+        val insertIndex = if (fromGroup != null) {
+            items.indexOf(fromGroup)
+        } else {
+            items.indexOf(config)
+        }
+
+        val dialog = GroupEditorDialog()
+        if (dialog.showAndGet()) {
+            val newGroup = AdbCommandGroup(
+                name = dialog.groupName,
+                iconId = dialog.iconId,
+                iconColor = dialog.iconColor,
+                commands = listOf(config)
+            )
+            removeCommandFromLocation(config, fromGroup)
+            if (insertIndex in 0..items.size) {
+                items.add(insertIndex, newGroup)
+            } else {
+                items.add(newGroup)
+            }
+            refreshList()
+        }
+    }
+
+    private fun removeCommandFromGroup(config: AdbCommand, group: AdbCommandGroup) {
+        removeCommandFromLocation(config, group)
+        addCommandToLocation(config, null)
+        refreshList()
     }
 
     // endregion

@@ -45,7 +45,6 @@ class AdbCommandsService : PersistentStateComponent<AdbCommandsService> {
     companion object {
         private val LOG = logger<AdbCommandsService>()
 
-
         val defaultItems: List<CommandListItem> by lazy {
             loadDefaultsFromResource()
         }
