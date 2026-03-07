@@ -33,7 +33,6 @@ import dev.polek.adbwifi.ui.view.AdbCommandEditorDialog
 import dev.polek.adbwifi.ui.view.GroupEditorDialog
 import java.awt.BorderLayout
 import java.awt.Component
-import java.awt.FlowLayout
 import java.awt.Font
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
@@ -971,15 +970,34 @@ class AdbCommandsSettingsPanel : JBPanel<AdbCommandsSettingsPanel>(BorderLayout(
 
     private inner class SettingsListCellRenderer : ListCellRenderer<SettingsListItem> {
         // Group header components
-        private val groupPanel = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply { isOpaque = true }
-        private val groupIconLabel = JLabel().apply { border = JBUI.Borders.empty(0, 4) }
-        private val groupTextLabel = JLabel()
+        private val groupPanel = JPanel().apply {
+            layout = BoxLayout(this, BoxLayout.X_AXIS)
+            isOpaque = true
+        }
+        private val groupIconLabel = JLabel().apply {
+            border = JBUI.Borders.empty(0, 4)
+            alignmentY = CENTER_ALIGNMENT
+        }
+        private val groupTextLabel = JLabel().apply {
+            alignmentY = CENTER_ALIGNMENT
+        }
 
         // Command components
-        private val commandPanel = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply { isOpaque = true }
-        private val commandCheckBox = JCheckBox().apply { isOpaque = false }
-        private val commandIconLabel = JLabel().apply { border = JBUI.Borders.empty(0, 4) }
-        private val commandTextLabel = JLabel()
+        private val commandPanel = JPanel().apply {
+            layout = BoxLayout(this, BoxLayout.X_AXIS)
+            isOpaque = true
+        }
+        private val commandCheckBox = JCheckBox().apply {
+            isOpaque = false
+            alignmentY = CENTER_ALIGNMENT
+        }
+        private val commandIconLabel = JLabel().apply {
+            border = JBUI.Borders.empty(0, 4)
+            alignmentY = CENTER_ALIGNMENT
+        }
+        private val commandTextLabel = JLabel().apply {
+            alignmentY = CENTER_ALIGNMENT
+        }
 
         init {
             groupPanel.add(groupIconLabel)
