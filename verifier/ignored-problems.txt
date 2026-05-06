@@ -1,0 +1,1 @@
+dev.polek.adbwifi::Invocation of unresolved method com.android.tools.idea.projectsystem.AndroidModuleSystem.getAndroidModel.*

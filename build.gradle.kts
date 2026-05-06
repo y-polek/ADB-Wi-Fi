@@ -1,8 +1,10 @@
 import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.AndroidStudio
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdea
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel.*
 import org.jetbrains.kotlin.gradle.internal.ensureParentDirsCreated
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import kotlin.time.Duration.Companion.seconds
@@ -112,8 +114,31 @@ intellijPlatform {
     }
 
     pluginVerification {
+        ignoredProblemsFile = file("verifier/ignored-problems.txt")
+
+        // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#-cbbl0j_1232
+        //recommended()
         ides {
-            recommended()
+            select {
+                types = listOf(IntellijIdea)
+                channels = listOf(RELEASE)
+                sinceBuild = providers.gradleProperty("pluginSinceBuild")
+            }
+            select {
+                types = listOf(IntellijIdea)
+                channels = listOf(EAP)
+                sinceBuild = "261"
+            }
+            select {
+                types = listOf(AndroidStudio)
+                channels = listOf(RELEASE)
+                sinceBuild = providers.gradleProperty("pluginSinceBuild")
+            }
+            select {
+                types = listOf(AndroidStudio)
+                channels = listOf(BETA, CANARY)
+                sinceBuild = "261"
+            }
         }
     }
 }
@@ -181,12 +206,12 @@ tasks {
 
     // AndroidStudio releases list: https://plugins.jetbrains.com/docs/intellij/android-studio-releases-list.html
     val runAndroidStudio by intellijPlatformTesting.runIde.registering {
-        type = IntelliJPlatformType.AndroidStudio
+        type = AndroidStudio
         version = "2025.2.2.7"
     }
 
     val runIntellijIdea by intellijPlatformTesting.runIde.registering {
-        type = IntelliJPlatformType.IntellijIdea
+        type = IntellijIdea
         version = "2025.3.2"
     }
 

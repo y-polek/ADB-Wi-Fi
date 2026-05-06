@@ -1,5 +1,6 @@
 package dev.polek.adbwifi.services
 
+import com.android.tools.idea.IdeInfo
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
@@ -38,13 +39,13 @@ class PackageService(private val project: Project) {
      * Returns empty list if the Android plugin is not available or no Android modules are found.
      */
     private fun getApplicationIdsFromAndroidModel(): List<String> {
-        return try {
-            AndroidModelPackageProvider.getApplicationIds(project)
-        } catch (_: NoClassDefFoundError) {
-            // Android plugin is not installed
-            emptyList()
-        } catch (_: Exception) {
-            // Any other error accessing Android model
+        return if (IdeInfo.getInstance().isAndroidStudio) {
+            try {
+                AndroidModelPackageProvider.getApplicationIds(project)
+            } catch (_: Throwable) {
+                emptyList()
+            }
+        } else {
             emptyList()
         }
     }
