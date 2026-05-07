@@ -4,7 +4,8 @@ import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.AndroidStudio
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdea
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
-import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel.*
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel.EAP
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel.RELEASE
 import org.jetbrains.kotlin.gradle.internal.ensureParentDirsCreated
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import kotlin.time.Duration.Companion.seconds
@@ -121,24 +122,14 @@ intellijPlatform {
         ides {
             select {
                 types = listOf(IntellijIdea)
-                channels = listOf(RELEASE)
+                channels = listOf(RELEASE, EAP)
                 sinceBuild = providers.gradleProperty("pluginSinceBuild")
             }
-            select {
-                types = listOf(IntellijIdea)
-                channels = listOf(EAP)
-                sinceBuild = "261"
-            }
-            select {
-                types = listOf(AndroidStudio)
-                channels = listOf(RELEASE)
-                sinceBuild = providers.gradleProperty("pluginSinceBuild")
-            }
-            select {
-                types = listOf(AndroidStudio)
-                channels = listOf(BETA, CANARY)
-                sinceBuild = "261"
-            }
+            // https://plugins.jetbrains.com/docs/intellij/android-studio-releases-list.html
+            // create(AndroidStudio, "2025.3.4.7") // Panda 4 Patch 1
+            // create(AndroidStudio, "2025.3.3.7") // Panda 3 2025.3.3 Patch 1
+            // create(AndroidStudio, "2025.3.2.6") // Panda 2 2025.3.2
+            create(AndroidStudio, "2025.2.3.9") // Otter 3 Feature Drop 2025.2.3
         }
     }
 }
@@ -207,12 +198,12 @@ tasks {
     // AndroidStudio releases list: https://plugins.jetbrains.com/docs/intellij/android-studio-releases-list.html
     val runAndroidStudio by intellijPlatformTesting.runIde.registering {
         type = AndroidStudio
-        version = "2025.2.2.7"
+        version = "2025.3.1.7"
     }
 
     val runIntellijIdea by intellijPlatformTesting.runIde.registering {
         type = IntellijIdea
-        version = "2025.3.2"
+        version = "2026.1.1"
     }
 
     // Run IDE with Robot Server for UI testing
